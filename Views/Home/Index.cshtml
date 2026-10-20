@@ -1,0 +1,110 @@
+@{
+    ViewData["Title"] = "Trang Chủ";
+}
+
+<div class="row g-4 mb-4">
+    <!-- Hero Banner -->
+    <div class="col-12">
+        <div class="p-4 p-md-5 rounded-4 bg-body-tertiary border shadow-sm">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <div>
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill mb-2">
+                        .NET 10 • Supabase PostgreSQL • Dark Mode
+                    </span>
+                    <h1 class="display-6 fw-bold mb-2">Hệ Thống Quản Lý Sản Phẩm & Bảng Tin</h1>
+                    <p class="lead text-body-secondary mb-0">
+                        Đầy đủ các API Thêm / Xóa / Sửa / Tìm kiếm theo ID & Tên và Bảng tin bài đăng phong cách Facebook (Bài tập về nhà 6đ).
+                    </p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="/products" class="btn btn-primary btn-lg rounded-pill px-4 shadow-sm">
+                        🛍️ Xem Sản phẩm
+                    </a>
+                    <a href="/posts" class="btn btn-outline-primary btn-lg rounded-pill px-4 shadow-sm">
+                        📰 Xem Bảng tin FB
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2 Feature Navigation Cards -->
+    <div class="col-md-6">
+        <div class="card border stat-card shadow-sm h-100">
+            <div class="card-body p-4 d-flex flex-column">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <span class="fs-1">🛍️</span>
+                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1 rounded-pill">Đầy đủ CRUD + Search</span>
+                </div>
+                <h4 class="fw-bold mb-2">Quản Lý Sản Phẩm (Product)</h4>
+                <p class="text-body-secondary mb-4 flex-grow-1">
+                    Bao gồm các chức năng gọi API: Thêm, Xóa, Sửa, Tìm theo ID và Tìm kiếm theo tên sản phẩm. Đổ dữ liệu động vào giao diện Grid Card hiện đại.
+                </p>
+                <div class="d-flex gap-2">
+                    <a href="/products" class="btn btn-primary rounded-pill px-4">Truy cập Quản lý Sản phẩm →</a>
+                    <a href="/swagger" target="_blank" class="btn btn-outline-secondary rounded-pill">Swagger API</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card border stat-card shadow-sm h-100">
+            <div class="card-body p-4 d-flex flex-column">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <span class="fs-1">📰</span>
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 rounded-pill">Bài tập về nhà 6đ</span>
+                </div>
+                <h4 class="fw-bold mb-2">Bảng Tin Bài Đăng (Facebook Feed)</h4>
+                <p class="text-body-secondary mb-4 flex-grow-1">
+                    Mô phỏng bài đăng Facebook hoàn chỉnh: Đổ dữ liệu lên giao diện (3đ), chức năng Thêm bài viết (1đ), Sửa bài viết (1đ), Xóa bài viết (1đ) và tính năng Thích bài viết.
+                </p>
+                <div class="d-flex gap-2">
+                    <a href="/posts" class="btn btn-primary rounded-pill px-4">Truy cập Bảng tin Facebook →</a>
+                    <a href="/swagger" target="_blank" class="btn btn-outline-secondary rounded-pill">Swagger API</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="col-sm-6 col-lg-3">
+        <div class="card stat-card h-100 border shadow-sm">
+            <div class="card-body">
+                <div class="text-body-secondary fw-semibold small mb-1">CỔNG DOCKER</div>
+                <h4 class="fw-bold mb-1">Port 8888</h4>
+                <small class="text-body-secondary">Sẵn sàng triển khai container</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-3">
+        <div class="card stat-card h-100 border shadow-sm">
+            <div class="card-body">
+                <div class="text-body-secondary fw-semibold small mb-1">DATABASE SUPABASE</div>
+                <h4 class="fw-bold mb-1 text-success">Đã kết nối</h4>
+                <small class="text-body-secondary">PostgreSQL (Session Port 5432)</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-3">
+        <div class="card stat-card h-100 border shadow-sm">
+            <div class="card-body">
+                <div class="text-body-secondary fw-semibold small mb-1">BẢNG PRODUCT</div>
+                <h4 class="fw-bold mb-1">Đầy đủ API</h4>
+                <small class="text-body-secondary">Id, Name, Price, Image, Description</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-3">
+        <div class="card stat-card h-100 border shadow-sm">
+            <div class="card-body">
+                <div class="text-body-secondary fw-semibold small mb-1">BẢNG BÀI ĐĂNG (POST)</div>
+                <h4 class="fw-bold mb-1">Feed Facebook</h4>
+                <small class="text-body-secondary">Thêm, Xóa, Sửa, Thích bài viết</small>
+            </div>
+        </div>
+    </div>
+</div>

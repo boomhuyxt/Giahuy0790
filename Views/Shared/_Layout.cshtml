@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="vi" data-bs-theme="light">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Giahuy0790 App</title>
+    
+    <!-- Script chạy sớm nhất để áp dụng Dark/Light Mode trước khi render tránh chớp màn hình -->
+    <script>
+        (function() {
+            const storedTheme = localStorage.getItem('theme');
+            const preferredTheme = storedTheme ? storedTheme : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-bs-theme', preferredTheme);
+        })();
+    </script>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Giahuy0790.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom shadow-sm mb-4">
+            <div class="container">
+                <a class="navbar-brand fw-bold d-flex align-items-center gap-2" asp-area="" asp-controller="Home" asp-action="Index">
+                    <span class="badge bg-primary text-white p-2 rounded-3">GH</span>
+                    <span>Giahuy0790</span>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link fw-medium" asp-area="" asp-controller="Home" asp-action="Index">Trang chủ</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link fw-medium" href="/products">
+                                🛍️ Quản lý Sản phẩm
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link fw-medium" href="/posts">
+                                📰 Bảng tin Facebook
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link fw-medium" href="/swagger" target="_blank">
+                                Swagger API <span class="badge bg-success-subtle text-success border border-success-subtle ms-1">v1</span>
+                            </a>
+                        </li>
+                    </ul>
+
+                    <div class="d-flex align-items-center gap-2">
+                        <!-- Nút đổi theme nhanh (Quick Toggle) -->
+                        <button class="theme-switch-btn" id="quickThemeToggle" type="button" title="Đổi nhanh Chế độ Sáng / Tối">
+                            <span class="theme-icon-active fs-5">🌙</span>
+                        </button>
+
+                        <!-- Menu chi tiết chọn Theme (Light / Dark / Auto) -->
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary btn-sm dropdown-toggle rounded-pill px-3 py-1" id="themeSwitcher" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Giao diện
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="themeSwitcher">
+                                <li>
+                                    <button type="button" class="dropdown-item d-flex align-items-center justify-content-between" data-bs-theme-value="light" data-icon="☀️">
+                                        <span>☀️ Sáng (Light)</span>
+                                        <span class="theme-check d-none text-primary ms-2">✓</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button type="button" class="dropdown-item d-flex align-items-center justify-content-between" data-bs-theme-value="dark" data-icon="🌙">
+                                        <span>🌙 Tối (Dark)</span>
+                                        <span class="theme-check d-none text-primary ms-2">✓</span>
+                                    </button>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <button type="button" class="dropdown-item d-flex align-items-center justify-content-between" data-bs-theme-value="auto" data-icon="💻">
+                                        <span>💻 Theo hệ thống (Auto)</span>
+                                        <span class="theme-check d-none text-primary ms-2">✓</span>
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="footer border-top bg-body-tertiary text-body-secondary">
+        <div class="container d-flex flex-wrap justify-content-between align-items-center py-2">
+            <div>
+                &copy; @DateTime.UtcNow.Year - <strong>Giahuy0790</strong> - Hệ thống Quản lý Sản phẩm & Bảng tin
+            </div>
+            <div class="d-flex gap-3">
+                <a href="/products" class="text-decoration-none text-body-secondary">Sản phẩm</a>
+                <span>•</span>
+                <a href="/posts" class="text-decoration-none text-body-secondary">Bài đăng</a>
+                <span>•</span>
+                <a href="/swagger" class="text-decoration-none text-body-secondary" target="_blank">Swagger API</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
