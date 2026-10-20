@@ -1,0 +1,40 @@
+name: mobile_app
+description: "Ứng dụng di động Flutter kết nối API ASP.NET Core Identity & Phân quyền JWT"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Giải mã token JWT từ server để xác định người dùng, quyền và thời gian hiệu lực
+  jwt_decode: ^0.3.1
+
+  # Quản lý cấu hình URL API tách biệt khỏi mã nguồn
+  flutter_dotenv: ^5.2.1
+
+  # Lưu trữ JWT token vào thiết bị và hỗ trợ tự động đăng nhập lại
+  shared_preferences: ^2.3.3
+
+  # Gửi HTTP requests đến Web API
+  http: ^1.2.2
+
+  # Định dạng ngày giờ, tiền tệ VNĐ
+  intl: ^0.19.0
+
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+
+  # Khai báo file .env để flutter_dotenv nạp cấu hình khi khởi động
+  assets:
+    - .env

@@ -1,12 +1,14 @@
 using Giahuy0790.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Giahuy0790.Data;
 
 /// <summary>
-/// DbContext chính kết nối với Supabase PostgreSQL
+/// DbContext chính kết nối với Supabase PostgreSQL, tích hợp ASP.NET Core Identity
 /// </summary>
-public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
+public class AppDbContext(DbContextOptions<AppDbContext> options) 
+    : IdentityDbContext<ApplicationUser>(options)
 {
     // Bảng Sản phẩm (Product)
     public DbSet<Product> Products => Set<Product>();
@@ -16,6 +18,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Bắt buộc gọi base.OnModelCreating để khởi tạo các bảng của Identity (AspNetUsers, AspNetRoles...)
         base.OnModelCreating(modelBuilder);
 
         // Cấu hình Bảng Products

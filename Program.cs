@@ -1,6 +1,11 @@
+using System.Text;
 using Giahuy0790.Data;
+using Giahuy0790.Models;
 using Giahuy0790.Repositories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Giahuy0790
 {
@@ -24,13 +29,53 @@ namespace Giahuy0790
                 {
                     Title = "Giahuy0790 API",
                     Version = "v1",
-                    Description = "API Backend Quản lý Sản phẩm, Bài đăng & Upload File (Repository Pattern)"
+                    Description = "API Backend Quản lý Sản phẩm, Bài đăng, Identity & JWT Token"
                 });
             });
 
             // Cấu hình Entity Framework Core + Supabase PostgreSQL
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            // ==========================================
+            // Cấu hình ASP.NET Core Identity
+            // ==========================================
+            builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+            {
+                // Cấu hình độ phức tạp mật khẩu linh hoạt
+                options.Password.RequireDigit = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequiredLength = 6;
+                options.User.RequireUniqueEmail = true;
+            })
+            .AddEntityFrameworkStores<AppDbContext>()
+            .AddDefaultTokenProviders();
+
+            // ==========================================
+            // Cấu hình Xác thực JWT Bearer Token
+            // ==========================================
+            var jwtKey = builder.Configuration["Jwt:Key"] ?? "Giahuy0790_Super_Secret_Key_For_Jwt_Authentication_2026!#@$";
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = builder.Configuration["Jwt:Issuer"] ?? "Giahuy0790",
+                    ValidAudience = builder.Configuration["Jwt:Audience"] ?? "Giahuy0790_Client",
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+                    ClockSkew = TimeSpan.Zero
+                };
+            });
 
             // ==========================================
             // Đăng ký Repository Pattern vào DI Container
@@ -66,6 +111,69 @@ namespace Giahuy0790
                 }
             }
 
+            // Khởi tạo các Roles mặc định và người dùng mẫu cho từng quyền (Admin, Staff, User)
+            try
+            {
+                using var scope = app.Services.CreateScope();
+                var roleMgr = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+                var userMgr = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
+                string[] roles = ["Admin", "Staff", "User"];
+                foreach (var r in roles)
+                {
+                    if (!await roleMgr.RoleExistsAsync(r))
+                    {
+                        await roleMgr.CreateAsync(new IdentityRole(r));
+                    }
+                }
+
+                // 1. Tài khoản Admin mẫu
+                if (await userMgr.FindByNameAsync("admin") == null)
+                {
+                    var admin = new ApplicationUser
+                    {
+                        UserName = "admin",
+                        Email = "admin@giahuy.com",
+                        FullName = "Quản Trị Viên (Admin)",
+                        AvatarUrl = "https://api.dicebear.com/7.x/bottts/svg?seed=Admin"
+                    };
+                    var res = await userMgr.CreateAsync(admin, "Admin@123");
+                    if (res.Succeeded) await userMgr.AddToRoleAsync(admin, "Admin");
+                }
+
+                // 2. Tài khoản Staff mẫu
+                if (await userMgr.FindByNameAsync("staff") == null)
+                {
+                    var staff = new ApplicationUser
+                    {
+                        UserName = "staff",
+                        Email = "staff@giahuy.com",
+                        FullName = "Nhân Viên POS (Staff)",
+                        AvatarUrl = "https://api.dicebear.com/7.x/bottts/svg?seed=Staff"
+                    };
+                    var res = await userMgr.CreateAsync(staff, "Staff@123");
+                    if (res.Succeeded) await userMgr.AddToRoleAsync(staff, "Staff");
+                }
+
+                // 3. Tài khoản User khách hàng mẫu
+                if (await userMgr.FindByNameAsync("user") == null)
+                {
+                    var user = new ApplicationUser
+                    {
+                        UserName = "user",
+                        Email = "user@giahuy.com",
+                        FullName = "Khách Hàng (User)",
+                        AvatarUrl = "https://api.dicebear.com/7.x/bottts/svg?seed=Customer"
+                    };
+                    var res = await userMgr.CreateAsync(user, "User@123");
+                    if (res.Succeeded) await userMgr.AddToRoleAsync(user, "User");
+                }
+            }
+            catch (Exception ex)
+            {
+                app.Logger.LogWarning("Không thể khởi tạo seed users: {Msg}", ex.Message);
+            }
+
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
@@ -88,6 +196,8 @@ namespace Giahuy0790
 
             app.UseRouting();
 
+            // Authentication PHẢI nằm TRƯỚC Authorization
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapStaticAssets();

@@ -53,6 +53,26 @@
                     </ul>
 
                     <div class="d-flex align-items-center gap-2">
+                        <!-- Khu vực Trạng thái Xác thực Người dùng (Identity) -->
+                        <div id="authNavGuest" class="d-flex align-items-center gap-2">
+                            <button class="btn btn-outline-primary btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#modalLogin">
+                                Đăng nhập
+                            </button>
+                            <button class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalRegister">
+                                Đăng ký
+                            </button>
+                        </div>
+
+                        <div id="authNavUser" class="d-none align-items-center gap-2">
+                            <img id="navUserAvatar" src="" class="rounded-circle border" style="width: 32px; height: 32px; object-fit: cover;" alt="Avatar" />
+                            <span id="navUserName" class="fw-semibold small"></span>
+                            <button class="btn btn-outline-danger btn-sm rounded-pill px-2 py-0 ms-1" id="btnNavLogout" title="Đăng xuất">
+                                Thoát
+                            </button>
+                        </div>
+
+                        <div class="vr mx-1"></div>
+
                         <!-- Nút đổi theme nhanh (Quick Toggle) -->
                         <button class="theme-switch-btn" id="quickThemeToggle" type="button" title="Đổi nhanh Chế độ Sáng / Tối">
                             <span class="theme-icon-active fs-5">🌙</span>
@@ -97,10 +117,84 @@
         </main>
     </div>
 
+    <!-- ================= MODAL ĐĂNG NHẬP ================= -->
+    <div class="modal fade" id="modalLogin" tabindex="-1" aria-labelledby="modalLoginLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
+            <div class="modal-content shadow-lg rounded-4">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold" id="modalLoginLabel">🔐 Đăng nhập tài khoản</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="formLogin">
+                    <div class="modal-body">
+                        <div id="loginAlertBox"></div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">Tên đăng nhập hoặc Email</label>
+                            <input type="text" id="loginIdentifier" class="form-control" placeholder="username hoặc email@domain.com" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">Mật khẩu</label>
+                            <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" required />
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-link text-decoration-none btn-sm me-auto" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#modalRegister">
+                            Chưa có tài khoản? Đăng ký
+                        </button>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm" id="btnSubmitLogin">
+                            Đăng nhập
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL ĐĂNG KÝ ================= -->
+    <div class="modal fade" id="modalRegister" tabindex="-1" aria-labelledby="modalRegisterLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
+            <div class="modal-content shadow-lg rounded-4">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold" id="modalRegisterLabel">📝 Đăng ký thành viên</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="formRegister">
+                    <div class="modal-body">
+                        <div id="registerAlertBox"></div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">Tên đăng nhập (Username) <span class="text-danger">*</span></label>
+                            <input type="text" id="regUsername" class="form-control" placeholder="Ví dụ: giahuy123" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">Địa chỉ Email <span class="text-danger">*</span></label>
+                            <input type="email" id="regEmail" class="form-control" placeholder="name@example.com" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">Họ và tên</label>
+                            <input type="text" id="regFullName" class="form-control" placeholder="Ví dụ: Nguyễn Gia Huy" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">Mật khẩu (Tối thiểu 6 ký tự) <span class="text-danger">*</span></label>
+                            <input type="password" id="regPassword" class="form-control" placeholder="••••••••" minlength="6" required />
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-link text-decoration-none btn-sm me-auto" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#modalLogin">
+                            Đã có tài khoản? Đăng nhập
+                        </button>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm" id="btnSubmitRegister">
+                            Tạo tài khoản
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <footer class="footer border-top bg-body-tertiary text-body-secondary">
         <div class="container d-flex flex-wrap justify-content-between align-items-center py-2">
             <div>
-                &copy; @DateTime.UtcNow.Year - <strong>Giahuy0790</strong> - Hệ thống Quản lý Sản phẩm & Bảng tin
+                &copy; @DateTime.UtcNow.Year - <strong>Giahuy0790</strong> - Hệ thống Quản lý Sản phẩm, Bài đăng & Identity
             </div>
             <div class="d-flex gap-3">
                 <a href="/products" class="text-decoration-none text-body-secondary">Sản phẩm</a>
@@ -115,6 +209,131 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        // Quản lý trạng thái Đăng nhập / Đăng ký người dùng
+        const updateAuthUI = () => {
+            const userStr = localStorage.getItem('authUser');
+            const guestBox = document.getElementById('authNavGuest');
+            const userBox = document.getElementById('authNavUser');
+            
+            if (userStr) {
+                try {
+                    const u = JSON.parse(userStr);
+                    document.getElementById('navUserName').textContent = u.fullName || u.username;
+                    document.getElementById('navUserAvatar').src = u.avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(u.username)}`;
+                    guestBox.classList.add('d-none');
+                    userBox.classList.remove('d-none');
+                    userBox.classList.add('d-flex');
+                    return;
+                } catch (e) {
+                    localStorage.removeItem('authUser');
+                }
+            }
+            guestBox.classList.remove('d-none');
+            userBox.classList.add('d-none');
+            userBox.classList.remove('d-flex');
+        };
+
+        document.getElementById('btnNavLogout')?.addEventListener('click', () => {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('authUser');
+            updateAuthUI();
+            alert('Đã đăng xuất thành công!');
+        });
+
+        // Xử lý submit Đăng ký
+        document.getElementById('formRegister')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const alertBox = document.getElementById('registerAlertBox');
+            const btn = document.getElementById('btnSubmitRegister');
+            btn.disabled = true;
+            btn.innerHTML = 'Đang xử lý...';
+
+            const payload = {
+                username: document.getElementById('regUsername').value.trim(),
+                email: document.getElementById('regEmail').value.trim(),
+                fullName: document.getElementById('regFullName').value.trim(),
+                password: document.getElementById('regPassword').value
+            };
+
+            try {
+                const res = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+                if (!res.ok) {
+                    const errMsg = data.message || (data.errors ? data.errors.join('<br>') : 'Đăng ký thất bại');
+                    alertBox.innerHTML = `<div class="alert alert-danger py-2 small">${errMsg}</div>`;
+                    return;
+                }
+
+                alertBox.innerHTML = `<div class="alert alert-success py-2 small">🎉 Đăng ký thành công! Hãy đăng nhập ngay.</div>`;
+                setTimeout(() => {
+                    bootstrap.Modal.getInstance(document.getElementById('modalRegister')).hide();
+                    document.getElementById('formRegister').reset();
+                    alertBox.innerHTML = '';
+                    const loginModal = new bootstrap.Modal(document.getElementById('modalLogin'));
+                    document.getElementById('loginIdentifier').value = payload.username;
+                    loginModal.show();
+                }, 1500);
+            } catch (err) {
+                alertBox.innerHTML = `<div class="alert alert-danger py-2 small">Lỗi kết nối: ${err.message}</div>`;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Tạo tài khoản';
+            }
+        });
+
+        // Xử lý submit Đăng nhập
+        document.getElementById('formLogin')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const alertBox = document.getElementById('loginAlertBox');
+            const btn = document.getElementById('btnSubmitLogin');
+            btn.disabled = true;
+            btn.innerHTML = 'Đang đăng nhập...';
+
+            const payload = {
+                usernameOrEmail: document.getElementById('loginIdentifier').value.trim(),
+                password: document.getElementById('loginPassword').value
+            };
+
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+                if (!res.ok) {
+                    alertBox.innerHTML = `<div class="alert alert-danger py-2 small">${data.message || 'Đăng nhập thất bại'}</div>`;
+                    return;
+                }
+
+                // Lưu JWT Token và User info vào localStorage
+                localStorage.setItem('authToken', data.token);
+                localStorage.setItem('authUser', JSON.stringify(data.user));
+                
+                alertBox.innerHTML = `<div class="alert alert-success py-2 small">✅ ${data.message}</div>`;
+                setTimeout(() => {
+                    bootstrap.Modal.getInstance(document.getElementById('modalLogin')).hide();
+                    document.getElementById('formLogin').reset();
+                    alertBox.innerHTML = '';
+                    updateAuthUI();
+                }, 1000);
+            } catch (err) {
+                alertBox.innerHTML = `<div class="alert alert-danger py-2 small">Lỗi kết nối: ${err.message}</div>`;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Đăng nhập';
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', updateAuthUI);
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
