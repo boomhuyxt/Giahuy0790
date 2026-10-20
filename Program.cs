@@ -1,4 +1,5 @@
 using Giahuy0790.Data;
+using Giahuy0790.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace Giahuy0790
@@ -23,13 +24,20 @@ namespace Giahuy0790
                 {
                     Title = "Giahuy0790 API",
                     Version = "v1",
-                    Description = "API Backend Quản lý Sản phẩm, Bài đăng & Upload File"
+                    Description = "API Backend Quản lý Sản phẩm, Bài đăng & Upload File (Repository Pattern)"
                 });
             });
 
             // Cấu hình Entity Framework Core + Supabase PostgreSQL
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            // ==========================================
+            // Đăng ký Repository Pattern vào DI Container
+            // ==========================================
+            builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+            builder.Services.AddScoped<IProductRepository, ProductRepository>();
+            builder.Services.AddScoped<IPostRepository, PostRepository>();
 
             var app = builder.Build();
 
@@ -75,7 +83,7 @@ namespace Giahuy0790
 
             app.UseHttpsRedirection();
 
-            // Phục vụ các file tĩnh trong wwwroot (bao gồm wwwroot/uploads/products và wwwroot/uploads/posts)
+            // Phục vụ các file tĩnh trong wwwroot (bao gồm uploads)
             app.UseStaticFiles();
 
             app.UseRouting();

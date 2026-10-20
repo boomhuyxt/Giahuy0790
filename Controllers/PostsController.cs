@@ -1,16 +1,16 @@
-using Giahuy0790.Data;
 using Giahuy0790.Models;
+using Giahuy0790.Repositories;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Giahuy0790.Controllers;
 
 /// <summary>
 /// API Bài đăng (tương tự bài đăng Facebook): Thêm / Xóa / Sửa / Lấy danh sách / Thả tim
+/// Áp dụng Repository Pattern qua IPostRepository
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-public class PostsController(AppDbContext db) : ControllerBase
+public class PostsController(IPostRepository repository) : ControllerBase
 {
     /// <summary>
     /// Lấy danh sách tất cả bài đăng (mới nhất lên đầu)
@@ -18,11 +18,7 @@ public class PostsController(AppDbContext db) : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var posts = await db.Posts
-            .AsNoTracking()
-            .OrderByDescending(p => p.CreatedAt)
-            .ToListAsync();
-
+        var posts = await repository.GetFeedAsync();
         return Ok(posts);
     }
 
@@ -32,7 +28,7 @@ public class PostsController(AppDbContext db) : ControllerBase
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id)
     {
-        var post = await db.Posts.FindAsync(id);
+        var post = await repository.GetByIdAsync(id);
         if (post == null)
         {
             return NotFound(new { message = $"Không tìm thấy bài đăng với ID = {id}" });
@@ -64,10 +60,8 @@ public class PostsController(AppDbContext db) : ControllerBase
             CreatedAt = DateTime.UtcNow
         };
 
-        db.Posts.Add(post);
-        await db.SaveChangesAsync();
-
-        return CreatedAtAction(nameof(GetById), new { id = post.Id }, post);
+        var created = await repository.AddAsync(post);
+        return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
     /// <summary>
@@ -76,7 +70,7 @@ public class PostsController(AppDbContext db) : ControllerBase
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, [FromBody] UpdatePostDto dto)
     {
-        var post = await db.Posts.FindAsync(id);
+        var post = await repository.GetByIdAsync(id);
         if (post == null)
         {
             return NotFound(new { message = $"Không tìm thấy bài đăng với ID = {id}" });
@@ -95,7 +89,7 @@ public class PostsController(AppDbContext db) : ControllerBase
         }
         post.UpdatedAt = DateTime.UtcNow;
 
-        await db.SaveChangesAsync();
+        await repository.UpdateAsync(post);
 
         return Ok(new
         {
@@ -110,14 +104,11 @@ public class PostsController(AppDbContext db) : ControllerBase
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var post = await db.Posts.FindAsync(id);
-        if (post == null)
+        var deleted = await repository.DeleteAsync(id);
+        if (!deleted)
         {
             return NotFound(new { message = $"Không tìm thấy bài đăng với ID = {id}" });
         }
-
-        db.Posts.Remove(post);
-        await db.SaveChangesAsync();
 
         return Ok(new { message = $"Đã xóa bài đăng ID = {id} thành công" });
     }
@@ -128,19 +119,16 @@ public class PostsController(AppDbContext db) : ControllerBase
     [HttpPost("{id:int}/like")]
     public async Task<IActionResult> LikePost(int id)
     {
-        var post = await db.Posts.FindAsync(id);
-        if (post == null)
+        var newLikesCount = await repository.LikePostAsync(id);
+        if (newLikesCount == null)
         {
             return NotFound(new { message = $"Không tìm thấy bài đăng với ID = {id}" });
         }
 
-        post.LikesCount += 1;
-        await db.SaveChangesAsync();
-
         return Ok(new
         {
             message = "Đã thích bài viết",
-            likesCount = post.LikesCount
+            likesCount = newLikesCount.Value
         });
     }
 }

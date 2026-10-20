@@ -1,16 +1,16 @@
-using Giahuy0790.Data;
 using Giahuy0790.Models;
+using Giahuy0790.Repositories;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Giahuy0790.Controllers;
 
 /// <summary>
 /// API Quản lý Sản phẩm (Products): Thêm / Xóa / Sửa / Tìm theo ID / Tìm kiếm theo tên
+/// Áp dụng Repository Pattern qua IProductRepository
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-public class ProductsController(AppDbContext db) : ControllerBase
+public class ProductsController(IProductRepository repository) : ControllerBase
 {
     /// <summary>
     /// Lấy danh sách tất cả sản phẩm
@@ -18,11 +18,7 @@ public class ProductsController(AppDbContext db) : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var products = await db.Products
-            .AsNoTracking()
-            .OrderByDescending(p => p.Id)
-            .ToListAsync();
-
+        var products = await repository.GetAllAsync();
         return Ok(products);
     }
 
@@ -32,7 +28,7 @@ public class ProductsController(AppDbContext db) : ControllerBase
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id)
     {
-        var product = await db.Products.FindAsync(id);
+        var product = await repository.GetByIdAsync(id);
         if (product == null)
         {
             return NotFound(new { message = $"Không tìm thấy sản phẩm với ID = {id}" });
@@ -42,23 +38,12 @@ public class ProductsController(AppDbContext db) : ControllerBase
     }
 
     /// <summary>
-    /// Tìm kiếm sản phẩm theo tên
+    /// Tìm kiếm sản phẩm theo từ khóa tên
     /// </summary>
     [HttpGet("search")]
     public async Task<IActionResult> SearchByName([FromQuery] string? name)
     {
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            return await GetAll();
-        }
-
-        var keyword = name.Trim().ToLower();
-        var results = await db.Products
-            .AsNoTracking()
-            .Where(p => p.Name != null && p.Name.ToLower().Contains(keyword))
-            .OrderByDescending(p => p.Id)
-            .ToListAsync();
-
+        var results = await repository.SearchByNameAsync(name ?? string.Empty);
         return Ok(results);
     }
 
@@ -75,17 +60,15 @@ public class ProductsController(AppDbContext db) : ControllerBase
 
         var product = new Product
         {
-            Name = dto.Name,
+            Name = dto.Name.Trim(),
             Price = dto.Price,
-            Image = dto.Image,
-            Description = dto.Description,
+            Image = dto.Image?.Trim(),
+            Description = dto.Description?.Trim(),
             CreatedAt = DateTime.UtcNow
         };
 
-        db.Products.Add(product);
-        await db.SaveChangesAsync();
-
-        return CreatedAtAction(nameof(GetById), new { id = product.Id }, product);
+        var created = await repository.AddAsync(product);
+        return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
     /// <summary>
@@ -94,7 +77,7 @@ public class ProductsController(AppDbContext db) : ControllerBase
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, [FromBody] ProductDto dto)
     {
-        var product = await db.Products.FindAsync(id);
+        var product = await repository.GetByIdAsync(id);
         if (product == null)
         {
             return NotFound(new { message = $"Không tìm thấy sản phẩm với ID = {id}" });
@@ -105,13 +88,13 @@ public class ProductsController(AppDbContext db) : ControllerBase
             return BadRequest(new { message = "Tên sản phẩm không được để trống" });
         }
 
-        product.Name = dto.Name;
+        product.Name = dto.Name.Trim();
         product.Price = dto.Price;
-        product.Image = dto.Image;
-        product.Description = dto.Description;
+        product.Image = dto.Image?.Trim();
+        product.Description = dto.Description?.Trim();
         product.UpdatedAt = DateTime.UtcNow;
 
-        await db.SaveChangesAsync();
+        await repository.UpdateAsync(product);
 
         return Ok(new
         {
@@ -126,14 +109,11 @@ public class ProductsController(AppDbContext db) : ControllerBase
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var product = await db.Products.FindAsync(id);
-        if (product == null)
+        var deleted = await repository.DeleteAsync(id);
+        if (!deleted)
         {
             return NotFound(new { message = $"Không tìm thấy sản phẩm với ID = {id}" });
         }
-
-        db.Products.Remove(product);
-        await db.SaveChangesAsync();
 
         return Ok(new { message = $"Đã xóa sản phẩm ID = {id} thành công" });
     }

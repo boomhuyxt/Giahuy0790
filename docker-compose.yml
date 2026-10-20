@@ -1,0 +1,15 @@
+services:
+  web-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: giahuy0790_app
+    ports:
+      - "8888:8888"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8888
+    volumes:
+      # Giữ lại các ảnh đã tải lên ngay cả khi build lại hoặc khởi động lại container
+      - ./wwwroot/uploads:/app/wwwroot/uploads
+    restart: unless-stopped
