@@ -226,14 +226,16 @@ public class AuthController(
             return BadRequest(new { message = "Vui lòng cung cấp địa chỉ email hợp lệ." });
         }
 
-        var email = request.Email.Trim();
-        var user = await userManager.FindByEmailAsync(email);
-        if (user == null)
+        var identifier = request.Email.Trim();
+        var user = await userManager.FindByEmailAsync(identifier)
+                   ?? await userManager.FindByNameAsync(identifier);
+
+        if (user == null || string.IsNullOrWhiteSpace(user.Email))
         {
             // Phản hồi chung để đảm bảo bảo mật không lộ thông tin tài khoản
             return Ok(new
             {
-                message = "Nếu địa chỉ email tồn tại trong hệ thống, mã xác thực OTP đã được gửi. Vui lòng kiểm tra hộp thư."
+                message = "Nếu thông tin tài khoản tồn tại trong hệ thống, mã xác thực OTP đã được gửi đến email liên kết. Vui lòng kiểm tra hộp thư."
             });
         }
 
@@ -273,7 +275,9 @@ public class AuthController(
             return BadRequest(new { message = "Email và mã OTP không được để trống." });
         }
 
-        var user = await userManager.FindByEmailAsync(request.Email.Trim());
+        var identifier = request.Email.Trim();
+        var user = await userManager.FindByEmailAsync(identifier)
+                   ?? await userManager.FindByNameAsync(identifier);
         if (user == null ||
             string.IsNullOrWhiteSpace(user.PasswordResetOtp) ||
             user.PasswordResetOtp != request.Otp.Trim() ||
@@ -305,7 +309,9 @@ public class AuthController(
             return BadRequest(new { message = "Mật khẩu xác nhận không khớp với mật khẩu mới." });
         }
 
-        var user = await userManager.FindByEmailAsync(request.Email.Trim());
+        var identifier = request.Email.Trim();
+        var user = await userManager.FindByEmailAsync(identifier)
+                   ?? await userManager.FindByNameAsync(identifier);
         if (user == null ||
             string.IsNullOrWhiteSpace(user.PasswordResetOtp) ||
             user.PasswordResetOtp != request.Otp.Trim() ||

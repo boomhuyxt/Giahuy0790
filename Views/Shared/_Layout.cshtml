@@ -136,6 +136,11 @@
                             <label class="form-label fw-semibold small">Mật khẩu</label>
                             <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" required />
                         </div>
+                        <div class="d-flex justify-content-end mb-2">
+                            <a href="#" class="small text-decoration-none text-primary fw-semibold" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#modalForgotPassword">
+                                🔑 Quên mật khẩu?
+                            </a>
+                        </div>
                     </div>
                     <div class="modal-footer border-0 pt-0">
                         <button type="button" class="btn btn-link text-decoration-none btn-sm me-auto" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#modalRegister">
@@ -187,6 +192,78 @@
                         </button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL QUÊN MẬT KHẨU (GỬI MÃ OTP QUA EMAIL) ================= -->
+    <div class="modal fade" id="modalForgotPassword" tabindex="-1" aria-labelledby="modalForgotLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
+            <div class="modal-content shadow-lg rounded-4">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold" id="modalForgotLabel">🔑 Khôi phục mật khẩu</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                
+                <!-- BƯỚC 1: GỬI MÃ OTP QUA EMAIL -->
+                <form id="formForgotStep1">
+                    <div class="modal-body">
+                        <p class="text-muted small mb-3">Nhập địa chỉ Email hoặc Tên tài khoản đã đăng ký. Hệ thống sẽ gửi mã OTP gồm 6 chữ số về email của bạn để xác thực.</p>
+                        <div id="forgotStep1Alert"></div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">Email hoặc Username <span class="text-danger">*</span></label>
+                            <input type="text" id="forgotIdentifier" class="form-control" placeholder="vidu@gmail.com hoặc username" required />
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-link text-decoration-none btn-sm me-auto" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#modalLogin">
+                            Quay lại Đăng nhập
+                        </button>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm" id="btnSubmitForgotStep1">
+                            Gửi mã OTP
+                        </button>
+                    </div>
+                </form>
+
+                <!-- BƯỚC 2: NHẬP MÃ OTP VÀ THAY ĐỔI MẬT KHẨU MỚI -->
+                <form id="formForgotStep2" style="display: none;">
+                    <div class="modal-body">
+                        <div class="alert alert-info py-2 small mb-3">
+                            ✉️ Mã xác thực OTP 6 số đã được gửi qua email. Vui lòng kiểm tra hộp thư đến (hoặc thư mục Spam/Rác).
+                        </div>
+                        <div id="forgotStep2Alert"></div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small text-primary">Mã OTP (6 chữ số) <span class="text-danger">*</span></label>
+                            <input type="text" id="forgotOtp" class="form-control text-center fw-bold fs-4 tracking-widest" maxlength="6" placeholder="123456" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">Mật khẩu mới (Tối thiểu 6 ký tự) <span class="text-danger">*</span></label>
+                            <input type="password" id="forgotNewPassword" class="form-control" placeholder="••••••••" minlength="6" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">Xác nhận mật khẩu mới <span class="text-danger">*</span></label>
+                            <input type="password" id="forgotConfirmPassword" class="form-control" placeholder="••••••••" minlength="6" required />
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-2">
+                            <button type="button" class="btn btn-link btn-sm text-decoration-none p-0" id="btnBackToStep1">
+                                ← Đổi email khác
+                            </button>
+                            <button type="button" class="btn btn-link btn-sm text-decoration-none p-0 text-primary" id="btnResendOtp">
+                                Gửi lại mã OTP
+                            </button>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-link text-decoration-none btn-sm me-auto" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#modalLogin">
+                            Đăng nhập
+                        </button>
+                        <button type="submit" class="btn btn-success rounded-pill px-4 shadow-sm" id="btnSubmitForgotStep2">
+                            Đổi mật khẩu
+                        </button>
+                    </div>
+                </form>
+
             </div>
         </div>
     </div>
@@ -329,6 +406,144 @@
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = 'Đăng nhập';
+            }
+        });
+
+        // ================= QUÊN MẬT KHẨU / XÁC THỰC OTP =================
+        let currentForgotIdentifier = '';
+
+        // Bước 1: Gửi mã OTP về email người dùng
+        document.getElementById('formForgotStep1')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const input = document.getElementById('forgotIdentifier');
+            const alertBox = document.getElementById('forgotStep1Alert');
+            const btn = document.getElementById('btnSubmitForgotStep1');
+
+            currentForgotIdentifier = input.value.trim();
+            if (!currentForgotIdentifier) return;
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang gửi OTP...';
+            alertBox.innerHTML = '';
+
+            try {
+                const res = await fetch('/api/auth/forgot-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: currentForgotIdentifier })
+                });
+
+                const data = await res.json();
+                if (!res.ok) {
+                    alertBox.innerHTML = `<div class="alert alert-danger py-2 small">${data.message || 'Lỗi gửi yêu cầu'}</div>`;
+                    return;
+                }
+
+                // Chuyển sang Bước 2: Nhập OTP & Đổi mật khẩu
+                document.getElementById('formForgotStep1').style.display = 'none';
+                document.getElementById('formForgotStep2').style.display = 'block';
+                document.getElementById('forgotOtp').value = '';
+                document.getElementById('forgotNewPassword').value = '';
+                document.getElementById('forgotConfirmPassword').value = '';
+                document.getElementById('forgotStep2Alert').innerHTML = `<div class="alert alert-success py-2 small">✅ ${data.message}</div>`;
+            } catch (err) {
+                alertBox.innerHTML = `<div class="alert alert-danger py-2 small">Lỗi kết nối: ${err.message}</div>`;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Gửi mã OTP';
+            }
+        });
+
+        // Nút quay lại Bước 1
+        document.getElementById('btnBackToStep1')?.addEventListener('click', () => {
+            document.getElementById('formForgotStep2').style.display = 'none';
+            document.getElementById('formForgotStep1').style.display = 'block';
+            document.getElementById('forgotStep1Alert').innerHTML = '';
+        });
+
+        // Gửi lại mã OTP
+        document.getElementById('btnResendOtp')?.addEventListener('click', async () => {
+            const btn = document.getElementById('btnResendOtp');
+            const alertBox = document.getElementById('forgotStep2Alert');
+            if (!currentForgotIdentifier) return;
+
+            btn.disabled = true;
+            btn.textContent = 'Đang gửi lại...';
+
+            try {
+                const res = await fetch('/api/auth/forgot-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: currentForgotIdentifier })
+                });
+                const data = await res.json();
+                alertBox.innerHTML = `<div class="alert alert-success py-2 small">🔁 ${data.message || 'Đã gửi lại mã OTP!'}</div>`;
+            } catch (err) {
+                alertBox.innerHTML = `<div class="alert alert-danger py-2 small">Lỗi: ${err.message}</div>`;
+            } finally {
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btn.textContent = 'Gửi lại mã OTP';
+                }, 5000);
+            }
+        });
+
+        // Bước 2: Xác nhận đổi mật khẩu mới với mã OTP
+        document.getElementById('formForgotStep2')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const alertBox = document.getElementById('forgotStep2Alert');
+            const btn = document.getElementById('btnSubmitForgotStep2');
+
+            const otp = document.getElementById('forgotOtp').value.trim();
+            const newPassword = document.getElementById('forgotNewPassword').value;
+            const confirmPassword = document.getElementById('forgotConfirmPassword').value;
+
+            if (newPassword !== confirmPassword) {
+                alertBox.innerHTML = '<div class="alert alert-danger py-2 small">Mật khẩu xác nhận không khớp!</div>';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang xác thực...';
+            alertBox.innerHTML = '';
+
+            try {
+                const res = await fetch('/api/auth/reset-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: currentForgotIdentifier,
+                        otp: otp,
+                        newPassword: newPassword,
+                        confirmPassword: confirmPassword
+                    })
+                });
+
+                const data = await res.json();
+                if (!res.ok) {
+                    const errorMsg = data.errors ? data.errors.join('<br>') : (data.message || 'Đổi mật khẩu thất bại');
+                    alertBox.innerHTML = `<div class="alert alert-danger py-2 small">${errorMsg}</div>`;
+                    return;
+                }
+
+                alertBox.innerHTML = `<div class="alert alert-success py-2 small">🎉 ${data.message}</div>`;
+
+                setTimeout(() => {
+                    bootstrap.Modal.getInstance(document.getElementById('modalForgotPassword')).hide();
+                    document.getElementById('formForgotStep2').style.display = 'none';
+                    document.getElementById('formForgotStep1').style.display = 'block';
+                    document.getElementById('formForgotStep1').reset();
+
+                    const loginModal = new bootstrap.Modal(document.getElementById('modalLogin'));
+                    document.getElementById('loginIdentifier').value = currentForgotIdentifier;
+                    document.getElementById('loginPassword').value = '';
+                    loginModal.show();
+                }, 1500);
+            } catch (err) {
+                alertBox.innerHTML = `<div class="alert alert-danger py-2 small">Lỗi kết nối: ${err.message}</div>`;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Đổi mật khẩu';
             }
         });
 
