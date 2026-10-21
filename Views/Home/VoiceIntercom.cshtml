@@ -1,5 +1,5 @@
 @{
-    ViewData["Title"] = "Bộ Đàm Gia Đình - Đàm Thoại Giọng Nói";
+    ViewData["Title"] = "Bộ Đàm Gia Đình - Đàm Thoại Giọng Nói MP3";
 }
 
 <style>
@@ -146,17 +146,20 @@
     <div class="apple-voice-card p-4 mb-4">
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
             <div>
-                <div class="d-flex align-items-center gap-2 mb-1">
+                <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
                     <span class="badge" style="background-color: var(--apple-blue-soft); color: var(--apple-blue); font-size: 0.75rem; font-weight: 600;">
                         VOICE INTERCOM
+                    </span>
+                    <span class="badge bg-dark text-white" style="font-size: 0.75rem; font-weight: 600;">
+                        <i class="bi bi-file-earmark-music me-1"></i> MP3 128 KBPS
                     </span>
                     <span class="text-muted small">● Kết nối trực tiếp</span>
                 </div>
                 <h3 class="fw-bold mb-1" style="color: var(--apple-black); letter-spacing: -0.02em;">
-                    Bộ Đàm Gia Đình
+                    Bộ Đàm Gia Đình - Lưu & Gửi Giọng Nói MP3
                 </h3>
                 <p class="text-muted mb-0 small">
-                    Đàm thoại giọng nói tức thì giữa Ba Mẹ và Bé. Nhấn nút để nói và gửi tin nhắn thoại.
+                    Đàm thoại giọng nói tức thì. Khi nói, hệ thống sẽ mã hóa và lưu trực tiếp thành file <strong>.mp3</strong> vào thư mục lưu trữ để người khác có thể nghe và tải về trên mọi thiết bị.
                 </p>
             </div>
             <div class="d-flex gap-2 flex-wrap align-items-center">
@@ -181,7 +184,7 @@
             </div>
         </div>
         <h5 class="fw-bold mb-1" style="color: var(--apple-black);">Đăng nhập để sử dụng bộ đàm</h5>
-        <p class="text-muted small mb-3">Vui lòng đăng nhập tài khoản Phụ huynh hoặc tài khoản Bé để gửi và nhận tin nhắn thoại.</p>
+        <p class="text-muted small mb-3">Vui lòng đăng nhập tài khoản Phụ huynh hoặc tài khoản Bé để gửi và nhận tin nhắn thoại MP3.</p>
         <button class="btn apple-btn-blue px-4 py-2" data-bs-toggle="modal" data-bs-target="#modalLogin">
             <i class="bi bi-box-arrow-in-right me-1"></i> Đăng nhập ngay
         </button>
@@ -226,7 +229,7 @@
                 <div class="d-flex justify-content-between align-items-center pb-3 mb-3 border-bottom" style="border-color: var(--apple-border) !important;">
                     <div class="d-flex align-items-center gap-2">
                         <i class="bi bi-chat-quote-fill" style="color: var(--apple-blue);"></i>
-                        <h6 class="fw-bold mb-0" style="color: var(--apple-black);">Hộp thư thoại</h6>
+                        <h6 class="fw-bold mb-0" style="color: var(--apple-black);">Hộp thư thoại MP3</h6>
                     </div>
                     <div class="d-flex align-items-center gap-2">
                         <span class="badge rounded-pill bg-light text-dark border small" id="lblMessageCount">0 tin nhắn</span>
@@ -247,7 +250,7 @@
                     <div id="feedEmptyBox" class="text-center py-5 my-auto" style="display: none;">
                         <div class="mb-2" style="font-size: 2.5rem; color: var(--apple-gray);">🎙️</div>
                         <h6 class="fw-bold mb-1" style="color: var(--apple-black);">Chưa có tin nhắn thoại nào</h6>
-                        <p class="text-muted small mb-0">Nhấn nút bên phải để ghi âm và gửi tin nhắn đầu tiên!</p>
+                        <p class="text-muted small mb-0">Nhấn nút bên phải để ghi âm và gửi tin nhắn MP3 đầu tiên!</p>
                     </div>
                     <!-- Message bubbles injected here -->
                     <div id="voiceMessagesList" class="d-flex flex-column gap-3"></div>
@@ -262,7 +265,7 @@
                 <div>
                     <!-- Header máy bộ đàm -->
                     <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: var(--apple-border) !important;">
-                        <span class="small fw-semibold text-muted">BỘ ĐÀM TRỰC TUYẾN</span>
+                        <span class="small fw-semibold text-muted">BỘ ĐÀM MP3 TRỰC TUYẾN</span>
                         <span class="badge" id="badgeLedStatus" style="background: var(--apple-blue-soft); color: var(--apple-blue); font-weight: 600;">
                             ● SẴN SÀNG
                         </span>
@@ -272,7 +275,7 @@
                     <div class="p-3 rounded-4 mb-4 text-center border" id="intercomScreen" style="background: var(--apple-light-gray); border-color: var(--apple-border);">
                         <div class="d-flex justify-content-between align-items-center mb-1 small text-muted" style="font-size: 11px;">
                             <span id="lcdChannelName" class="fw-bold text-uppercase">CH: GIA ĐÌNH</span>
-                            <span id="lcdRecIndicator" style="display: none; color: #dc2626; font-weight: 700;">● ĐANG GHI ÂM</span>
+                            <span id="lcdRecIndicator" style="display: none; color: #dc2626; font-weight: 700;">● ĐANG THU MP3</span>
                         </div>
 
                         <!-- Đồng hồ đếm giây -->
@@ -295,7 +298,7 @@
                         </div>
 
                         <div class="small text-muted" id="lcdStatusText" style="font-size: 12px;">
-                            Sẵn sàng đàm thoại. Bấm nút dưới để nói!
+                            Sẵn sàng thu âm MP3. Bấm nút dưới để nói!
                         </div>
                     </div>
                 </div>
@@ -313,23 +316,23 @@
                             <i class="bi bi-x-circle me-1"></i> Hủy
                         </button>
                         <button type="button" class="btn apple-btn-blue btn-sm px-4" id="btnSendRecord">
-                            <i class="bi bi-send-fill me-1"></i> Gửi ngay
+                            <i class="bi bi-send-fill me-1"></i> Gửi ngay (MP3)
                         </button>
                     </div>
 
                     <div class="mt-3 text-muted small" style="font-size: 12px;">
-                        💡 <em>Bấm 1 lần để nói, bấm lần nữa để gửi ngay. Hoặc giữ nút để nói và thả tay để gửi!</em>
+                        💡 <em>Bấm 1 lần để nói, bấm lần nữa để gửi MP3. Hoặc nhấn giữ để nói và thả tay để gửi!</em>
                     </div>
 
                     <!-- Tùy chọn gửi file âm thanh hoặc gửi tin nhắn mẫu kiểm tra -->
                     <div class="mt-3 pt-3 border-top d-flex flex-column gap-2" style="border-color: var(--apple-border) !important;">
                         <div class="d-flex justify-content-center gap-2 flex-wrap">
-                            <label class="btn btn-sm apple-btn-outline py-1 px-3 m-0" style="cursor: pointer;" title="Chọn file ghi âm từ máy tính hoặc điện thoại để gửi">
-                                <i class="bi bi-paperclip me-1"></i> Gửi file âm thanh
-                                <input type="file" id="fileAudioUpload" accept="audio/*,.webm,.ogg,.wav,.mp3,.m4a,.mp4" style="display: none;" onchange="handleAudioFileUpload(this)" />
+                            <label class="btn btn-sm apple-btn-outline py-1 px-3 m-0" style="cursor: pointer;" title="Chọn file MP3 từ máy tính hoặc điện thoại để gửi">
+                                <i class="bi bi-upload me-1"></i> Gửi file MP3 có sẵn
+                                <input type="file" id="fileAudioUpload" accept=".mp3,audio/mpeg,audio/mp3,audio/*" style="display: none;" onchange="handleAudioFileUpload(this)" />
                             </label>
-                            <button type="button" class="btn btn-sm apple-btn-outline py-1 px-3" onclick="sendTestVoiceMessage()" title="Tự động tạo âm thanh mẫu và gửi để kiểm tra đường truyền">
-                                <i class="bi bi-soundwave me-1"></i> Gửi tin mẫu kiểm tra
+                            <button type="button" class="btn btn-sm apple-btn-outline py-1 px-3" onclick="sendTestMp3VoiceMessage()" title="Tự động tạo file âm thanh MP3 mẫu và gửi để kiểm tra">
+                                <i class="bi bi-soundwave me-1"></i> Gửi tin MP3 mẫu kiểm tra
                             </button>
                         </div>
                     </div>
@@ -342,23 +345,32 @@
 </div>
 
 @section Scripts {
+<!-- Thư viện mã hóa MP3 thời gian thực LAME.js -->
+<script src="~/js/lame.min.js"></script>
 <script>
     let currentKidId = null;
     let kidsList = [];
     let isKidRole = false;
-    let mediaRecorder = null;
-    let mediaStream = null;
-    let audioChunks = [];
-    let recordStartTime = null;
-    let recordTimerInterval = null;
-    let audioContext = null;
+
+    // Web Audio API + LAME MP3 Encoder pipeline
+    let audioCtx = null;
+    let micStream = null;
+    let micSource = null;
+    let scriptProcessor = null;
+    let muteGain = null;
     let analyserNode = null;
-    let visualizerAnimation = null;
-    let pollInterval = null;
-    let currentlyPlayingAudio = null;
+    let mp3Encoder = null;
+    let mp3DataChunks = [];
+
+    // Trạng thái thu âm
     let isRecording = false;
     let isStarting = false;
     let isUploading = false;
+    let recordStartTime = null;
+    let recordTimerInterval = null;
+    let visualizerAnimation = null;
+    let pollInterval = null;
+    let currentlyPlayingAudio = null;
     let pointerPressStartTime = 0;
 
     function getAuthHeaders() {
@@ -611,7 +623,7 @@
         }
     }
 
-    // 5. Render danh sách bong bóng tin nhắn Apple
+    // 5. Render danh sách bong bóng tin nhắn Apple có link tải file MP3
     function renderMessagesFeed(messages) {
         const listContainer = document.getElementById('voiceMessagesList');
         const feedScroll = document.getElementById('voiceFeedContainer');
@@ -624,13 +636,19 @@
             const roleBadge = m.senderRole === 'Kid' ? '<span class="badge bg-light text-dark ms-1">Bé</span>' : '<span class="badge" style="background: rgba(0, 113, 227, 0.15); color: var(--apple-blue);">Ba Mẹ</span>';
             const unreadBadge = (!isMe && !m.isHeard) ? '<span class="badge bg-danger ms-1">MỚI</span>' : '';
 
+            // Định dạng file hiển thị (MP3)
+            const isMp3 = m.audioUrl.toLowerCase().endsWith('.mp3');
+            const formatBadge = isMp3 
+                ? '<span class="badge bg-dark text-white ms-1" style="font-size: 9px; padding: 2px 5px;">MP3</span>' 
+                : '<span class="badge bg-secondary text-white ms-1" style="font-size: 9px; padding: 2px 5px;">AUDIO</span>';
+
             return `
-            <div class="${bubbleAlign} d-flex gap-2" style="max-width: 82%;">
+            <div class="${bubbleAlign} d-flex gap-2" style="max-width: 84%;">
                 ${!isMe ? `<img src="${m.senderAvatarUrl}" class="rounded-circle border" style="width: 34px; height: 34px; object-fit: cover;" alt="${m.senderName}" />` : ''}
                 
-                <div class="p-3 shadow-sm ${bubbleClass}" style="min-width: 220px;">
+                <div class="p-3 shadow-sm ${bubbleClass}" style="min-width: 230px;">
                     <div class="d-flex justify-content-between align-items-center mb-2 small" style="font-size: 11px;">
-                        <span class="fw-semibold">${m.senderName} ${roleBadge} ${unreadBadge}</span>
+                        <span class="fw-semibold">${m.senderName} ${roleBadge} ${formatBadge} ${unreadBadge}</span>
                         <span class="opacity-75">${m.createdAtVn}</span>
                     </div>
 
@@ -654,9 +672,14 @@
                             </div>
                             <div class="d-flex justify-content-between small opacity-75" style="font-size: 10px;">
                                 <span>00:${String(m.durationSeconds).padStart(2, '0')}</span>
-                                <span>Ghi âm</span>
+                                <span>MP3 Thoại</span>
                             </div>
                         </div>
+
+                        <!-- Nút Tải file MP3 về máy để gửi cho người khác -->
+                        <a href="${m.audioUrl}" download="${m.senderName}_voice_${m.id}.mp3" class="btn btn-link btn-sm p-0 ms-1 opacity-75" style="color: inherit;" title="Tải file MP3 về máy">
+                            <i class="bi bi-download"></i>
+                        </a>
 
                         ${isMe || !isKidRole ? `
                         <button type="button" class="btn btn-link btn-sm text-danger p-0 ms-1 opacity-75" onclick="deleteVoiceMessage(${m.id})" title="Xóa tin nhắn">
@@ -729,7 +752,7 @@
         } catch (_) {}
     };
 
-    // 8. Điều khiển bộ đàm Push-To-Talk và Tap-to-Talk chuẩn Apple
+    // 8. Điều khiển bộ đàm Push-To-Talk và Tap-to-Talk
     function setupPttControls() {
         const btnPtt = document.getElementById('btnPtt');
         const btnCancel = document.getElementById('btnCancelRecord');
@@ -741,42 +764,43 @@
             if (isStarting || isUploading) return;
 
             if (!isRecording) {
-                await startRecording();
+                await startMp3Recording();
             } else {
-                await stopAndSendRecording();
+                await stopAndSendMp3Recording();
             }
         });
 
-        // Giữ để nói (Push-To-Talk)
+        // Hỗ trợ giữ để nói (Push-To-Talk)
         btnPtt.addEventListener('pointerdown', (e) => {
             pointerPressStartTime = Date.now();
         });
 
         btnPtt.addEventListener('pointerup', async (e) => {
             const pressDuration = Date.now() - pointerPressStartTime;
-            // Nếu người dùng đã nhấn giữ hơn 700ms thì thả tay ra sẽ tự động gửi ngay
             if (isRecording && pressDuration >= 700) {
-                await stopAndSendRecording();
+                await stopAndSendMp3Recording();
             }
         });
 
-        btnCancel.addEventListener('click', cancelRecording);
+        btnCancel.addEventListener('click', cancelMp3Recording);
         btnSend.addEventListener('click', async () => {
-            await stopAndSendRecording();
+            await stopAndSendMp3Recording();
         });
     }
 
-    // Bắt đầu thu âm qua microphone
-    async function startRecording() {
+    // =========================================================================
+    // THU ÂM VÀ MÃ HÓA TRỰC TIẾP SANG ĐỊNH DẠNG MP3 BẰNG LAME.JS & WEB AUDIO API
+    // =========================================================================
+    async function startMp3Recording() {
         if (isRecording || isStarting || isUploading) return;
         isStarting = true;
 
         const lcdStatus = document.getElementById('lcdStatusText');
-        if (lcdStatus) lcdStatus.textContent = 'Đang mở microphone...';
+        if (lcdStatus) lcdStatus.textContent = 'Đang khởi động bộ mã hóa MP3...';
 
         try {
-            // Yêu cầu quyền truy cập micro
-            mediaStream = await navigator.mediaDevices.getUserMedia({
+            // 1. Mở micro thiết bị
+            micStream = await navigator.mediaDevices.getUserMedia({
                 audio: {
                     echoCancellation: true,
                     noiseSuppression: true,
@@ -784,71 +808,80 @@
                 }
             });
 
-            audioChunks = [];
+            // 2. Khởi tạo AudioContext
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            micSource = audioCtx.createMediaStreamSource(micStream);
 
-            // Chọn định dạng MIME tối ưu
-            let chosenMime = '';
-            if (typeof MediaRecorder !== 'undefined') {
-                const mimeCandidates = [
-                    'audio/webm;codecs=opus',
-                    'audio/webm',
-                    'audio/mp4',
-                    'audio/aac',
-                    'audio/ogg;codecs=opus',
-                    'audio/ogg',
-                    'audio/wav'
-                ];
-                for (const m of mimeCandidates) {
-                    if (MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(m)) {
-                        chosenMime = m;
-                        break;
-                    }
-                }
+            // 3. Khởi tạo LAME MP3 Encoder (Mono, SampleRate của thiết bị, Bitrate 128kbps chuẩn nét)
+            const sampleRate = audioCtx.sampleRate || 44100;
+            if (typeof lamejs === 'undefined' || !lamejs.Mp3Encoder) {
+                throw new Error('Thư viện lamejs chưa sẵn sàng.');
             }
+            mp3Encoder = new lamejs.Mp3Encoder(1, sampleRate, 128);
+            mp3DataChunks = [];
 
-            const options = chosenMime ? { mimeType: chosenMime } : {};
-            mediaRecorder = new MediaRecorder(mediaStream, options);
+            // 4. ScriptProcessorNode lấy mẫu PCM và mã hóa liên tục
+            // bufferSize: 4096 (chuẩn tối ưu cho xử lý âm thanh không giật)
+            scriptProcessor = audioCtx.createScriptProcessor(4096, 1, 1);
+            scriptProcessor.onaudioprocess = (e) => {
+                if (!isRecording) return;
+                const inputFloat = e.inputBuffer.getChannelData(0);
+                const sampleLength = inputFloat.length;
+                const pcm16 = new Int16Array(sampleLength);
 
-            mediaRecorder.ondataavailable = (e) => {
-                if (e.data && e.data.size > 0) {
-                    audioChunks.push(e.data);
+                for (let i = 0; i < sampleLength; i++) {
+                    const s = Math.max(-1, Math.min(1, inputFloat[i]));
+                    pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+                }
+
+                const mp3buf = mp3Encoder.encodeBuffer(pcm16);
+                if (mp3buf.length > 0) {
+                    mp3DataChunks.push(mp3buf);
                 }
             };
 
-            // timeslice 200ms gom chunk đều đặn
-            mediaRecorder.start(200);
+            // Gain node chống vang (mute feedback vào loa)
+            muteGain = audioCtx.createGain();
+            muteGain.gain.value = 0;
+
+            micSource.connect(scriptProcessor);
+            scriptProcessor.connect(muteGain);
+            muteGain.connect(audioCtx.destination);
+
+            // Analyser cho visualizer sóng âm
+            startVisualizer(micStream);
+
             isRecording = true;
             recordStartTime = Date.now();
             playAppleBeep('start');
 
             updatePttUi(true);
             startRecordTimer();
-            startVisualizer(mediaStream);
 
-            if (lcdStatus) lcdStatus.textContent = 'Đang ghi âm... Bấm lại hoặc bấm "Gửi ngay" khi nói xong!';
+            if (lcdStatus) lcdStatus.textContent = 'Đang ghi âm MP3... Bấm lại hoặc bấm "Gửi ngay" khi nói xong!';
 
         } catch (err) {
-            console.error('Lỗi mở microphone:', err);
+            console.error('Lỗi mở microphone / MP3 encoder:', err);
             isRecording = false;
             updatePttUi(false);
 
             if (lcdStatus) lcdStatus.textContent = '❌ Không thể truy cập microphone.';
 
             if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-                alert('Trình duyệt chưa được cấp quyền Microphone. Vui lòng nhấn vào biểu tượng ổ khóa/cài đặt cạnh thanh địa chỉ web, chọn "Cho phép Microphone" và thử lại!');
+                alert('Trình duyệt chưa được cấp quyền Microphone. Vui lòng bấm vào biểu tượng cài đặt cạnh thanh địa chỉ web, chọn "Cho phép Microphone" và thử lại!');
             } else if (err.name === 'NotFoundError') {
-                alert('Không tìm thấy microphone trên máy. Bạn có thể sử dụng nút "Gửi file âm thanh" bên dưới để gửi tin nhắn thoại!');
+                alert('Không tìm thấy microphone trên máy. Bạn có thể sử dụng nút "Gửi file MP3 có sẵn" bên dưới để gửi!');
             } else {
-                alert('Không thể mở microphone: ' + err.message);
+                alert('Không thể mở micro: ' + err.message);
             }
         } finally {
             isStarting = false;
         }
     }
 
-    // Dừng và gửi bản ghi âm
-    async function stopAndSendRecording() {
-        if (!mediaRecorder || !isRecording || isUploading) return;
+    // Dừng thu âm, đóng gói MP3 và gửi lên server
+    async function stopAndSendMp3Recording() {
+        if (!isRecording || isUploading) return;
         isRecording = false;
         isUploading = true;
 
@@ -858,52 +891,63 @@
 
         const duration = Math.max(1, Math.round((Date.now() - recordStartTime) / 1000));
         const lcdStatus = document.getElementById('lcdStatusText');
-        if (lcdStatus) lcdStatus.textContent = 'Đang gửi tin nhắn thoại...';
+        if (lcdStatus) lcdStatus.textContent = 'Đang đóng gói file MP3 và lưu vào thư mục...';
 
-        // Xả nốt dữ liệu còn trong đệm
         try {
-            if (mediaRecorder.state === 'recording') {
-                mediaRecorder.requestData();
+            // 1. Flush dữ liệu MP3 còn trong encoder
+            if (mp3Encoder) {
+                const mp3Flush = mp3Encoder.flush();
+                if (mp3Flush.length > 0) {
+                    mp3DataChunks.push(mp3Flush);
+                }
             }
-        } catch (_) {}
 
-        mediaRecorder.onstop = async () => {
-            try {
-                // Tắt stream micro sau khi kết thúc
-                if (mediaStream) {
-                    mediaStream.getTracks().forEach(t => t.stop());
-                    mediaStream = null;
-                }
+            // 2. Ngắt kết nối Web Audio
+            if (scriptProcessor) {
+                scriptProcessor.disconnect();
+                scriptProcessor.onaudioprocess = null;
+                scriptProcessor = null;
+            }
+            if (micSource) {
+                micSource.disconnect();
+                micSource = null;
+            }
+            if (muteGain) {
+                muteGain.disconnect();
+                muteGain = null;
+            }
+            if (audioCtx) {
+                audioCtx.close().catch(() => {});
+                audioCtx = null;
+            }
+            if (micStream) {
+                micStream.getTracks().forEach(t => t.stop());
+                micStream = null;
+            }
 
-                const mime = mediaRecorder.mimeType || 'audio/webm';
-                const blob = new Blob(audioChunks, { type: mime });
+            // 3. Tạo Blob chuẩn MP3
+            const mp3Blob = new Blob(mp3DataChunks, { type: 'audio/mp3' });
 
-                if (blob.size === 0) {
-                    alert('Bản ghi âm quá ngắn hoặc không có tiếng. Vui lòng nói to hơn và thử lại!');
-                    updatePttUi(false);
-                    return;
-                }
-
-                await uploadVoiceMessage(blob, duration, mime);
-            } catch (err) {
-                console.error('Lỗi xử lý file ghi âm:', err);
-                alert('Lỗi: ' + err.message);
-            } finally {
-                isUploading = false;
+            if (mp3Blob.size === 0) {
+                alert('Bản ghi âm quá ngắn hoặc không có âm thanh. Vui lòng nói to hơn và thử lại!');
                 updatePttUi(false);
+                return;
             }
-        };
 
-        try {
-            mediaRecorder.stop();
-        } catch (e) {
+            // 4. Upload file MP3 lên server
+            await uploadVoiceMessage(mp3Blob, duration, 'audio/mp3');
+
+        } catch (err) {
+            console.error('Lỗi đóng gói MP3:', err);
+            alert('Lỗi: ' + err.message);
+        } finally {
             isUploading = false;
             updatePttUi(false);
         }
     }
 
-    // Hủy ghi âm
-    function cancelRecording() {
+    // Hủy thu âm
+    function cancelMp3Recording() {
         isRecording = false;
         isStarting = false;
         isUploading = false;
@@ -911,38 +955,37 @@
         clearInterval(recordTimerInterval);
         stopVisualizer();
 
-        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-            try { mediaRecorder.stop(); } catch (_) {}
+        if (scriptProcessor) {
+            scriptProcessor.disconnect();
+            scriptProcessor.onaudioprocess = null;
+            scriptProcessor = null;
         }
-        if (mediaStream) {
-            mediaStream.getTracks().forEach(t => t.stop());
-            mediaStream = null;
+        if (micSource) { micSource.disconnect(); micSource = null; }
+        if (muteGain) { muteGain.disconnect(); muteGain = null; }
+        if (audioCtx) { audioCtx.close().catch(() => {}); audioCtx = null; }
+        if (micStream) {
+            micStream.getTracks().forEach(t => t.stop());
+            micStream = null;
         }
-        audioChunks = [];
+        mp3DataChunks = [];
         updatePttUi(false);
 
         const lcdStatus = document.getElementById('lcdStatusText');
         if (lcdStatus) {
             lcdStatus.textContent = 'Đã hủy bản ghi âm.';
             setTimeout(() => {
-                lcdStatus.textContent = 'Sẵn sàng đàm thoại. Bấm nút dưới để nói!';
+                lcdStatus.textContent = 'Sẵn sàng thu âm MP3. Bấm nút dưới để nói!';
             }, 1500);
         }
     }
 
-    // Gửi file âm thanh lên server
+    // Gửi file MP3 lên server lưu vào thư mục wwwroot/uploads/voice/
     async function uploadVoiceMessage(blob, duration, mimeType) {
         const lcdStatus = document.getElementById('lcdStatusText');
-        if (lcdStatus) lcdStatus.textContent = 'Đang truyền tín hiệu bộ đàm...';
+        if (lcdStatus) lcdStatus.textContent = 'Đang lưu file MP3 vào máy chủ...';
 
-        let ext = 'webm';
-        if (mimeType.includes('mp4')) ext = 'mp4';
-        else if (mimeType.includes('ogg')) ext = 'ogg';
-        else if (mimeType.includes('wav')) ext = 'wav';
-        else if (mimeType.includes('aac')) ext = 'aac';
-        else if (mimeType.includes('mpeg') || mimeType.includes('mp3')) ext = 'mp3';
-
-        const fileName = `voice_${Date.now()}.${ext}`;
+        // Luôn đặt phần mở rộng là .mp3
+        const fileName = `voice_${Date.now()}.mp3`;
         const formData = new FormData();
         formData.append('audioFile', blob, fileName);
         formData.append('durationSeconds', duration);
@@ -973,11 +1016,12 @@
                 throw new Error(errData.message || 'Lỗi gửi tin nhắn thoại từ máy chủ');
             }
 
-            if (lcdStatus) lcdStatus.textContent = '✅ Đã gửi tin nhắn thoại thành công!';
+            const data = await res.json();
+            if (lcdStatus) lcdStatus.textContent = `✅ Đã lưu file MP3 (${data.voiceMessage?.audioUrl}) và gửi thành công!`;
             await loadVoiceMessages(false);
 
             setTimeout(() => {
-                if (lcdStatus) lcdStatus.textContent = 'Sẵn sàng đàm thoại. Bấm nút dưới để nói!';
+                if (lcdStatus) lcdStatus.textContent = 'Sẵn sàng thu âm MP3. Bấm nút dưới để nói!';
             }, 2500);
 
         } catch (err) {
@@ -996,7 +1040,7 @@
         modal.show();
     }
 
-    // Tùy chọn 1: Người dùng chọn file âm thanh từ máy để gửi
+    // Tùy chọn 1: Người dùng chọn file MP3 từ máy để gửi
     window.handleAudioFileUpload = async function(input) {
         if (!input.files || input.files.length === 0) return;
         const file = input.files[0];
@@ -1008,64 +1052,49 @@
         }
 
         const lcdStatus = document.getElementById('lcdStatusText');
-        if (lcdStatus) lcdStatus.textContent = `Đang gửi file âm thanh "${file.name}"...`;
+        if (lcdStatus) lcdStatus.textContent = `Đang lưu file MP3 "${file.name}"...`;
 
         try {
-            await uploadVoiceMessage(file, 5, file.type || 'audio/webm');
+            await uploadVoiceMessage(file, 5, 'audio/mp3');
         } finally {
             input.value = '';
         }
     };
 
-    // Tùy chọn 2: Gửi tin nhắn thoại mẫu kiểm tra bộ đàm
-    window.sendTestVoiceMessage = async function() {
+    // Tùy chọn 2: Gửi tin nhắn thoại MP3 mẫu kiểm tra bộ đàm
+    window.sendTestMp3VoiceMessage = async function() {
         const lcdStatus = document.getElementById('lcdStatusText');
-        if (lcdStatus) lcdStatus.textContent = 'Đang tạo âm thanh mẫu và gửi kiểm tra...';
+        if (lcdStatus) lcdStatus.textContent = 'Đang tạo file MP3 mẫu (128kbps) và gửi kiểm tra...';
 
         try {
-            // Tạo 1 file WAV mẫu (tiếng beep 440Hz 1 giây) bằng AudioContext Offline
-            const sampleRate = 8000;
-            const numFrames = sampleRate * 1; // 1s
-            const wavBuffer = createSineWaveWav(440, sampleRate, 1);
-            const blob = new Blob([wavBuffer], { type: 'audio/wav' });
+            if (typeof lamejs === 'undefined' || !lamejs.Mp3Encoder) {
+                throw new Error('Thư viện mã hóa MP3 chưa được tải.');
+            }
 
-            await uploadVoiceMessage(blob, 1, 'audio/wav');
+            const sampleRate = 44100;
+            const durationSec = 1;
+            const numSamples = sampleRate * durationSec;
+            const enc = new lamejs.Mp3Encoder(1, sampleRate, 128);
+
+            // Sinh sóng sine 587Hz (nốt Re D5)
+            const pcm16 = new Int16Array(numSamples);
+            for (let i = 0; i < numSamples; i++) {
+                const t = i / sampleRate;
+                pcm16[i] = Math.sin(2 * Math.PI * 587.33 * t) * 0.4 * 32767;
+            }
+
+            const chunks = [];
+            const buf1 = enc.encodeBuffer(pcm16);
+            if (buf1.length > 0) chunks.push(buf1);
+            const buf2 = enc.flush();
+            if (buf2.length > 0) chunks.push(buf2);
+
+            const mp3Blob = new Blob(chunks, { type: 'audio/mp3' });
+            await uploadVoiceMessage(mp3Blob, 1, 'audio/mp3');
         } catch (err) {
-            alert('Lỗi gửi tin mẫu: ' + err.message);
+            alert('Lỗi tạo và gửi tin MP3 mẫu: ' + err.message);
         }
     };
-
-    // Tạo WAV PCM 16-bit Mono đơn giản
-    function createSineWaveWav(freq, sampleRate, durationSec) {
-        const numSamples = sampleRate * durationSec;
-        const buffer = new ArrayBuffer(44 + numSamples * 2);
-        const view = new DataView(buffer);
-
-        function writeString(offset, str) {
-            for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
-        }
-
-        writeString(0, 'RIFF');
-        view.setUint32(4, 36 + numSamples * 2, true);
-        writeString(8, 'WAVE');
-        writeString(12, 'fmt ');
-        view.setUint32(16, 16, true);
-        view.setUint16(20, 1, true); // PCM
-        view.setUint16(22, 1, true); // Mono
-        view.setUint32(24, sampleRate, true);
-        view.setUint32(28, sampleRate * 2, true);
-        view.setUint16(32, 2, true);
-        view.setUint16(34, 16, true);
-        writeString(36, 'data');
-        view.setUint32(40, numSamples * 2, true);
-
-        for (let i = 0; i < numSamples; i++) {
-            const t = i / sampleRate;
-            const sample = Math.sin(2 * Math.PI * freq * t) * 0.4 * 32767;
-            view.setInt16(44 + i * 2, sample, true);
-        }
-        return buffer;
-    }
 
     function updatePttUi(recording) {
         const btn = document.getElementById('btnPtt');
@@ -1082,7 +1111,7 @@
 
             led.style.background = '#fee2e2';
             led.style.color = '#dc2626';
-            led.textContent = '● ĐANG GHI ÂM';
+            led.textContent = '● ĐANG GHI MP3';
             recBadge.style.display = 'inline';
             actionBox.style.setProperty('display', 'flex', 'important');
         } else {
@@ -1109,16 +1138,16 @@
 
             // Tự động dừng sau 60s
             if (elapsed >= 60) {
-                stopAndSendRecording();
+                stopAndSendMp3Recording();
             }
         }, 250);
     }
 
     function startVisualizer(stream) {
         try {
-            audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const source = audioContext.createMediaStreamSource(stream);
-            analyserNode = audioContext.createAnalyser();
+            const vCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+            const source = vCtx.createMediaStreamSource(stream);
+            analyserNode = vCtx.createAnalyser();
             analyserNode.fftSize = 32;
             source.connect(analyserNode);
 
@@ -1144,10 +1173,6 @@
 
     function stopVisualizer() {
         if (visualizerAnimation) cancelAnimationFrame(visualizerAnimation);
-        if (audioContext) {
-            audioContext.close().catch(() => {});
-            audioContext = null;
-        }
         document.querySelectorAll('#lcdWaveform div').forEach((bar, idx) => {
             bar.style.height = `${(idx % 4 + 1) * 5}px`;
         });
