@@ -27,9 +27,6 @@
             <button type="button" class="btn btn-warning fw-bold text-dark pixel-font px-3 shadow-sm" onclick="openFamilyQrModal()">
                 <i class="pixelart-icons-font-zap i8-xs me-1"></i> Xin Mã QR (1 Phút)
             </button>
-            <button class="btn btn-primary px-4 fw-semibold" id="btnOpenAddModal">
-                <i class="pixelart-icons-font-plus i8-xs me-1"></i> Thêm Bé Mới
-            </button>
         </div>
     </div>
 
@@ -187,19 +184,22 @@
     <!-- Empty state -->
     <div id="emptyBox" class="text-center py-5 bg-white rounded-4 shadow-sm border border-light my-3" style="display: none;">
         <div style="font-size: 55px;">🎈</div>
-        <h5 class="fw-bold mt-2">Chưa có hồ sơ trẻ nào</h5>
-        <p class="text-muted small">Hãy nhấn nút <strong>"+ Thêm Bé Mới"</strong> để tạo hồ sơ bé yêu và cấp tài khoản con ngay.</p>
+        <h5 class="fw-bold mt-2 pixel-font">Chưa có bé nào trong gia đình</h5>
+        <p class="text-muted small mb-3">Bé tham gia bằng cách quét mã QR gia đình. Hãy nhấn nút bên dưới để tạo mã QR có hiệu lực 1 phút cho bé quét.</p>
+        <button type="button" class="btn btn-warning fw-bold text-dark pixel-font px-4 shadow-sm" onclick="openFamilyQrModal()">
+            <i class="pixelart-icons-font-zap i8-xs me-1"></i> Xin Mã QR (1 Phút)
+        </button>
     </div>
 </div>
 
-<!-- ================= MODAL THÊM / CHỈNH SỬA BÉ (8-BIT RETRO) ================= -->
+<!-- ================= MODAL CHỈNH SỬA BÉ (8-BIT RETRO) ================= -->
 <div class="modal fade" id="modalKid" tabindex="-1" aria-labelledby="modalKidLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" style="max-width: 550px;">
         <div class="modal-content shadow-lg">
             <div class="modal-header border-bottom">
                 <h5 class="modal-title fw-bold d-flex align-items-center gap-2" id="modalKidLabel">
                     <i class="pixelart-icons-font-heart i8-md text-primary"></i>
-                    <span>Thêm Hồ Sơ Trẻ Mới</span>
+                    <span>Chỉnh Sửa Hồ Sơ Bé</span>
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -251,38 +251,11 @@
                             <input type="file" id="kidAvatarFile" class="form-control" accept="image/*" />
                             <input type="hidden" id="kidAvatarUrl" value="" />
                         </div>
-
-                        <!-- Khu vực tùy chọn tạo luôn tài khoản con (Chỉ hiện khi thêm mới) -->
-                        <div class="col-12" id="boxCreateChildAccountOption">
-                            <div class="p-3 rounded-4 bg-light border">
-                                <div class="form-check form-switch mb-2">
-                                    <input class="form-check-input" type="checkbox" id="chkCreateChildAccount" />
-                                    <label class="form-check-label fw-semibold small text-primary" for="chkCreateChildAccount">
-                                        ✨ Tạo luôn tài khoản con để bé tự đăng nhập
-                                    </label>
-                                </div>
-                                <div id="boxChildAccountInputs" style="display: none;" class="mt-2 pt-2 border-top">
-                                    <div class="row g-2">
-                                        <div class="col-md-6">
-                                            <label class="form-label small fw-semibold">Tên đăng nhập con <span class="text-danger">*</span></label>
-                                            <input type="text" id="newChildUsername" class="form-control form-control-sm" placeholder="Ví dụ: be_huy" />
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label small fw-semibold">Mật khẩu con <span class="text-danger">*</span></label>
-                                            <input type="password" id="newChildPassword" class="form-control form-control-sm" placeholder="••••••••" minlength="6" />
-                                        </div>
-                                        <div class="col-12">
-                                            <small class="text-muted">💡 Bé có thể dùng thông tin này để đăng nhập xem thời khóa biểu và tích lũy sao thưởng.</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
                 <div class="modal-footer border-0 pt-0">
                     <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Hủy</button>
-                    <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm" id="btnSaveKid">Lưu Hồ Sơ</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm" id="btnSaveKid">Cập Nhật Hồ Sơ</button>
                 </div>
             </form>
         </div>
@@ -900,7 +873,6 @@
     function updateStats(list) {
         if (isKidRole) {
             parentStatsBar.style.display = 'none';
-            document.getElementById('btnOpenAddModal').style.display = 'none';
             if (list.length > 0) {
                 const k = list[0];
                 kidGreetingBanner.classList.remove('d-none');
@@ -911,7 +883,6 @@
         }
 
         parentStatsBar.style.display = 'flex';
-        document.getElementById('btnOpenAddModal').style.display = 'inline-block';
         kidGreetingBanner.classList.add('d-none');
 
         const total = list.length;
@@ -1077,7 +1048,7 @@
                             <a href="/activities?kidId=${k.id}" class="btn btn-sm btn-secondary flex-grow-1 text-primary fw-semibold border text-center">
                                 <i class="pixelart-icons-font-calendar i8-xs me-1"></i> Nhiệm Vụ
                             </a>
-                            <a href="/tracking?kidId=${k.id}" class="btn btn-sm btn-outline-primary px-2 fw-semibold" title="Định vị GPS thời gian thực & Vùng an toàn">
+                            <a href="/tracking?kidId=${k.id}" class="btn btn-sm btn-outline-primary px-2 fw-semibold" title="Định vị vị trí GPS thời gian thực">
                                 <i class="pixelart-icons-font-map-pin i8-xs me-1"></i> Định Vị
                             </a>
                             <a href="/screentime?kidId=${k.id}" class="btn btn-sm btn-outline-primary px-2 fw-semibold" title="Đặt lịch và giới hạn giờ dùng máy">
@@ -1100,22 +1071,6 @@
         }).join('');
     }
 
-    // Toggle hiện/ẩn trường nhập tài khoản con khi thêm bé
-    document.getElementById('chkCreateChildAccount')?.addEventListener('change', (e) => {
-        document.getElementById('boxChildAccountInputs').style.display = e.target.checked ? 'block' : 'none';
-    });
-
-    // Mở modal thêm bé mới
-    document.getElementById('btnOpenAddModal')?.addEventListener('click', () => {
-        document.getElementById('formKid').reset();
-        document.getElementById('kidId').value = '';
-        document.getElementById('modalKidLabel').textContent = '🧒 Thêm Hồ Sơ Trẻ Mới';
-        document.getElementById('modalKidAlert').innerHTML = '';
-        document.getElementById('boxCreateChildAccountOption').style.display = 'block';
-        document.getElementById('boxChildAccountInputs').style.display = 'none';
-        modalKid.show();
-    });
-
     // Mở modal chỉnh sửa bé
     window.openEditModal = function(id) {
         const k = kidsList.find(x => x.id === id);
@@ -1130,9 +1085,8 @@
         document.getElementById('kidHealth').value = k.healthNotes || '';
         document.getElementById('kidInterests').value = k.interests || '';
         document.getElementById('kidAvatarUrl').value = k.avatarUrl || '';
-        document.getElementById('boxCreateChildAccountOption').style.display = 'none';
 
-        document.getElementById('modalKidLabel').textContent = `✏️ Chỉnh Sửa: ${k.fullName}`;
+        document.getElementById('modalKidLabel').innerHTML = `<i class="pixelart-icons-font-heart i8-md text-primary"></i> <span>Chỉnh Sửa Hồ Sơ: ${k.fullName}</span>`;
         document.getElementById('modalKidAlert').innerHTML = '';
         modalKid.show();
     };
@@ -1182,13 +1136,13 @@
         return data.url;
     }
 
-    // Submit form thêm / sửa bé
+    // Submit form chỉnh sửa hồ sơ bé
     document.getElementById('formKid')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const alertBox = document.getElementById('modalKidAlert');
         const btn = document.getElementById('btnSaveKid');
         const id = document.getElementById('kidId').value;
-        const isEdit = !!id;
+        if (!id) return;
 
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang lưu...';
@@ -1199,8 +1153,6 @@
             const uploadedUrl = await handleAvatarUpload();
             if (uploadedUrl) avatarUrl = uploadedUrl;
 
-            const shouldCreateSub = !isEdit && document.getElementById('chkCreateChildAccount')?.checked;
-
             const payload = {
                 fullName: document.getElementById('kidFullName').value.trim(),
                 nickname: document.getElementById('kidNickname').value.trim() || null,
@@ -1209,17 +1161,11 @@
                 schoolName: document.getElementById('kidSchool').value.trim() || null,
                 healthNotes: document.getElementById('kidHealth').value.trim() || null,
                 interests: document.getElementById('kidInterests').value.trim() || null,
-                avatarUrl: avatarUrl || null,
-                createSubAccount: shouldCreateSub,
-                subAccountUsername: shouldCreateSub ? document.getElementById('newChildUsername').value.trim() : null,
-                subAccountPassword: shouldCreateSub ? document.getElementById('newChildPassword').value : null
+                avatarUrl: avatarUrl || null
             };
 
-            const url = isEdit ? `/api/kids/${id}` : '/api/kids';
-            const method = isEdit ? 'PUT' : 'POST';
-
-            const res = await fetch(url, {
-                method,
+            const res = await fetch(`/api/kids/${id}`, {
+                method: 'PUT',
                 headers: getAuthHeaders(),
                 body: JSON.stringify(payload)
             });
@@ -1233,7 +1179,7 @@
             alertBox.innerHTML = `<div class="alert alert-danger py-2 small">${err.message}</div>`;
         } finally {
             btn.disabled = false;
-            btn.innerHTML = 'Lưu Hồ Sơ';
+            btn.innerHTML = 'Cập Nhật Hồ Sơ';
         }
     });
 

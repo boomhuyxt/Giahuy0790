@@ -1,5 +1,5 @@
 @{
-    ViewData["Title"] = "Định Vị Vị Trí & Vùng An Toàn";
+    ViewData["Title"] = "Định Vị Vị Trí Của Bé";
 }
 
 <!-- Leaflet CSS & SignalR CDN -->
@@ -9,7 +9,7 @@
 
 <style>
     #mapContainer {
-        height: 540px;
+        height: 560px;
         width: 100%;
         border-radius: 18px;
         z-index: 1;
@@ -62,31 +62,25 @@
                     </span>
                 </div>
                 <h2 class="fw-bold mb-1" style="letter-spacing: -0.025em;">
-                    Định Vị Vị Trí & Vùng An Toàn
+                    Định Vị Vị Trí Của Bé
                 </h2>
                 <p class="text-muted mb-0 small">
-                    Theo dõi vị trí thời gian thực, giám sát lộ trình di chuyển và tự động cảnh báo khi bé rời vùng an toàn
+                    Theo dõi vị trí thời gian thực và giám sát lộ trình di chuyển của bé qua GPS
                 </p>
             </div>
             <div class="d-flex align-items-center gap-2 flex-wrap">
-                <select id="selectKid" class="form-select rounded-pill px-3" style="min-width: 200px;">
+                <select id="selectKid" class="form-select rounded-pill px-3" style="min-width: 220px;">
                     <option value="">-- Đang nạp danh sách bé --</option>
                 </select>
                 <button class="btn btn-outline-primary rounded-pill px-3 py-2 btn-sm" id="btnPingMyDeviceLocation" title="Gửi tọa độ GPS từ trình duyệt thiết bị này cho bé">
                     🛰️ Vị trí máy này
                 </button>
-                <button class="btn btn-primary rounded-pill px-3 py-2 btn-sm" id="btnSimulateRoute" title="Chạy mô phỏng di chuyển từ Trường về Nhà">
-                    ▶️ Mô phỏng di chuyển
-                </button>
-                <button class="btn btn-secondary rounded-pill px-3 py-2 btn-sm" data-bs-toggle="modal" data-bs-target="#modalGeofences">
-                    🛡️ Vùng an toàn
+                <button class="btn btn-secondary rounded-pill px-3 py-2 btn-sm" id="btnRefreshLocation" title="Làm mới vị trí">
+                    🔄 Làm mới
                 </button>
             </div>
         </div>
     </div>
-
-    <!-- Alert placeholder cho cảnh báo Vùng An Toàn Real-time -->
-    <div id="liveAlertBox"></div>
 
     <!-- Live Status Card (Tóm tắt nhanh trạng thái của bé) -->
     <div class="apple-card p-3 mb-4">
@@ -126,79 +120,9 @@
                 <span class="d-inline-block rounded-circle" style="width: 10px; height: 10px; background-color: #0071e3;"></span>
                 <span>Vị trí hiện tại của bé</span>
             </div>
-            <div class="d-flex align-items-center gap-2 mb-1">
-                <span class="d-inline-block rounded-circle border" style="width: 10px; height: 10px; background-color: rgba(0, 113, 227, 0.2); border-color: #0071e3 !important;"></span>
-                <span>Vùng an toàn (Geofence)</span>
-            </div>
             <div class="d-flex align-items-center gap-2">
                 <span class="d-inline-block" style="width: 14px; height: 3px; background-color: #0071e3;"></span>
                 <span>Lộ trình di chuyển hôm nay</span>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- ================= MODAL QUẢN LÝ VÙNG AN TOÀN (GEOFENCES) ================= -->
-<div class="modal fade" id="modalGeofences" tabindex="-1" aria-labelledby="modalGeofencesLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content shadow-lg">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold" id="modalGeofencesLabel">🛡️ Quản Lý Vùng An Toàn (Geofence)</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div id="geofenceAlertBox"></div>
-
-                <div class="row g-4">
-                    <!-- Cột 1: Danh sách các vùng an toàn hiện có -->
-                    <div class="col-md-6 border-end">
-                        <div class="fw-semibold small text-muted mb-2 text-uppercase" style="letter-spacing: 0.05em;">Danh sách vùng đã thiết lập:</div>
-                        <div id="geofenceListContainer" class="d-flex flex-column gap-2" style="max-height: 320px; overflow-y: auto;">
-                            <div class="text-center py-4 text-muted small">Đang tải danh sách vùng...</div>
-                        </div>
-                    </div>
-
-                    <!-- Cột 2: Form thêm vùng an toàn mới -->
-                    <div class="col-md-6">
-                        <div class="fw-semibold small text-muted mb-2 text-uppercase" style="letter-spacing: 0.05em;">Thêm vùng an toàn mới:</div>
-                        <form id="formAddGeofence">
-                            <div class="mb-2">
-                                <label class="form-label small fw-medium">Tên vùng an toàn <span class="text-primary">*</span></label>
-                                <input type="text" id="geoName" class="form-control form-control-sm" placeholder="Ví dụ: Trường Tiểu Học Kim Đồng, Nhà riêng..." required />
-                            </div>
-                            <div class="row g-2 mb-2">
-                                <div class="col-6">
-                                    <label class="form-label small fw-medium">Vĩ độ (Lat) <span class="text-primary">*</span></label>
-                                    <input type="number" step="any" id="geoLat" class="form-control form-control-sm" placeholder="21.0285" required />
-                                </div>
-                                <div class="col-6">
-                                    <label class="form-label small fw-medium">Kinh độ (Lng) <span class="text-primary">*</span></label>
-                                    <input type="number" step="any" id="geoLng" class="form-control form-control-sm" placeholder="105.8542" required />
-                                </div>
-                            </div>
-                            <div class="mb-2">
-                                <label class="form-label small fw-medium">Bán kính an toàn (mét): <strong id="geoRadiusVal" class="text-primary">200m</strong></label>
-                                <input type="range" class="form-range" id="geoRadius" min="50" max="2000" step="50" value="200" oninput="document.getElementById('geoRadiusVal').textContent = this.value + 'm'" />
-                            </div>
-                            <div class="form-check form-switch mb-2">
-                                <input class="form-check-input" type="checkbox" id="geoAlertExit" checked />
-                                <label class="form-check-label small" for="geoAlertExit">Cảnh báo khi bé <strong>rời khỏi</strong> vùng này</label>
-                            </div>
-                            <div class="form-check form-switch mb-3">
-                                <input class="form-check-input" type="checkbox" id="geoAlertEnter" />
-                                <label class="form-check-label small" for="geoAlertEnter">Thông báo khi bé <strong>đến nơi</strong> (nhập vùng)</label>
-                            </div>
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-primary rounded-pill btn-sm py-2" id="btnSaveGeofence">
-                                    + Lưu Vùng An Toàn Mới
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-secondary rounded-pill px-3 btn-sm" data-bs-dismiss="modal">Đóng</button>
             </div>
         </div>
     </div>
@@ -211,14 +135,11 @@
     let currentKid = null;
     let map = null;
     let kidMarker = null;
-    let geofenceCircles = [];
     let routePolyline = null;
     let signalRConnection = null;
-    let simulationStep = 0;
 
     const selectKid = document.getElementById('selectKid');
     const signalRStatusBadge = document.getElementById('signalRStatusBadge');
-    const liveAlertBox = document.getElementById('liveAlertBox');
 
     function getAuthHeaders() {
         const token = localStorage.getItem('authToken');
@@ -242,14 +163,6 @@
             maxZoom: 19,
             attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         }).addTo(map);
-
-        // Bắt sự kiện click trên bản đồ để điền nhanh tọa độ khi tạo vùng an toàn
-        map.on('click', (e) => {
-            const lat = e.latlng.lat.toFixed(6);
-            const lng = e.latlng.lng.toFixed(6);
-            document.getElementById('geoLat').value = lat;
-            document.getElementById('geoLng').value = lng;
-        });
     }
 
     // Khởi tạo kết nối SignalR Real-time
@@ -278,10 +191,6 @@
                 if (data.kidId === currentKidId) {
                     updateKidPositionOnMap(data);
                     updateStatusPanel(data);
-
-                    if (data.alerts && data.alerts.length > 0) {
-                        data.alerts.forEach(alert => showGeofenceAlert(alert));
-                    }
                 }
             });
 
@@ -356,50 +265,6 @@
         document.getElementById('statusAddress').textContent = data.address || 'Đang xác định địa chỉ...';
     }
 
-    // Vẽ các vùng an toàn (Geofences) lên bản đồ
-    async function loadAndDrawGeofences(kidId) {
-        geofenceCircles.forEach(c => map.removeLayer(c));
-        geofenceCircles = [];
-
-        try {
-            const res = await fetch(`/api/kids/${kidId}/locations/geofences`, { headers: getAuthHeaders() });
-            if (!res.ok) return;
-            const fences = await res.json();
-
-            // Render danh sách trong modal
-            const listContainer = document.getElementById('geofenceListContainer');
-            if (fences.length === 0) {
-                listContainer.innerHTML = '<div class="text-center py-4 text-muted small">Chưa có vùng an toàn nào được thiết lập.</div>';
-            } else {
-                listContainer.innerHTML = fences.map(f => `
-                    <div class="apple-card-static p-2 px-3 d-flex justify-content-between align-items-center">
-                        <div>
-                            <div class="fw-bold small text-body">${f.name}</div>
-                            <div class="small text-muted" style="font-size: 11px;">Bán kính: ${f.radiusMeters}m · (${f.latitude.toFixed(4)}, ${f.longitude.toFixed(4)})</div>
-                        </div>
-                        <button class="btn btn-outline-danger btn-sm rounded-pill px-2 py-0" style="font-size: 11px;" onclick="deleteGeofence(${f.id})">
-                            Xóa
-                        </button>
-                    </div>
-                `).join('');
-            }
-
-            // Vẽ hình tròn lên Leaflet
-            fences.forEach(f => {
-                const circle = L.circle([f.latitude, f.longitude], {
-                    color: '#0071e3',
-                    fillColor: '#0071e3',
-                    fillOpacity: 0.12,
-                    weight: 2,
-                    radius: f.radiusMeters
-                }).addTo(map);
-
-                circle.bindPopup(`<strong>🛡️ Vùng an toàn:</strong> ${f.name}<br>Bán kính: ${f.radiusMeters} mét`);
-                geofenceCircles.push(circle);
-            });
-        } catch (_) {}
-    }
-
     // Tải và vẽ lộ trình di chuyển trong ngày (Polyline)
     async function loadRouteHistory(kidId) {
         if (routePolyline) {
@@ -455,7 +320,6 @@
         }
 
         await loadLatestLocation(kidId);
-        await loadAndDrawGeofences(kidId);
         await loadRouteHistory(kidId);
     }
 
@@ -499,20 +363,13 @@
         if (id) await switchKid(id);
     });
 
-    // Cảnh báo Vùng An Toàn
-    function showGeofenceAlert(alert) {
-        liveAlertBox.innerHTML = `
-            <div class="alert alert-danger alert-dismissible fade show shadow-sm mb-3" role="alert">
-                <div class="d-flex align-items-center gap-2">
-                    <span class="fs-5">⚠️</span>
-                    <div>
-                        <strong>CẢNH BÁO VÙNG AN TOÀN:</strong> ${alert.message}
-                        <div class="small text-muted" style="font-size: 11px;">Thời gian: ${new Date(alert.timestamp).toLocaleTimeString('vi-VN')}</div>
-                    </div>
-                </div>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>`;
-    }
+    // Nút Làm mới
+    document.getElementById('btnRefreshLocation')?.addEventListener('click', async () => {
+        if (currentKidId) {
+            await loadLatestLocation(currentKidId);
+            await loadRouteHistory(currentKidId);
+        }
+    });
 
     // Nút Gửi vị trí thiết bị này (HTML5 Geolocation)
     document.getElementById('btnPingMyDeviceLocation')?.addEventListener('click', () => {
@@ -546,7 +403,8 @@
                         body: JSON.stringify(payload)
                     });
                     if (res.ok) {
-                        alert('✅ Đã cập nhật thành công vị trí GPS của thiết bị này cho bé!');
+                        alert('Đã cập nhật thành công vị trí GPS của thiết bị này cho bé!');
+                        await loadLatestLocation(currentKidId);
                     }
                 } catch (err) {
                     alert('Lỗi gửi vị trí: ' + err.message);
@@ -563,82 +421,6 @@
             { enableHighAccuracy: true, timeout: 10000 }
         );
     });
-
-    // Nút Mô Phỏng Di Chuyển (Simulate Movement)
-    document.getElementById('btnSimulateRoute')?.addEventListener('click', async () => {
-        if (!currentKidId) return;
-        const btn = document.getElementById('btnSimulateRoute');
-        btn.disabled = true;
-        btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Điểm ${simulationStep + 1}/5...`;
-
-        try {
-            const res = await fetch(`/api/kids/${currentKidId}/locations/simulate?step=${simulationStep}`, {
-                method: 'POST',
-                headers: getAuthHeaders()
-            });
-            if (res.ok) {
-                simulationStep = (simulationStep + 1) % 5;
-            }
-        } catch (err) {
-            console.error(err);
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = '▶️ Mô phỏng di chuyển';
-        }
-    });
-
-    // Thêm Vùng An Toàn Mới
-    document.getElementById('formAddGeofence')?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const alertBox = document.getElementById('geofenceAlertBox');
-        const btn = document.getElementById('btnSaveGeofence');
-
-        btn.disabled = true;
-        btn.innerHTML = 'Đang lưu...';
-
-        const payload = {
-            name: document.getElementById('geoName').value.trim(),
-            latitude: parseFloat(document.getElementById('geoLat').value),
-            longitude: parseFloat(document.getElementById('geoLng').value),
-            radiusMeters: parseFloat(document.getElementById('geoRadius').value),
-            alertOnExit: document.getElementById('geoAlertExit').checked,
-            alertOnEnter: document.getElementById('geoAlertEnter').checked
-        };
-
-        try {
-            const res = await fetch(`/api/kids/${currentKidId}/locations/geofences`, {
-                method: 'POST',
-                headers: getAuthHeaders(),
-                body: JSON.stringify(payload)
-            });
-
-            if (!res.ok) throw new Error('Không thể tạo vùng an toàn');
-
-            document.getElementById('formAddGeofence').reset();
-            document.getElementById('geoRadiusVal').textContent = '200m';
-            alertBox.innerHTML = '<div class="alert alert-success py-2 small">Đã lưu vùng an toàn mới thành công!</div>';
-            await loadAndDrawGeofences(currentKidId);
-        } catch (err) {
-            alertBox.innerHTML = `<div class="alert alert-danger py-2 small">${err.message}</div>`;
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = '+ Lưu Vùng An Toàn Mới';
-        }
-    });
-
-    // Xóa Vùng An Toàn
-    window.deleteGeofence = async function(fenceId) {
-        if (!confirm('Bạn có chắc chắn muốn xóa vùng an toàn này?')) return;
-        try {
-            const res = await fetch(`/api/kids/${currentKidId}/locations/geofences/${fenceId}`, {
-                method: 'DELETE',
-                headers: getAuthHeaders()
-            });
-            if (res.ok) {
-                await loadAndDrawGeofences(currentKidId);
-            }
-        } catch (_) {}
-    };
 
     document.addEventListener('DOMContentLoaded', initPage);
 </script>

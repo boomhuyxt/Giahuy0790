@@ -281,7 +281,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 ),
                 _buildActionCard(
                   title: 'Định Vị GPS',
-                  subtitle: 'Giám sát vị trí & Vùng an toàn',
+                  subtitle: 'Giám sát vị trí thời gian thực',
                   icon: Icons.location_on_outlined,
                   onTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(

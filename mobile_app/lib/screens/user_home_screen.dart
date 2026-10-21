@@ -181,11 +181,11 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                 ),
                 _buildActionCard(
                   title: 'Định Vị GPS Của Bé',
-                  subtitle: 'Live Tracking & Vùng an toàn',
+                  subtitle: 'Live GPS Tracking',
                   icon: Icons.location_on_outlined,
                   onTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Đang mở màn hình định vị GPS & Vùng an toàn'), backgroundColor: Color(0xFF0071E3)),
+                      const SnackBar(content: Text('Theo dõi vị trí GPS của bé theo thời gian thực'), backgroundColor: Color(0xFF0071E3)),
                     );
                   },
                 ),
