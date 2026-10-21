@@ -23,8 +23,8 @@
         <nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom shadow-sm mb-4">
             <div class="container">
                 <a class="navbar-brand fw-bold d-flex align-items-center gap-2" asp-area="" asp-controller="Home" asp-action="Index">
-                    <span class="badge bg-primary text-white p-2 rounded-3">GH</span>
-                    <span>Giahuy0790</span>
+                    <span class="badge bg-primary text-white p-2 rounded-3">KC</span>
+                    <span class="text-primary">KidCare</span>
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
@@ -36,13 +36,13 @@
                             <a class="nav-link fw-medium" asp-area="" asp-controller="Home" asp-action="Index">Trang chủ</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link fw-medium" href="/products">
-                                🛍️ Quản lý Sản phẩm
+                            <a class="nav-link fw-medium" href="/kids">
+                                🧒 Quản lý Trẻ
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link fw-medium" href="/posts">
-                                📰 Bảng tin Facebook
+                            <a class="nav-link fw-medium" href="/activities">
+                                📋 Lịch & Hoạt động
                             </a>
                         </li>
                         <li class="nav-item">
@@ -136,10 +136,26 @@
                             <label class="form-label fw-semibold small">Mật khẩu</label>
                             <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" required />
                         </div>
-                        <div class="d-flex justify-content-end mb-2">
+                        <div class="d-flex justify-content-end mb-3">
                             <a href="#" class="small text-decoration-none text-primary fw-semibold" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#modalForgotPassword">
                                 🔑 Quên mật khẩu?
                             </a>
+                        </div>
+
+                        <!-- Quick Test Accounts for 3 Roles -->
+                        <div class="p-2 bg-body-tertiary rounded-3 border small">
+                            <div class="fw-bold text-muted mb-1" style="font-size: 11px;">ĐĂNG NHẬP NHANH (QUICK DEMO):</div>
+                            <div class="d-flex gap-1">
+                                <button type="button" class="btn btn-sm btn-outline-purple flex-grow-1 py-1" style="font-size: 11px;" onclick="fillLogin('admin', 'Admin@123')">
+                                    👑 Admin
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-success flex-grow-1 py-1" style="font-size: 11px;" onclick="fillLogin('parents', 'Parents@123')">
+                                    👨‍👩‍👧 Parents
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-warning text-dark flex-grow-1 py-1" style="font-size: 11px;" onclick="fillLogin('kid', 'Kid@123')">
+                                    🧒 Kid
+                                </button>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer border-0 pt-0">
@@ -177,6 +193,14 @@
                         <div class="mb-3">
                             <label class="form-label fw-semibold small">Họ và tên</label>
                             <input type="text" id="regFullName" class="form-control" placeholder="Ví dụ: Nguyễn Gia Huy" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">Vai trò (Role) <span class="text-danger">*</span></label>
+                            <select id="regRole" class="form-select">
+                                <option value="Parents" selected>👨‍👩‍👧 Phụ huynh (Parents) - Quản lý con em</option>
+                                <option value="Kid">🧒 Trẻ em (Kid) - Tự làm nhiệm vụ & nhận sao</option>
+                                <option value="Admin">👑 Quản trị viên (Admin) - Toàn quyền hệ thống</option>
+                            </select>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-semibold small">Mật khẩu (Tối thiểu 6 ký tự) <span class="text-danger">*</span></label>
@@ -271,12 +295,12 @@
     <footer class="footer border-top bg-body-tertiary text-body-secondary">
         <div class="container d-flex flex-wrap justify-content-between align-items-center py-2">
             <div>
-                &copy; @DateTime.UtcNow.Year - <strong>Giahuy0790</strong> - Hệ thống Quản lý Sản phẩm, Bài đăng & Identity
+                &copy; @DateTime.UtcNow.Year - <strong>KidCare</strong> - Hệ thống Quản lý & Đồng hành cùng Trẻ em
             </div>
             <div class="d-flex gap-3">
-                <a href="/products" class="text-decoration-none text-body-secondary">Sản phẩm</a>
+                <a href="/kids" class="text-decoration-none text-body-secondary">Quản lý Trẻ</a>
                 <span>•</span>
-                <a href="/posts" class="text-decoration-none text-body-secondary">Bài đăng</a>
+                <a href="/activities" class="text-decoration-none text-body-secondary">Lịch & Hoạt động</a>
                 <span>•</span>
                 <a href="/swagger" class="text-decoration-none text-body-secondary" target="_blank">Swagger API</a>
             </div>
@@ -288,6 +312,11 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script>
         // Quản lý trạng thái Đăng nhập / Đăng ký người dùng
+        window.fillLogin = function(username, password) {
+            document.getElementById('loginIdentifier').value = username;
+            document.getElementById('loginPassword').value = password;
+        };
+
         const updateAuthUI = () => {
             const userStr = localStorage.getItem('authUser');
             const guestBox = document.getElementById('authNavGuest');
@@ -296,7 +325,9 @@
             if (userStr) {
                 try {
                     const u = JSON.parse(userStr);
-                    document.getElementById('navUserName').textContent = u.fullName || u.username;
+                    const roles = u.roles || [];
+                    const roleLabel = roles.includes('Admin') ? '👑 Admin' : (roles.includes('Kid') ? '🧒 Kid' : '👨‍👩‍👧 Parents');
+                    document.getElementById('navUserName').innerHTML = `${u.fullName || u.username} <span class="badge bg-primary-subtle text-primary border small ms-1">${roleLabel}</span>`;
                     document.getElementById('navUserAvatar').src = u.avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(u.username)}`;
                     guestBox.classList.add('d-none');
                     userBox.classList.remove('d-none');
@@ -330,6 +361,7 @@
                 username: document.getElementById('regUsername').value.trim(),
                 email: document.getElementById('regEmail').value.trim(),
                 fullName: document.getElementById('regFullName').value.trim(),
+                role: document.getElementById('regRole') ? document.getElementById('regRole').value : 'Parents',
                 password: document.getElementById('regPassword').value
             };
 

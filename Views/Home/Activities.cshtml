@@ -1,0 +1,349 @@
+@{
+    ViewData["Title"] = "Lịch Trình & Hoạt Động Của Bé";
+}
+
+<div class="container py-4">
+    <!-- Header banner -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3 bg-white p-4 rounded-4 shadow-sm border border-light">
+        <div>
+            <h2 class="fw-bold mb-1 text-primary d-flex align-items-center gap-2">
+                <span>📋</span> Lịch Trình & Nhiệm Vụ Hàng Ngày
+            </h2>
+            <p class="text-muted mb-0">Thiết lập thời gian biểu, theo dõi sinh hoạt và khen thưởng sao khi bé hoàn thành</p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <select id="selectKid" class="form-select rounded-pill px-3" style="min-width: 200px;">
+                <option value="">-- Chọn Bé Yêu --</option>
+            </select>
+            <button class="btn btn-primary rounded-pill px-4 shadow-sm fw-semibold" id="btnOpenAddActivity">
+                + Thêm Nhiệm Vụ
+            </button>
+        </div>
+    </div>
+
+    <!-- Alert placeholder -->
+    <div id="pageAlert"></div>
+
+    <!-- Kid Summary Info Banner -->
+    <div id="kidBanner" class="alert alert-info rounded-4 border-0 shadow-sm p-3 mb-4 d-none align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-3">
+            <img id="bannerAvatar" src="" class="rounded-circle border" style="width: 50px; height: 50px; object-fit: cover;" />
+            <div>
+                <h5 class="fw-bold mb-0 text-dark" id="bannerName"></h5>
+                <small class="text-secondary" id="bannerSchool"></small>
+            </div>
+        </div>
+        <div class="text-end">
+            <span class="fs-4 fw-bold text-warning" id="bannerPoints">⭐ 0</span>
+            <div class="small text-muted">Điểm thưởng tích lũy</div>
+        </div>
+    </div>
+
+    <!-- Loading spinner -->
+    <div id="loadingBox" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Đang tải...</span>
+        </div>
+        <p class="text-muted mt-2 small">Đang tải lịch sinh hoạt...</p>
+    </div>
+
+    <!-- Activities Table / List -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden" id="activitiesCard" style="display: none;">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Hoạt Động / Nhiệm Vụ</th>
+                        <th>Phân Loại</th>
+                        <th>Thời Gian</th>
+                        <th>Thưởng</th>
+                        <th>Trạng Thái</th>
+                        <th class="text-end pe-4">Thao Tác</th>
+                    </tr>
+                </thead>
+                <tbody id="activitiesTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Empty state -->
+    <div id="emptyBox" class="text-center py-5 bg-white rounded-4 shadow-sm border border-light my-3" style="display: none;">
+        <div style="font-size: 50px;">🌟</div>
+        <h5 class="fw-bold mt-2">Bé chưa có lịch trình hoặc nhiệm vụ nào</h5>
+        <p class="text-muted small">Hãy nhấn <strong>"+ Thêm Nhiệm Vụ"</strong> để tạo thời khóa biểu và giao nhiệm vụ cho bé rèn luyện mỗi ngày.</p>
+    </div>
+</div>
+
+<!-- ================= MODAL THÊM HOẠT ĐỘNG ================= -->
+<div class="modal fade" id="modalActivity" tabindex="-1" aria-labelledby="modalActivityLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg rounded-4">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="modalActivityLabel">📝 Giao Nhiệm Vụ / Lịch Sinh Hoạt</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="formActivity">
+                <div class="modal-body">
+                    <div id="modalActAlert"></div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Bé thực hiện <span class="text-danger">*</span></label>
+                        <select id="actKidId" class="form-select" required></select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Tiêu đề hoạt động <span class="text-danger">*</span></label>
+                        <input type="text" id="actTitle" class="form-control" placeholder="Ví dụ: Đọc sách 20 phút, Tự giác đánh răng, Ăn hết bữa tối..." required />
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold small">Phân loại</label>
+                            <select id="actCategory" class="form-select">
+                                <option value="Học tập">📚 Học tập</option>
+                                <option value="Sinh hoạt">⏰ Sinh hoạt</option>
+                                <option value="Dinh dưỡng">🥦 Dinh dưỡng</option>
+                                <option value="Thể thao">⚽ Thể thao</option>
+                                <option value="Sức khỏe">🩺 Sức khỏe</option>
+                                <option value="Nhiệm vụ">⭐ Nhiệm vụ gia đình</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold small">Sao thưởng ⭐</label>
+                            <input type="number" id="actPoints" class="form-control" value="5" min="1" max="100" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Thời gian dự kiến</label>
+                        <input type="datetime-local" id="actTime" class="form-control" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Mô tả chi tiết hoặc hướng dẫn cho bé</label>
+                        <textarea id="actDesc" class="form-control" rows="2" placeholder="Ghi chú thêm về cách làm hoặc lời dặn của cha mẹ..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm" id="btnSaveAct">Tạo Nhiệm Vụ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    let allKids = [];
+    let currentKidId = null;
+    const selectKid = document.getElementById('selectKid');
+    const actKidSelect = document.getElementById('actKidId');
+    const tableBody = document.getElementById('activitiesTableBody');
+    const loadingBox = document.getElementById('loadingBox');
+    const emptyBox = document.getElementById('emptyBox');
+    const activitiesCard = document.getElementById('activitiesCard');
+    const kidBanner = document.getElementById('kidBanner');
+    const modal = new bootstrap.Modal(document.getElementById('modalActivity'));
+
+    function getAuthHeaders() {
+        const token = localStorage.getItem('authToken');
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+        return headers;
+    }
+
+    // Load danh sách bé vào dropdown
+    async function initPage() {
+        const params = new URLSearchParams(window.location.search);
+        const urlKidId = params.get('kidId');
+
+        try {
+            const res = await fetch('/api/kids', { headers: getAuthHeaders() });
+            allKids = await res.json();
+
+            selectKid.innerHTML = '<option value="">-- Chọn Bé Yêu --</option>' +
+                allKids.map(k => `<option value="${k.id}">${k.fullName} ${k.nickname ? `(${k.nickname})` : ''}</option>`).join('');
+
+            actKidSelect.innerHTML = allKids.map(k => `<option value="${k.id}">${k.fullName}</option>`).join('');
+
+            if (urlKidId && allKids.some(k => k.id == urlKidId)) {
+                selectKid.value = urlKidId;
+                currentKidId = parseInt(urlKidId);
+            } else if (allKids.length > 0) {
+                selectKid.value = allKids[0].id;
+                currentKidId = allKids[0].id;
+            }
+
+            if (currentKidId) {
+                await loadActivitiesForKid(currentKidId);
+            } else {
+                loadingBox.style.display = 'none';
+                emptyBox.style.display = 'block';
+            }
+        } catch (err) {
+            loadingBox.style.display = 'none';
+            document.getElementById('pageAlert').innerHTML = `<div class="alert alert-danger py-2 small">${err.message}</div>`;
+        }
+    }
+
+    // Tải danh sách hoạt động của 1 bé
+    async function loadActivitiesForKid(kidId) {
+        loadingBox.style.display = 'block';
+        activitiesCard.style.display = 'none';
+        emptyBox.style.display = 'none';
+
+        const kid = allKids.find(k => k.id === kidId);
+        if (kid) {
+            kidBanner.classList.remove('d-none');
+            kidBanner.classList.add('d-flex');
+            document.getElementById('bannerAvatar').src = kid.avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(kid.fullName)}`;
+            document.getElementById('bannerName').textContent = `${kid.fullName} ${kid.nickname ? `(Bé ${kid.nickname})` : ''}`;
+            document.getElementById('bannerSchool').textContent = kid.schoolName || 'Chưa cập nhật trường học';
+            document.getElementById('bannerPoints').textContent = `⭐ ${kid.totalPoints || 0}`;
+        }
+
+        try {
+            const res = await fetch(`/api/kidactivities/kid/${kidId}`, { headers: getAuthHeaders() });
+            const list = await res.json();
+            renderActivities(list);
+        } catch (err) {
+            document.getElementById('pageAlert').innerHTML = `<div class="alert alert-danger py-2 small">${err.message}</div>`;
+        } finally {
+            loadingBox.style.display = 'none';
+        }
+    }
+
+    function renderActivities(list) {
+        if (!list || list.length === 0) {
+            emptyBox.style.display = 'block';
+            activitiesCard.style.display = 'none';
+            return;
+        }
+
+        emptyBox.style.display = 'none';
+        activitiesCard.style.display = 'block';
+
+        tableBody.innerHTML = list.map(a => {
+            const isCompleted = a.status === 'Completed';
+            const statusBadge = isCompleted 
+                ? '<span class="badge bg-success-subtle text-success fw-bold px-2 py-1">✅ Đã hoàn thành</span>'
+                : '<span class="badge bg-warning-subtle text-warning-emphasis fw-bold px-2 py-1">⏳ Chờ thực hiện</span>';
+            
+            const timeStr = a.activityTime ? new Date(a.activityTime).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' }) : 'Hàng ngày';
+
+            return `
+            <tr class="${isCompleted ? 'table-light text-muted' : ''}">
+                <td class="ps-4">
+                    <div class="fw-bold ${isCompleted ? 'text-decoration-line-through text-muted' : 'text-dark'}">${a.title}</div>
+                    ${a.description ? `<small class="text-secondary">${a.description}</small>` : ''}
+                </td>
+                <td><span class="badge bg-info-subtle text-info-emphasis">${a.category}</span></td>
+                <td><small class="text-secondary">${timeStr}</small></td>
+                <td><span class="fw-bold text-warning">+${a.rewardPoints || 5} ⭐</span></td>
+                <td>${statusBadge}</td>
+                <td class="text-end pe-4">
+                    ${!isCompleted ? `
+                    <button class="btn btn-sm btn-success rounded-pill px-3 py-1 fw-semibold me-1" onclick="markComplete(${a.id})">
+                        Hoàn thành
+                    </button>` : ''}
+                    <button class="btn btn-sm btn-outline-danger rounded-pill px-2 py-1" onclick="deleteActivity(${a.id})">
+                        Xóa
+                    </button>
+                </td>
+            </tr>`;
+        }).join('');
+    }
+
+    // Đổi bé từ dropdown
+    selectKid.addEventListener('change', async (e) => {
+        const id = parseInt(e.target.value);
+        if (id) {
+            currentKidId = id;
+            await loadActivitiesForKid(id);
+        }
+    });
+
+    // Mở modal thêm nhiệm vụ
+    document.getElementById('btnOpenAddActivity')?.addEventListener('click', () => {
+        document.getElementById('formActivity').reset();
+        if (currentKidId) actKidSelect.value = currentKidId;
+        document.getElementById('actTime').value = new Date(Date.now() + 3600000).toISOString().slice(0, 16);
+        document.getElementById('modalActAlert').innerHTML = '';
+        modal.show();
+    });
+
+    // Submit form tạo hoạt động
+    document.getElementById('formActivity')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const alertBox = document.getElementById('modalActAlert');
+        const btn = document.getElementById('btnSaveAct');
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang tạo...';
+        alertBox.innerHTML = '';
+
+        try {
+            const payload = {
+                kidId: parseInt(actKidSelect.value),
+                title: document.getElementById('actTitle').value.trim(),
+                category: document.getElementById('actCategory').value,
+                rewardPoints: parseInt(document.getElementById('actPoints').value) || 5,
+                activityTime: document.getElementById('actTime').value ? new Date(document.getElementById('actTime').value).toISOString() : new Date().toISOString(),
+                description: document.getElementById('actDesc').value.trim() || null
+            };
+
+            const res = await fetch('/api/kidactivities', {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify(payload)
+            });
+
+            if (!res.ok) throw new Error('Không thể tạo hoạt động');
+            modal.hide();
+
+            // Refresh kid stats & list
+            const refreshRes = await fetch('/api/kids', { headers: getAuthHeaders() });
+            allKids = await refreshRes.json();
+            await loadActivitiesForKid(payload.kidId);
+        } catch (err) {
+            alertBox.innerHTML = `<div class="alert alert-danger py-2 small">${err.message}</div>`;
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = 'Tạo Nhiệm Vụ';
+        }
+    });
+
+    // Đánh dấu hoàn thành
+    window.markComplete = async function(id) {
+        try {
+            const res = await fetch(`/api/kidactivities/${id}/status`, {
+                method: 'PUT',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ status: 'Completed' })
+            });
+
+            if (res.ok) {
+                // Tải lại để cập nhật điểm sao
+                const refreshRes = await fetch('/api/kids', { headers: getAuthHeaders() });
+                allKids = await refreshRes.json();
+                if (currentKidId) await loadActivitiesForKid(currentKidId);
+            }
+        } catch (_) {}
+    };
+
+    // Xóa hoạt động
+    window.deleteActivity = async function(id) {
+        if (!confirm('Bạn có chắc chắn muốn xóa nhiệm vụ này?')) return;
+        try {
+            const res = await fetch(`/api/kidactivities/${id}`, {
+                method: 'DELETE',
+                headers: getAuthHeaders()
+            });
+            if (res.ok && currentKidId) await loadActivitiesForKid(currentKidId);
+        } catch (_) {}
+    };
+
+    document.addEventListener('DOMContentLoaded', initPage);
+</script>
+}

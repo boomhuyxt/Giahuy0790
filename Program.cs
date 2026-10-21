@@ -38,9 +38,9 @@ namespace Giahuy0790
             {
                 options.SwaggerDoc("v1", new Microsoft.OpenApi.OpenApiInfo
                 {
-                    Title = "Giahuy0790 API",
+                    Title = "KidCare API - Hệ thống Quản lý Trẻ em",
                     Version = "v1",
-                    Description = "API Backend Quản lý Sản phẩm, Bài đăng, Identity & JWT Token"
+                    Description = "API Backend Quản lý Hồ sơ Trẻ em, Nhật ký hoạt động, Nhiệm vụ sinh hoạt & Phân quyền (Admin, Parents, Kid)"
                 });
             });
 
@@ -115,11 +115,11 @@ namespace Giahuy0790
             builder.Services.AddScoped<IEmailService, EmailService>();
 
             // ==========================================
-            // Đăng ký Repository Pattern vào DI Container
+            // Đăng ký Repository Pattern Quản lý Trẻ vào DI Container
             // ==========================================
             builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-            builder.Services.AddScoped<IProductRepository, ProductRepository>();
-            builder.Services.AddScoped<IPostRepository, PostRepository>();
+            builder.Services.AddScoped<IKidRepository, KidRepository>();
+            builder.Services.AddScoped<IKidActivityRepository, KidActivityRepository>();
 
             var app = builder.Build();
 
@@ -148,14 +148,15 @@ namespace Giahuy0790
                 }
             }
 
-            // Khởi tạo các Roles mặc định và người dùng mẫu cho từng quyền (Admin, Staff, User)
+            // Khởi tạo 3 nhóm quyền chính: Admin, Parents, Kid và các tài khoản mẫu
             try
             {
                 using var scope = app.Services.CreateScope();
                 var roleMgr = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
                 var userMgr = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+                var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-                string[] roles = ["Admin", "Staff", "User"];
+                string[] roles = ["Admin", "Parents", "Kid"];
                 foreach (var r in roles)
                 {
                     if (!await roleMgr.RoleExistsAsync(r))
@@ -164,51 +165,121 @@ namespace Giahuy0790
                     }
                 }
 
-                // 1. Tài khoản Admin mẫu
+                // 1. Tài khoản Quản trị viên (Admin)
                 if (await userMgr.FindByNameAsync("admin") == null)
                 {
                     var admin = new ApplicationUser
                     {
                         UserName = "admin",
-                        Email = "admin@giahuy.com",
-                        FullName = "Quản Trị Viên (Admin)",
+                        Email = "admin@kidcare.com",
+                        FullName = "Quản Trị Viên Hệ Thống",
                         AvatarUrl = "https://api.dicebear.com/7.x/bottts/svg?seed=Admin"
                     };
                     var res = await userMgr.CreateAsync(admin, "Admin@123");
                     if (res.Succeeded) await userMgr.AddToRoleAsync(admin, "Admin");
                 }
 
-                // 2. Tài khoản Staff mẫu
-                if (await userMgr.FindByNameAsync("staff") == null)
+                // 2. Tài khoản Phụ huynh (Parents)
+                ApplicationUser? parentUser = await userMgr.FindByNameAsync("parents");
+                if (parentUser == null)
                 {
-                    var staff = new ApplicationUser
+                    parentUser = new ApplicationUser
                     {
-                        UserName = "staff",
-                        Email = "staff@giahuy.com",
-                        FullName = "Nhân Viên POS (Staff)",
-                        AvatarUrl = "https://api.dicebear.com/7.x/bottts/svg?seed=Staff"
+                        UserName = "parents",
+                        Email = "parents@kidcare.com",
+                        FullName = "Phụ Huynh Nguyễn Văn A",
+                        AvatarUrl = "https://api.dicebear.com/7.x/bottts/svg?seed=Parents"
                     };
-                    var res = await userMgr.CreateAsync(staff, "Staff@123");
-                    if (res.Succeeded) await userMgr.AddToRoleAsync(staff, "Staff");
+                    var res = await userMgr.CreateAsync(parentUser, "Parents@123");
+                    if (res.Succeeded) await userMgr.AddToRoleAsync(parentUser, "Parents");
                 }
 
-                // 3. Tài khoản User khách hàng mẫu
-                if (await userMgr.FindByNameAsync("user") == null)
+                // 3. Tài khoản Trẻ em (Kid)
+                ApplicationUser? kidUser = await userMgr.FindByNameAsync("kid");
+                if (kidUser == null)
                 {
-                    var user = new ApplicationUser
+                    kidUser = new ApplicationUser
                     {
-                        UserName = "user",
-                        Email = "user@giahuy.com",
-                        FullName = "Khách Hàng (User)",
-                        AvatarUrl = "https://api.dicebear.com/7.x/bottts/svg?seed=Customer"
+                        UserName = "kid",
+                        Email = "kid@kidcare.com",
+                        FullName = "Bé Nguyễn Gia Huy",
+                        AvatarUrl = "https://api.dicebear.com/7.x/bottts/svg?seed=GiaHuy"
                     };
-                    var res = await userMgr.CreateAsync(user, "User@123");
-                    if (res.Succeeded) await userMgr.AddToRoleAsync(user, "User");
+                    var res = await userMgr.CreateAsync(kidUser, "Kid@123");
+                    if (res.Succeeded) await userMgr.AddToRoleAsync(kidUser, "Kid");
+                }
+
+                // Khởi tạo dữ liệu mẫu hồ sơ trẻ em nếu chưa có
+                if (!await dbContext.Kids.AnyAsync())
+                {
+                    var sampleKid1 = new Kid
+                    {
+                        FullName = "Nguyễn Gia Huy",
+                        Nickname = "Bé Bơ",
+                        DateOfBirth = DateTime.UtcNow.AddYears(-7),
+                        Gender = "Nam",
+                        AvatarUrl = "https://api.dicebear.com/7.x/bottts/svg?seed=GiaHuyKid",
+                        SchoolName = "Trường Tiểu Học Kim Đồng - Lớp 2A",
+                        HealthNotes = "Sức khỏe tốt, không có tiền sử dị ứng thực phẩm",
+                        Interests = "Vẽ tranh, xếp hình lego, bóng đá",
+                        ParentId = parentUser?.Id,
+                        KidUserId = kidUser?.Id,
+                        TotalPoints = 45,
+                        CreatedAt = DateTime.UtcNow
+                    };
+
+                    var sampleKid2 = new Kid
+                    {
+                        FullName = "Nguyễn Bảo An",
+                        Nickname = "Bé Na",
+                        DateOfBirth = DateTime.UtcNow.AddYears(-5),
+                        Gender = "Nữ",
+                        AvatarUrl = "https://api.dicebear.com/7.x/bottts/svg?seed=BaoAn",
+                        SchoolName = "Trường Mầm Non Họa Mi",
+                        HealthNotes = "Dị ứng hải sản nhẹ, cần nhắc uống nước thường xuyên",
+                        Interests = "Hát múa, nghe kể chuyện cổ tích",
+                        ParentId = parentUser?.Id,
+                        TotalPoints = 30,
+                        CreatedAt = DateTime.UtcNow
+                    };
+
+                    await dbContext.Kids.AddRangeAsync(sampleKid1, sampleKid2);
+                    await dbContext.SaveChangesAsync();
+
+                    // Thêm hoạt động mẫu cho bé
+                    var sampleActivity1 = new KidActivity
+                    {
+                        KidId = sampleKid1.Id,
+                        Title = "Đọc 1 mẩu truyện tiếng Anh",
+                        Description = "Đọc và phát âm truyện tranh song ngữ 15 phút",
+                        Category = "Học tập",
+                        ActivityTime = DateTime.UtcNow.AddHours(2),
+                        Status = "Completed",
+                        RewardPoints = 10,
+                        Notes = "Bé đọc rất chuẩn và tự giác!",
+                        CreatedAt = DateTime.UtcNow
+                    };
+
+                    var sampleActivity2 = new KidActivity
+                    {
+                        KidId = sampleKid1.Id,
+                        Title = "Tự giác dọn dẹp góc học tập",
+                        Description = "Xếp gọn sách vở và để bút vào hộp",
+                        Category = "Nhiệm vụ",
+                        ActivityTime = DateTime.UtcNow.AddHours(4),
+                        Status = "Pending",
+                        RewardPoints = 5,
+                        Notes = "Nhắc bé trước khi đi ngủ",
+                        CreatedAt = DateTime.UtcNow
+                    };
+
+                    await dbContext.KidActivities.AddRangeAsync(sampleActivity1, sampleActivity2);
+                    await dbContext.SaveChangesAsync();
                 }
             }
             catch (Exception ex)
             {
-                app.Logger.LogWarning("Không thể khởi tạo seed users: {Msg}", ex.Message);
+                app.Logger.LogWarning("Không thể khởi tạo seed users hoặc dữ liệu trẻ em mẫu: {Msg}", ex.Message);
             }
 
             // Configure the HTTP request pipeline.

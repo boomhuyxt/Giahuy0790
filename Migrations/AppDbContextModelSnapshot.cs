@@ -101,7 +101,7 @@ namespace Giahuy0790.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("Giahuy0790.Models.Post", b =>
+            modelBuilder.Entity("Giahuy0790.Models.Kid", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -110,21 +110,9 @@ namespace Giahuy0790.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("AuthorAvatar")
+                    b.Property<string>("AvatarUrl")
                         .HasColumnType("text")
-                        .HasColumnName("author_avatar");
-
-                    b.Property<string>("AuthorName")
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasDefaultValue("Gia Huy")
-                        .HasColumnName("author_name");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("content");
+                        .HasColumnName("avatar_url");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -132,15 +120,52 @@ namespace Giahuy0790.Migrations
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
-                    b.Property<string>("ImageUrl")
-                        .HasColumnType("text")
-                        .HasColumnName("image_url");
+                    b.Property<DateTime?>("DateOfBirth")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("date_of_birth");
 
-                    b.Property<int>("LikesCount")
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("full_name");
+
+                    b.Property<string>("Gender")
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("gender");
+
+                    b.Property<string>("HealthNotes")
+                        .HasColumnType("text")
+                        .HasColumnName("health_notes");
+
+                    b.Property<string>("Interests")
+                        .HasColumnType("text")
+                        .HasColumnName("interests");
+
+                    b.Property<string>("KidUserId")
+                        .HasColumnType("text")
+                        .HasColumnName("kid_user_id");
+
+                    b.Property<string>("Nickname")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("nickname");
+
+                    b.Property<string>("ParentId")
+                        .HasColumnType("text")
+                        .HasColumnName("parent_id");
+
+                    b.Property<string>("SchoolName")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("school_name");
+
+                    b.Property<int>("TotalPoints")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasDefaultValue(0)
-                        .HasColumnName("likes_count");
+                        .HasColumnName("total_points");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -148,10 +173,14 @@ namespace Giahuy0790.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("posts", (string)null);
+                    b.HasIndex("KidUserId");
+
+                    b.HasIndex("ParentId");
+
+                    b.ToTable("kids", (string)null);
                 });
 
-            modelBuilder.Entity("Giahuy0790.Models.Product", b =>
+            modelBuilder.Entity("Giahuy0790.Models.KidActivity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -160,27 +189,61 @@ namespace Giahuy0790.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("ActivityTime")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("activity_time");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasDefaultValue("Sinh hoạt")
+                        .HasColumnName("category");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
                     b.Property<string>("Description")
                         .HasColumnType("text")
                         .HasColumnName("description");
 
-                    b.Property<string>("Image")
+                    b.Property<int>("KidId")
+                        .HasColumnType("integer")
+                        .HasColumnName("kid_id");
+
+                    b.Property<string>("Notes")
                         .HasColumnType("text")
-                        .HasColumnName("image");
+                        .HasColumnName("notes");
 
-                    b.Property<string>("Name")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("name");
+                    b.Property<int>("RewardPoints")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(5)
+                        .HasColumnName("reward_points");
 
-                    b.Property<decimal>("Price")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("price");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("Pending")
+                        .HasColumnName("status");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("title");
 
                     b.HasKey("Id");
 
-                    b.ToTable("products", (string)null);
+                    b.HasIndex("KidId");
+
+                    b.ToTable("kid_activities", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -315,6 +378,34 @@ namespace Giahuy0790.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Giahuy0790.Models.Kid", b =>
+                {
+                    b.HasOne("Giahuy0790.Models.ApplicationUser", "KidUser")
+                        .WithMany()
+                        .HasForeignKey("KidUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Giahuy0790.Models.ApplicationUser", "Parent")
+                        .WithMany()
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("KidUser");
+
+                    b.Navigation("Parent");
+                });
+
+            modelBuilder.Entity("Giahuy0790.Models.KidActivity", b =>
+                {
+                    b.HasOne("Giahuy0790.Models.Kid", "Kid")
+                        .WithMany("Activities")
+                        .HasForeignKey("KidId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Kid");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -364,6 +455,11 @@ namespace Giahuy0790.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Giahuy0790.Models.Kid", b =>
+                {
+                    b.Navigation("Activities");
                 });
 #pragma warning restore 612, 618
         }

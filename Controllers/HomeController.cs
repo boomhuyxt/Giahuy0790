@@ -13,14 +13,14 @@ namespace Giahuy0790.Controllers
             return View();
         }
 
-        [HttpGet("products")]
-        public IActionResult Products()
+        [HttpGet("kids")]
+        public IActionResult Kids()
         {
             return View();
         }
 
-        [HttpGet("posts")]
-        public IActionResult Posts()
+        [HttpGet("activities")]
+        public IActionResult Activities()
         {
             return View();
         }

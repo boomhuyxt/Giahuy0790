@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Giahuy0790.Controllers;
 
 /// <summary>
-/// Controller xử lý tải lên (upload) và lưu trữ hình ảnh sản phẩm, bài đăng vào thư mục wwwroot/uploads
+/// Controller xử lý tải lên (upload) và lưu trữ hình ảnh trẻ em, ảnh đại diện vào thư mục wwwroot/uploads
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
@@ -13,21 +13,21 @@ public class UploadsController(IWebHostEnvironment env) : ControllerBase
     private const long MaxFileSize = 10 * 1024 * 1024; // 10MB
 
     /// <summary>
-    /// Upload hình ảnh sản phẩm và lưu vào wwwroot/uploads/products
+    /// Upload hình ảnh hồ sơ bé và lưu vào wwwroot/uploads/kids
     /// </summary>
-    [HttpPost("product")]
-    public async Task<IActionResult> UploadProductImage(IFormFile? file)
+    [HttpPost("kid")]
+    public async Task<IActionResult> UploadKidImage(IFormFile? file)
     {
-        return await SaveFileAsync(file, "products");
+        return await SaveFileAsync(file, "kids");
     }
 
     /// <summary>
-    /// Upload hình ảnh bài đăng Facebook và lưu vào wwwroot/uploads/posts
+    /// Upload ảnh đại diện tài khoản và lưu vào wwwroot/uploads/avatars
     /// </summary>
-    [HttpPost("post")]
-    public async Task<IActionResult> UploadPostImage(IFormFile? file)
+    [HttpPost("avatar")]
+    public async Task<IActionResult> UploadAvatar(IFormFile? file)
     {
-        return await SaveFileAsync(file, "posts");
+        return await SaveFileAsync(file, "avatars");
     }
 
     private async Task<IActionResult> SaveFileAsync(IFormFile? file, string subFolder)

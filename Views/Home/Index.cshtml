@@ -1,5 +1,5 @@
 @{
-    ViewData["Title"] = "Trang Chủ";
+    ViewData["Title"] = "KidCare - Quản Lý & Đồng Hành Cùng Trẻ";
 }
 
 <div class="row g-4 mb-4">
@@ -9,59 +9,75 @@
             <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
                 <div>
                     <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill mb-2">
-                        .NET 10 • Supabase PostgreSQL • Dark Mode
+                        🧒 KidCare System • .NET 10 • Supabase PostgreSQL
                     </span>
-                    <h1 class="display-6 fw-bold mb-2">Hệ Thống Quản Lý Sản Phẩm & Bảng Tin</h1>
+                    <h1 class="display-6 fw-bold mb-2">Hệ Thống Quản Lý & Chăm Sóc Trẻ Em</h1>
                     <p class="lead text-body-secondary mb-0">
-                        Đầy đủ các API Thêm / Xóa / Sửa / Tìm kiếm theo ID & Tên và Bảng tin bài đăng phong cách Facebook (Bài tập về nhà 6đ).
+                        Giải pháp toàn diện kết nối Gia đình và Trẻ nhỏ: Theo dõi sức khỏe, lịch sinh hoạt, giao bài tập rèn luyện và tích điểm thưởng sao.
                     </p>
                 </div>
                 <div class="d-flex gap-2">
-                    <a href="/products" class="btn btn-primary btn-lg rounded-pill px-4 shadow-sm">
-                        🛍️ Xem Sản phẩm
+                    <a href="/kids" class="btn btn-primary btn-lg rounded-pill px-4 shadow-sm">
+                        🧒 Danh Sách Trẻ
                     </a>
-                    <a href="/posts" class="btn btn-outline-primary btn-lg rounded-pill px-4 shadow-sm">
-                        📰 Xem Bảng tin FB
+                    <a href="/activities" class="btn btn-outline-primary btn-lg rounded-pill px-4 shadow-sm">
+                        📋 Lịch & Hoạt Động
                     </a>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 2 Feature Navigation Cards -->
-    <div class="col-md-6">
-        <div class="card border stat-card shadow-sm h-100">
+    <!-- 3 Role Feature Navigation Cards -->
+    <div class="col-md-4">
+        <div class="card border stat-card shadow-sm h-100 rounded-4">
             <div class="card-body p-4 d-flex flex-column">
                 <div class="d-flex align-items-center justify-content-between mb-3">
-                    <span class="fs-1">🛍️</span>
-                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1 rounded-pill">Đầy đủ CRUD + Search</span>
+                    <span class="fs-1">👑</span>
+                    <span class="badge bg-purple-subtle text-purple border px-3 py-1 rounded-pill">Quyền Admin</span>
                 </div>
-                <h4 class="fw-bold mb-2">Quản Lý Sản Phẩm (Product)</h4>
+                <h4 class="fw-bold mb-2">Quản Trị Viên (Admin)</h4>
                 <p class="text-body-secondary mb-4 flex-grow-1">
-                    Bao gồm các chức năng gọi API: Thêm, Xóa, Sửa, Tìm theo ID và Tìm kiếm theo tên sản phẩm. Đổ dữ liệu động vào giao diện Grid Card hiện đại.
+                    Quản lý toàn bộ danh sách trẻ trong trường học hoặc cộng đồng, phân quyền tài khoản phụ huynh, giám sát hệ thống và cấu hình chung.
                 </p>
-                <div class="d-flex gap-2">
-                    <a href="/products" class="btn btn-primary rounded-pill px-4">Truy cập Quản lý Sản phẩm →</a>
-                    <a href="/swagger" target="_blank" class="btn btn-outline-secondary rounded-pill">Swagger API</a>
+                <div>
+                    <a href="/kids" class="btn btn-primary rounded-pill px-3">Quản lý hồ sơ →</a>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="col-md-6">
-        <div class="card border stat-card shadow-sm h-100">
+    <div class="col-md-4">
+        <div class="card border stat-card shadow-sm h-100 rounded-4">
             <div class="card-body p-4 d-flex flex-column">
                 <div class="d-flex align-items-center justify-content-between mb-3">
-                    <span class="fs-1">📰</span>
-                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 rounded-pill">Bài tập về nhà 6đ</span>
+                    <span class="fs-1">👨‍👩‍👧</span>
+                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1 rounded-pill">Quyền Parents</span>
                 </div>
-                <h4 class="fw-bold mb-2">Bảng Tin Bài Đăng (Facebook Feed)</h4>
+                <h4 class="fw-bold mb-2">Phụ Huynh (Parents)</h4>
                 <p class="text-body-secondary mb-4 flex-grow-1">
-                    Mô phỏng bài đăng Facebook hoàn chỉnh: Đổ dữ liệu lên giao diện (3đ), chức năng Thêm bài viết (1đ), Sửa bài viết (1đ), Xóa bài viết (1đ) và tính năng Thích bài viết.
+                    Thêm và theo dõi các bé yêu trong gia đình, ghi chú sức khỏe, dị ứng, thiết lập thời gian biểu và thưởng sao khi bé hoàn thành việc tốt.
                 </p>
-                <div class="d-flex gap-2">
-                    <a href="/posts" class="btn btn-primary rounded-pill px-4">Truy cập Bảng tin Facebook →</a>
-                    <a href="/swagger" target="_blank" class="btn btn-outline-secondary rounded-pill">Swagger API</a>
+                <div>
+                    <a href="/kids" class="btn btn-success rounded-pill px-3">Hồ sơ con em →</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card border stat-card shadow-sm h-100 rounded-4">
+            <div class="card-body p-4 d-flex flex-column">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <span class="fs-1">🧒</span>
+                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-3 py-1 rounded-pill">Quyền Kid</span>
+                </div>
+                <h4 class="fw-bold mb-2">Trẻ Em (Kid)</h4>
+                <p class="text-body-secondary mb-4 flex-grow-1">
+                    Bé có thể đăng nhập để xem nhiệm vụ được giao hàng ngày (học tập, dọn dẹp, đánh răng), đánh dấu hoàn thành và tích lũy sao đổi quà!
+                </p>
+                <div>
+                    <a href="/activities" class="btn btn-warning rounded-pill px-3 text-dark fw-bold">Xem nhiệm vụ & Sao ⭐ →</a>
                 </div>
             </div>
         </div>
@@ -69,41 +85,41 @@
 
     <!-- Quick Stats -->
     <div class="col-sm-6 col-lg-3">
-        <div class="card stat-card h-100 border shadow-sm">
+        <div class="card stat-card h-100 border shadow-sm rounded-4">
             <div class="card-body">
-                <div class="text-body-secondary fw-semibold small mb-1">CỔNG DOCKER</div>
-                <h4 class="fw-bold mb-1">Port 8888</h4>
-                <small class="text-body-secondary">Sẵn sàng triển khai container</small>
+                <div class="text-body-secondary fw-semibold small mb-1">3 NHÓM QUYỀN (ROLES)</div>
+                <h4 class="fw-bold mb-1 text-primary">Admin • Parents • Kid</h4>
+                <small class="text-body-secondary">Bảo mật chuẩn JWT & ASP.NET Identity</small>
             </div>
         </div>
     </div>
 
     <div class="col-sm-6 col-lg-3">
-        <div class="card stat-card h-100 border shadow-sm">
+        <div class="card stat-card h-100 border shadow-sm rounded-4">
             <div class="card-body">
                 <div class="text-body-secondary fw-semibold small mb-1">DATABASE SUPABASE</div>
                 <h4 class="fw-bold mb-1 text-success">Đã kết nối</h4>
-                <small class="text-body-secondary">PostgreSQL (Session Port 5432)</small>
+                <small class="text-body-secondary">Bảng kids & kid_activities</small>
             </div>
         </div>
     </div>
 
     <div class="col-sm-6 col-lg-3">
-        <div class="card stat-card h-100 border shadow-sm">
+        <div class="card stat-card h-100 border shadow-sm rounded-4">
             <div class="card-body">
-                <div class="text-body-secondary fw-semibold small mb-1">BẢNG PRODUCT</div>
-                <h4 class="fw-bold mb-1">Đầy đủ API</h4>
-                <small class="text-body-secondary">Id, Name, Price, Image, Description</small>
+                <div class="text-body-secondary fw-semibold small mb-1">QUẢN LÝ LỊCH TRÌNH</div>
+                <h4 class="fw-bold mb-1 text-info">Sinh hoạt & Nhiệm vụ</h4>
+                <small class="text-body-secondary">Học tập, Sức khỏe, Thể thao...</small>
             </div>
         </div>
     </div>
 
     <div class="col-sm-6 col-lg-3">
-        <div class="card stat-card h-100 border shadow-sm">
+        <div class="card stat-card h-100 border shadow-sm rounded-4">
             <div class="card-body">
-                <div class="text-body-secondary fw-semibold small mb-1">BẢNG BÀI ĐĂNG (POST)</div>
-                <h4 class="fw-bold mb-1">Feed Facebook</h4>
-                <small class="text-body-secondary">Thêm, Xóa, Sửa, Thích bài viết</small>
+                <div class="text-body-secondary fw-semibold small mb-1">KHEN THƯỞNG</div>
+                <h4 class="fw-bold mb-1 text-warning">Tích Sao ⭐</h4>
+                <small class="text-body-secondary">Khích lệ tính tự giác cho trẻ</small>
             </div>
         </div>
     </div>

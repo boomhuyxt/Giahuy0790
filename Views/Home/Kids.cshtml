@@ -1,0 +1,376 @@
+@{
+    ViewData["Title"] = "Quản lý Hồ sơ Trẻ em";
+}
+
+<div class="container py-4">
+    <!-- Header banner -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3 bg-white p-4 rounded-4 shadow-sm border border-light">
+        <div>
+            <h2 class="fw-bold mb-1 text-primary d-flex align-items-center gap-2">
+                <span>🧒</span> Danh Sách Trẻ Em
+            </h2>
+            <p class="text-muted mb-0">Theo dõi thông tin sức khỏe, trường học, sở thích và quản lý các bé yêu</p>
+        </div>
+        <div class="d-flex gap-2">
+            <input type="text" id="searchInput" class="form-control rounded-pill px-3" placeholder="🔍 Tìm theo tên hoặc trường..." style="max-width: 260px;" />
+            <button class="btn btn-primary rounded-pill px-4 shadow-sm fw-semibold" id="btnOpenAddModal">
+                <i class="bi bi-plus-lg"></i> + Thêm Bé Mới
+            </button>
+        </div>
+    </div>
+
+    <!-- Alert placeholder -->
+    <div id="pageAlert"></div>
+
+    <!-- Loading spinner -->
+    <div id="loadingBox" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Đang tải...</span>
+        </div>
+        <p class="text-muted mt-2 small">Đang tải danh sách các bé...</p>
+    </div>
+
+    <!-- Kids Grid -->
+    <div class="row g-4" id="kidsContainer" style="display: none;"></div>
+
+    <!-- Empty state -->
+    <div id="emptyBox" class="text-center py-5 bg-white rounded-4 shadow-sm border border-light my-3" style="display: none;">
+        <div style="font-size: 50px;">🎈</div>
+        <h5 class="fw-bold mt-2">Chưa có hồ sơ trẻ nào</h5>
+        <p class="text-muted small">Hãy nhấn nút <strong>"+ Thêm Bé Mới"</strong> phía trên để bắt đầu thêm hồ sơ bé yêu của bạn.</p>
+    </div>
+</div>
+
+<!-- ================= MODAL THÊM / CHỈNH SỬA BÉ ================= -->
+<div class="modal fade" id="modalKid" tabindex="-1" aria-labelledby="modalKidLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 520px;">
+        <div class="modal-content shadow-lg rounded-4">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="modalKidLabel">🧒 Thêm Hồ Sơ Trẻ Mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="formKid">
+                <input type="hidden" id="kidId" value="" />
+                <div class="modal-body">
+                    <div id="modalKidAlert"></div>
+                    
+                    <div class="row g-3">
+                        <div class="col-md-7">
+                            <label class="form-label fw-semibold small">Họ và tên của bé <span class="text-danger">*</span></label>
+                            <input type="text" id="kidFullName" class="form-control" placeholder="Ví dụ: Nguyễn Gia Huy" required />
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label fw-semibold small">Tên ở nhà (Nickname)</label>
+                            <input type="text" id="kidNickname" class="form-control" placeholder="Ví dụ: Bé Bơ, Tin Tin" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small">Ngày sinh</label>
+                            <input type="date" id="kidDob" class="form-control" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small">Giới tính</label>
+                            <select id="kidGender" class="form-select">
+                                <option value="Nam">Nam</option>
+                                <option value="Nữ">Nữ</option>
+                                <option value="Khác">Khác</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-semibold small">Trường học / Lớp học</label>
+                            <input type="text" id="kidSchool" class="form-control" placeholder="Ví dụ: Mầm non Hoa Mai, Lớp 1A..." />
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-semibold small">Ghi chú sức khỏe & Dị ứng</label>
+                            <textarea id="kidHealth" class="form-control" rows="2" placeholder="Dị ứng đậu phộng, hải sản, cần uống thuốc vào lúc 8h..."></textarea>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-semibold small">Sở thích & Năng khiếu</label>
+                            <input type="text" id="kidInterests" class="form-control" placeholder="Vẽ tranh, piano, xếp lego, bơi lội..." />
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-semibold small">Ảnh đại diện (Tải lên hoặc để trống dùng avatar ngẫu nhiên)</label>
+                            <input type="file" id="kidAvatarFile" class="form-control" accept="image/*" />
+                            <input type="hidden" id="kidAvatarUrl" value="" />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm" id="btnSaveKid">Lưu Hồ Sơ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    let kidsList = [];
+    const container = document.getElementById('kidsContainer');
+    const loadingBox = document.getElementById('loadingBox');
+    const emptyBox = document.getElementById('emptyBox');
+    const modalEl = document.getElementById('modalKid');
+    const modal = new bootstrap.Modal(modalEl);
+
+    // Lấy token nếu đã đăng nhập
+    function getAuthHeaders() {
+        const token = localStorage.getItem('authToken');
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+        return headers;
+    }
+
+    // Load danh sách trẻ
+    async function loadKids() {
+        loadingBox.style.display = 'block';
+        container.style.display = 'none';
+        emptyBox.style.display = 'none';
+
+        try {
+            const res = await fetch('/api/kids', { headers: getAuthHeaders() });
+            if (!res.ok) throw new Error('Không thể tải danh sách trẻ');
+            kidsList = await res.json();
+            renderKids(kidsList);
+        } catch (err) {
+            document.getElementById('pageAlert').innerHTML = `<div class="alert alert-danger py-2 small">${err.message}</div>`;
+        } finally {
+            loadingBox.style.display = 'none';
+        }
+    }
+
+    function calculateAge(dobStr) {
+        if (!dobStr) return 'Chưa rõ';
+        const dob = new Date(dobStr);
+        const diff = Date.now() - dob.getTime();
+        const ageDate = new Date(diff);
+        const years = Math.abs(ageDate.getUTCFullYear() - 1970);
+        return `${years} tuổi`;
+    }
+
+    // Render danh sách thẻ card
+    function renderKids(list) {
+        if (!list || list.length === 0) {
+            emptyBox.style.display = 'block';
+            container.style.display = 'none';
+            return;
+        }
+
+        emptyBox.style.display = 'none';
+        container.style.display = 'flex';
+        container.innerHTML = list.map(k => {
+            const avatar = k.avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(k.fullName)}`;
+            const age = calculateAge(k.dateOfBirth);
+            const genderBadge = k.gender === 'Nữ' ? 'bg-danger-subtle text-danger' : 'bg-primary-subtle text-primary';
+
+            return `
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden position-relative hover-shadow transition">
+                    <div class="card-body p-4 d-flex flex-column">
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <img src="${avatar}" alt="${k.fullName}" class="rounded-circle border border-2 border-primary-subtle bg-light" style="width: 64px; height: 64px; object-fit: cover;" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Kid'"/>
+                            <div class="flex-grow-1">
+                                <h5 class="fw-bold mb-0 text-dark">${k.fullName}</h5>
+                                <div class="small text-muted mt-1">
+                                    ${k.nickname ? `<span class="badge bg-warning-subtle text-warning-emphasis me-1">🧸 ${k.nickname}</span>` : ''}
+                                    <span class="badge ${genderBadge}">${k.gender || 'Bé'}</span>
+                                    <span class="badge bg-secondary-subtle text-secondary ms-1">${age}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3 small">
+                            <div class="d-flex align-items-center gap-2 text-secondary mb-1">
+                                <span>🏫</span>
+                                <span>${k.schoolName || 'Chưa cập nhật trường học'}</span>
+                            </div>
+                            ${k.healthNotes ? `
+                            <div class="d-flex align-items-start gap-2 text-danger-emphasis mb-1">
+                                <span>❤️</span>
+                                <span>${k.healthNotes}</span>
+                            </div>` : ''}
+                            ${k.interests ? `
+                            <div class="d-flex align-items-center gap-2 text-info-emphasis">
+                                <span>🎨</span>
+                                <span>${k.interests}</span>
+                            </div>` : ''}
+                        </div>
+
+                        <!-- Điểm sao thưởng tích lũy -->
+                        <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center gap-1 text-warning fw-bold fs-5">
+                                <span>⭐</span>
+                                <span class="text-dark">${k.totalPoints || 0}</span>
+                                <span class="small text-muted fw-normal fs-6">sao</span>
+                            </div>
+                            <button class="btn btn-sm btn-outline-warning rounded-pill px-2 py-0 fw-bold" onclick="addQuickPoints(${k.id}, 5)" title="Thưởng nóng 5 sao cho bé">
+                                +5 ⭐
+                            </button>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="d-flex gap-2 mt-3">
+                            <a href="/activities?kidId=${k.id}" class="btn btn-sm btn-light rounded-pill flex-grow-1 text-primary fw-semibold">
+                                📋 Lịch trình
+                            </a>
+                            <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="openEditModal(${k.id})">
+                                Sửa
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="deleteKid(${k.id}, '${k.fullName}')">
+                                Xóa
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    // Mở modal thêm mới
+    document.getElementById('btnOpenAddModal')?.addEventListener('click', () => {
+        document.getElementById('formKid').reset();
+        document.getElementById('kidId').value = '';
+        document.getElementById('modalKidLabel').textContent = '🧒 Thêm Hồ Sơ Trẻ Mới';
+        document.getElementById('modalKidAlert').innerHTML = '';
+        modal.show();
+    });
+
+    // Mở modal chỉnh sửa
+    window.openEditModal = function(id) {
+        const k = kidsList.find(x => x.id === id);
+        if (!k) return;
+
+        document.getElementById('kidId').value = k.id;
+        document.getElementById('kidFullName').value = k.fullName || '';
+        document.getElementById('kidNickname').value = k.nickname || '';
+        document.getElementById('kidDob').value = k.dateOfBirth ? k.dateOfBirth.substring(0, 10) : '';
+        document.getElementById('kidGender').value = k.gender || 'Nam';
+        document.getElementById('kidSchool').value = k.schoolName || '';
+        document.getElementById('kidHealth').value = k.healthNotes || '';
+        document.getElementById('kidInterests').value = k.interests || '';
+        document.getElementById('kidAvatarUrl').value = k.avatarUrl || '';
+
+        document.getElementById('modalKidLabel').textContent = `✏️ Chỉnh Sửa: ${k.fullName}`;
+        document.getElementById('modalKidAlert').innerHTML = '';
+        modal.show();
+    };
+
+    // Xử lý upload ảnh nếu có
+    async function handleAvatarUpload() {
+        const fileInput = document.getElementById('kidAvatarFile');
+        if (!fileInput.files || fileInput.files.length === 0) return null;
+
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+
+        const res = await fetch('/api/uploads/kid', {
+            method: 'POST',
+            body: formData
+        });
+        if (!res.ok) throw new Error('Không thể tải ảnh lên');
+        const data = await res.json();
+        return data.url;
+    }
+
+    // Submit form thêm / sửa
+    document.getElementById('formKid')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const alertBox = document.getElementById('modalKidAlert');
+        const btn = document.getElementById('btnSaveKid');
+        const id = document.getElementById('kidId').value;
+        const isEdit = !!id;
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang lưu...';
+        alertBox.innerHTML = '';
+
+        try {
+            let avatarUrl = document.getElementById('kidAvatarUrl').value;
+            const uploadedUrl = await handleAvatarUpload();
+            if (uploadedUrl) avatarUrl = uploadedUrl;
+
+            const payload = {
+                fullName: document.getElementById('kidFullName').value.trim(),
+                nickname: document.getElementById('kidNickname').value.trim() || null,
+                dateOfBirth: document.getElementById('kidDob').value ? new Date(document.getElementById('kidDob').value).toISOString() : null,
+                gender: document.getElementById('kidGender').value,
+                schoolName: document.getElementById('kidSchool').value.trim() || null,
+                healthNotes: document.getElementById('kidHealth').value.trim() || null,
+                interests: document.getElementById('kidInterests').value.trim() || null,
+                avatarUrl: avatarUrl || null
+            };
+
+            const url = isEdit ? `/api/kids/${id}` : '/api/kids';
+            const method = isEdit ? 'PUT' : 'POST';
+
+            const res = await fetch(url, {
+                method,
+                headers: getAuthHeaders(),
+                body: JSON.stringify(payload)
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Lỗi khi lưu hồ sơ');
+
+            modal.hide();
+            await loadKids();
+        } catch (err) {
+            alertBox.innerHTML = `<div class="alert alert-danger py-2 small">${err.message}</div>`;
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = 'Lưu Hồ Sơ';
+        }
+    });
+
+    // Thưởng nhanh sao cho bé
+    window.addQuickPoints = async function(id, pts) {
+        try {
+            const res = await fetch(`/api/kids/${id}/points`, {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ points: pts })
+            });
+            if (res.ok) {
+                await loadKids();
+            }
+        } catch (_) {}
+    };
+
+    // Xóa bé
+    window.deleteKid = async function(id, name) {
+        if (!confirm(`Bạn có chắc chắn muốn xóa hồ sơ bé "${name}" không?`)) return;
+
+        try {
+            const res = await fetch(`/api/kids/${id}`, {
+                method: 'DELETE',
+                headers: getAuthHeaders()
+            });
+            if (!res.ok) throw new Error('Không thể xóa hồ sơ');
+            await loadKids();
+        } catch (err) {
+            alert(err.message);
+        }
+    };
+
+    // Tìm kiếm tức thì
+    document.getElementById('searchInput')?.addEventListener('input', (e) => {
+        const kw = e.target.value.toLowerCase().trim();
+        if (!kw) {
+            renderKids(kidsList);
+            return;
+        }
+        const filtered = kidsList.filter(k => 
+            (k.fullName && k.fullName.toLowerCase().includes(kw)) ||
+            (k.nickname && k.nickname.toLowerCase().includes(kw)) ||
+            (k.schoolName && k.schoolName.toLowerCase().includes(kw))
+        );
+        renderKids(filtered);
+    });
+
+    document.addEventListener('DOMContentLoaded', loadKids);
+</script>
+}

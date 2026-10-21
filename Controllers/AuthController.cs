@@ -61,8 +61,16 @@ public class AuthController(
             return BadRequest(new { message = "Đăng ký không thành công", errors });
         }
 
-        // Phân quyền Role cho người dùng (mặc định là User nếu không chỉ định)
-        var roleToAssign = string.IsNullOrWhiteSpace(request.Role) ? "User" : request.Role.Trim();
+        // Phân quyền Role: 3 nhóm quyền chính là Admin, Parents, Kid (mặc định là Parents)
+        var requestedRole = string.IsNullOrWhiteSpace(request.Role) ? "Parents" : request.Role.Trim();
+        var roleToAssign = requestedRole.ToLower() switch
+        {
+            "admin" => "Admin",
+            "kid" => "Kid",
+            "parents" or "parent" => "Parents",
+            _ => "Parents"
+        };
+
         if (!await roleManager.RoleExistsAsync(roleToAssign))
         {
             await roleManager.CreateAsync(new IdentityRole(roleToAssign));
@@ -106,7 +114,7 @@ public class AuthController(
         var userRoles = await userManager.GetRolesAsync(user);
         if (userRoles.Count == 0)
         {
-            userRoles = ["User"];
+            userRoles = ["Parents"];
         }
 
         // Tạo JWT Token có chứa Role claims
@@ -344,14 +352,14 @@ public class AuthController(
 }
 
 /// <summary>
-/// DTO Đăng ký tài khoản (hỗ trợ chỉ định quyền Role: Admin, Staff, User)
+/// DTO Đăng ký tài khoản (hỗ trợ chỉ định quyền Role: Admin, Parents, Kid)
 /// </summary>
 public record RegisterRequest(
     string Username,
     string Email,
     string Password,
     string? FullName = null,
-    string? Role = "User"
+    string? Role = "Parents"
 );
 
 /// <summary>
