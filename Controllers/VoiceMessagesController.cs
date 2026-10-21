@@ -97,11 +97,12 @@ public class VoiceMessagesController(
     /// </summary>
     [HttpPost("send")]
     [Consumes("multipart/form-data")]
-    public async Task<IActionResult> SendVoiceMessage(
-        [FromForm] IFormFile? audioFile,
-        [FromForm] int? kidId,
-        [FromForm] int? durationSeconds)
+    public async Task<IActionResult> SendVoiceMessage([FromForm] SendVoiceMessageRequest request)
     {
+        var audioFile = request.AudioFile;
+        var kidId = request.KidId;
+        var durationSeconds = request.DurationSeconds;
+
         var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(currentUserId))
         {
@@ -345,4 +346,11 @@ public class VoiceMessagesController(
             return Ok(new { unreadCount = count });
         }
     }
+}
+
+public class SendVoiceMessageRequest
+{
+    public IFormFile? AudioFile { get; set; }
+    public int? KidId { get; set; }
+    public int? DurationSeconds { get; set; }
 }
