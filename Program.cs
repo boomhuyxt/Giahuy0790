@@ -2,6 +2,7 @@ using System.Text;
 using Giahuy0790.Data;
 using Giahuy0790.Models;
 using Giahuy0790.Repositories;
+using Giahuy0790.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,16 @@ namespace Giahuy0790
     {
         public static async Task Main(string[] args)
         {
+            // Tự động load file .env vào biến môi trường hệ thống để bảo mật thông tin
+            try
+            {
+                DotNetEnv.Env.TraversePath().Load();
+            }
+            catch
+            {
+                // Bỏ qua nếu không tìm thấy file .env
+            }
+
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
@@ -34,8 +45,11 @@ namespace Giahuy0790
             });
 
             // Cấu hình Entity Framework Core + Supabase PostgreSQL
+            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+                ?? Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
+
             builder.Services.AddDbContext<AppDbContext>(options =>
-                options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+                options.UseNpgsql(connectionString));
 
             // ==========================================
             // Cấu hình ASP.NET Core Identity
@@ -56,7 +70,9 @@ namespace Giahuy0790
             // ==========================================
             // Cấu hình Xác thực JWT Bearer Token
             // ==========================================
-            var jwtKey = builder.Configuration["Jwt:Key"] ?? "Giahuy0790_Super_Secret_Key_For_Jwt_Authentication_2026!#@$";
+            var jwtKey = builder.Configuration["Jwt:Key"]
+                ?? Environment.GetEnvironmentVariable("JWT_SECRET_KEY")
+                ?? "Giahuy0790_Super_Secret_Key_For_Jwt_Authentication_2026!#@$";
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -76,6 +92,11 @@ namespace Giahuy0790
                     ClockSkew = TimeSpan.Zero
                 };
             });
+
+            // ==========================================
+            // Đăng ký Email Service gửi qua SMTP
+            // ==========================================
+            builder.Services.AddScoped<IEmailService, EmailService>();
 
             // ==========================================
             // Đăng ký Repository Pattern vào DI Container

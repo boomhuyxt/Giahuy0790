@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Giahuy0790.Models;
+using Giahuy0790.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -10,14 +11,15 @@ using Microsoft.IdentityModel.Tokens;
 namespace Giahuy0790.Controllers;
 
 /// <summary>
-/// Controller xác thực người dùng (ASP.NET Core Identity & JWT Token): Đăng ký, Đăng nhập, Phân quyền Role
+/// Controller xác thực người dùng (ASP.NET Core Identity & JWT Token): Đăng ký, Đăng nhập, Quên mật khẩu qua SMTP, Phân quyền Role
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class AuthController(
     UserManager<ApplicationUser> userManager,
     RoleManager<IdentityRole> roleManager,
-    IConfiguration config) : ControllerBase
+    IConfiguration config,
+    IEmailService emailService) : ControllerBase
 {
     /// <summary>
     /// Đăng ký tài khoản người dùng mới (có gán quyền Role)
@@ -200,6 +202,127 @@ public class AuthController(
         var securityToken = tokenHandler.CreateToken(tokenDescriptor);
         return tokenHandler.WriteToken(securityToken);
     }
+
+    /// <summary>
+    /// Quên mật khẩu: Gửi mã OTP xác thực 6 chữ số qua Email bằng giao thức SMTP
+    /// </summary>
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+    {
+        if (!ModelState.IsValid || string.IsNullOrWhiteSpace(request.Email))
+        {
+            return BadRequest(new { message = "Vui lòng cung cấp địa chỉ email hợp lệ." });
+        }
+
+        var email = request.Email.Trim();
+        var user = await userManager.FindByEmailAsync(email);
+        if (user == null)
+        {
+            // Phản hồi chung để đảm bảo bảo mật không lộ thông tin tài khoản
+            return Ok(new
+            {
+                message = "Nếu địa chỉ email tồn tại trong hệ thống, mã xác thực OTP đã được gửi. Vui lòng kiểm tra hộp thư."
+            });
+        }
+
+        // Tạo mã OTP ngẫu nhiên gồm 6 chữ số (100000 - 999999)
+        var otpCode = Random.Shared.Next(100000, 1000000).ToString();
+        user.PasswordResetOtp = otpCode;
+        user.PasswordResetOtpExpiry = DateTime.UtcNow.AddMinutes(15);
+
+        var updateResult = await userManager.UpdateAsync(user);
+        if (!updateResult.Succeeded)
+        {
+            return StatusCode(500, new { message = "Không thể tạo mã xác thực. Vui lòng thử lại sau." });
+        }
+
+        // Gửi email chứa mã OTP qua dịch vụ SMTP
+        await emailService.SendPasswordResetOtpAsync(
+            user.Email!,
+            otpCode,
+            string.IsNullOrWhiteSpace(user.FullName) ? user.UserName : user.FullName
+        );
+
+        return Ok(new
+        {
+            message = "Mã xác thực OTP đã được gửi đến email của bạn. Mã có hiệu lực trong vòng 15 phút.",
+            email = user.Email
+        });
+    }
+
+    /// <summary>
+    /// Xác thực mã OTP đặt lại mật khẩu trước khi cho phép nhập mật khẩu mới
+    /// </summary>
+    [HttpPost("verify-reset-otp")]
+    public async Task<IActionResult> VerifyResetOtp([FromBody] VerifyResetOtpRequest request)
+    {
+        if (!ModelState.IsValid || string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Otp))
+        {
+            return BadRequest(new { message = "Email và mã OTP không được để trống." });
+        }
+
+        var user = await userManager.FindByEmailAsync(request.Email.Trim());
+        if (user == null ||
+            string.IsNullOrWhiteSpace(user.PasswordResetOtp) ||
+            user.PasswordResetOtp != request.Otp.Trim() ||
+            user.PasswordResetOtpExpiry == null ||
+            user.PasswordResetOtpExpiry < DateTime.UtcNow)
+        {
+            return BadRequest(new { message = "Mã xác thực OTP không chính xác hoặc đã hết hạn." });
+        }
+
+        return Ok(new { message = "Mã xác thực OTP hợp lệ. Bạn có thể tiến hành đổi mật khẩu mới." });
+    }
+
+    /// <summary>
+    /// Đặt lại mật khẩu mới sau khi xác thực mã OTP
+    /// </summary>
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+    {
+        if (!ModelState.IsValid ||
+            string.IsNullOrWhiteSpace(request.Email) ||
+            string.IsNullOrWhiteSpace(request.Otp) ||
+            string.IsNullOrWhiteSpace(request.NewPassword))
+        {
+            return BadRequest(new { message = "Vui lòng nhập đầy đủ Email, mã OTP và mật khẩu mới." });
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.ConfirmPassword) && request.NewPassword != request.ConfirmPassword)
+        {
+            return BadRequest(new { message = "Mật khẩu xác nhận không khớp với mật khẩu mới." });
+        }
+
+        var user = await userManager.FindByEmailAsync(request.Email.Trim());
+        if (user == null ||
+            string.IsNullOrWhiteSpace(user.PasswordResetOtp) ||
+            user.PasswordResetOtp != request.Otp.Trim() ||
+            user.PasswordResetOtpExpiry == null ||
+            user.PasswordResetOtpExpiry < DateTime.UtcNow)
+        {
+            return BadRequest(new { message = "Mã xác thực OTP không chính xác hoặc đã hết thời gian hiệu lực." });
+        }
+
+        // Tạo Identity Reset Token an toàn để đổi mật khẩu qua Identity
+        var resetToken = await userManager.GeneratePasswordResetTokenAsync(user);
+        var resetResult = await userManager.ResetPasswordAsync(user, resetToken, request.NewPassword);
+
+        if (!resetResult.Succeeded)
+        {
+            var errors = resetResult.Errors.Select(e => e.Description);
+            return BadRequest(new { message = "Đổi mật khẩu thất bại", errors });
+        }
+
+        // Xóa mã OTP sau khi sử dụng thành công để tránh tấn công Replay
+        user.PasswordResetOtp = null;
+        user.PasswordResetOtpExpiry = null;
+        await userManager.UpdateAsync(user);
+
+        return Ok(new
+        {
+            message = "🎉 Đặt lại mật khẩu thành công! Bạn có thể sử dụng mật khẩu mới để đăng nhập."
+        });
+    }
 }
 
 /// <summary>
@@ -219,4 +342,29 @@ public record RegisterRequest(
 public record LoginRequest(
     string UsernameOrEmail,
     string Password
+);
+
+/// <summary>
+/// DTO Yêu cầu gửi mã OTP quên mật khẩu
+/// </summary>
+public record ForgotPasswordRequest(
+    string Email
+);
+
+/// <summary>
+/// DTO Xác thực mã OTP
+/// </summary>
+public record VerifyResetOtpRequest(
+    string Email,
+    string Otp
+);
+
+/// <summary>
+/// DTO Đặt lại mật khẩu mới
+/// </summary>
+public record ResetPasswordRequest(
+    string Email,
+    string Otp,
+    string NewPassword,
+    string? ConfirmPassword = null
 );

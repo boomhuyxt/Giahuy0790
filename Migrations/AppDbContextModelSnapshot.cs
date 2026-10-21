@@ -67,6 +67,12 @@ namespace Giahuy0790.Migrations
                     b.Property<string>("PasswordHash")
                         .HasColumnType("text");
 
+                    b.Property<string>("PasswordResetOtp")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("PasswordResetOtpExpiry")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("text");
 

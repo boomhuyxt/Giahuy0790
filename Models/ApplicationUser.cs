@@ -21,4 +21,14 @@ public class ApplicationUser : IdentityUser
     /// Thời gian tạo tài khoản
     /// </summary>
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    /// <summary>
+    /// Mã OTP xác thực đặt lại mật khẩu (6 chữ số)
+    /// </summary>
+    public string? PasswordResetOtp { get; set; }
+
+    /// <summary>
+    /// Thời gian hết hạn của mã OTP đặt lại mật khẩu (UTC)
+    /// </summary>
+    public DateTime? PasswordResetOtpExpiry { get; set; }
 }
