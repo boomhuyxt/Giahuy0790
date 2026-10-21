@@ -26,11 +26,4 @@ public class Product
 
     [Column("description")]
     public string? Description { get; set; }
-
-    // Các thuộc tính bổ sung quản lý thời gian
-    [Column("created_at")]
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-    [Column("updated_at")]
-    public DateTime? UpdatedAt { get; set; }
 }

@@ -36,7 +36,7 @@ public class ProductRepository(AppDbContext context) : Repository<Product>(conte
     {
         return await _dbSet
             .AsNoTracking()
-            .OrderByDescending(p => p.CreatedAt)
+            .OrderByDescending(p => p.Id)
             .Take(count)
             .ToListAsync();
     }

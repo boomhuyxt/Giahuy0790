@@ -63,8 +63,7 @@ public class ProductsController(IProductRepository repository) : ControllerBase
             Name = dto.Name.Trim(),
             Price = dto.Price,
             Image = dto.Image?.Trim(),
-            Description = dto.Description?.Trim(),
-            CreatedAt = DateTime.UtcNow
+            Description = dto.Description?.Trim()
         };
 
         var created = await repository.AddAsync(product);
@@ -92,7 +91,6 @@ public class ProductsController(IProductRepository repository) : ControllerBase
         product.Price = dto.Price;
         product.Image = dto.Image?.Trim();
         product.Description = dto.Description?.Trim();
-        product.UpdatedAt = DateTime.UtcNow;
 
         await repository.UpdateAsync(product);
 

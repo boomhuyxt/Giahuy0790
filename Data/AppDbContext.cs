@@ -28,7 +28,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
             entity.HasKey(p => p.Id);
             entity.Property(p => p.Name).HasMaxLength(255);
             entity.Property(p => p.Price).HasPrecision(18, 2);
-            entity.Property(p => p.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
         });
 
         // Cấu hình Bảng Posts (Bài đăng Facebook)
