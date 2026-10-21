@@ -45,8 +45,13 @@ namespace Giahuy0790
             });
 
             // Cấu hình Entity Framework Core + Supabase PostgreSQL
-            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-                ?? Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
+            var rawConnection = builder.Configuration.GetConnectionString("DefaultConnection");
+            var envConnection = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
+            var connectionString = !string.IsNullOrWhiteSpace(envConnection)
+                ? envConnection
+                : (!string.IsNullOrWhiteSpace(rawConnection)
+                    ? rawConnection
+                    : "Host=aws-0-ap-southeast-1.pooler.supabase.com;Port=5432;Database=postgres;Username=postgres.fddbvowrgywnlcingnnc;Password=Huydepzai123;SSL Mode=Require;Trust Server Certificate=true;Timeout=60;Command Timeout=60");
 
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseNpgsql(connectionString));
@@ -70,9 +75,20 @@ namespace Giahuy0790
             // ==========================================
             // Cấu hình Xác thực JWT Bearer Token
             // ==========================================
-            var jwtKey = builder.Configuration["Jwt:Key"]
-                ?? Environment.GetEnvironmentVariable("JWT_SECRET_KEY")
-                ?? "Giahuy0790_Super_Secret_Key_For_Jwt_Authentication_2026!#@$";
+            var rawJwtKey = builder.Configuration["Jwt:Key"];
+            var envJwtKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY");
+            var jwtKey = !string.IsNullOrWhiteSpace(envJwtKey)
+                ? envJwtKey
+                : (!string.IsNullOrWhiteSpace(rawJwtKey)
+                    ? rawJwtKey
+                    : "Giahuy0790_Super_Secret_Key_For_Jwt_Authentication_2026!#@$");
+
+            // Đảm bảo độ dài khóa bí mật luôn đủ chuẩn HMAC-SHA256 (ít nhất 32 ký tự / 256 bits)
+            if (string.IsNullOrWhiteSpace(jwtKey) || jwtKey.Length < 32)
+            {
+                jwtKey = "Giahuy0790_Super_Secret_Key_For_Jwt_Authentication_2026!#@$";
+            }
+
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

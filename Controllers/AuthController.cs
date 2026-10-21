@@ -166,7 +166,19 @@ public class AuthController(
     private string GenerateJwtToken(ApplicationUser user, IList<string> roles, out DateTime expiresAt)
     {
         var jwtSettings = config.GetSection("Jwt");
-        var secretKey = jwtSettings["Key"] ?? "Default_Secret_Key_For_Jwt_Authentication_Must_Be_Long_Enough_2026";
+        var rawKey = config["JWT_SECRET_KEY"];
+        var settingKey = jwtSettings["Key"];
+        var secretKey = !string.IsNullOrWhiteSpace(rawKey)
+            ? rawKey
+            : (!string.IsNullOrWhiteSpace(settingKey)
+                ? settingKey
+                : "Giahuy0790_Super_Secret_Key_For_Jwt_Authentication_2026!#@$");
+
+        if (string.IsNullOrWhiteSpace(secretKey) || secretKey.Length < 32)
+        {
+            secretKey = "Giahuy0790_Super_Secret_Key_For_Jwt_Authentication_2026!#@$";
+        }
+
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
