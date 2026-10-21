@@ -1,5 +1,5 @@
 @{
-    ViewData["Title"] = "Quản lý Hồ sơ Trẻ em";
+    ViewData["Title"] = "Quản lý Hồ sơ Trẻ em & Tài khoản con";
 }
 
 <div class="container py-4">
@@ -7,15 +7,68 @@
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3 bg-white p-4 rounded-4 shadow-sm border border-light">
         <div>
             <h2 class="fw-bold mb-1 text-primary d-flex align-items-center gap-2">
-                <span>🧒</span> Danh Sách Trẻ Em
+                <span>🧒</span> Quản Lý Hồ Sơ Trẻ & Tài Khoản Con
             </h2>
-            <p class="text-muted mb-0">Theo dõi thông tin sức khỏe, trường học, sở thích và quản lý các bé yêu</p>
+            <p class="text-muted mb-0">Theo dõi thông tin sức khỏe, liên kết hoặc cấp tài khoản con để bé tự đăng nhập xem nhiệm vụ & tích điểm sao</p>
         </div>
-        <div class="d-flex gap-2">
-            <input type="text" id="searchInput" class="form-control rounded-pill px-3" placeholder="🔍 Tìm theo tên hoặc trường..." style="max-width: 260px;" />
+        <div class="d-flex gap-2 flex-wrap">
+            <input type="text" id="searchInput" class="form-control rounded-pill px-3" placeholder="🔍 Tìm theo tên bé hoặc username con..." style="max-width: 280px;" />
             <button class="btn btn-primary rounded-pill px-4 shadow-sm fw-semibold" id="btnOpenAddModal">
                 <i class="bi bi-plus-lg"></i> + Thêm Bé Mới
             </button>
+        </div>
+    </div>
+
+    <!-- Banner chào mừng riêng khi tài khoản con (Kid) đăng nhập -->
+    <div id="kidGreetingBanner" class="p-4 rounded-4 text-white shadow-sm mb-4 d-none" style="background: linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%);">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <div style="font-size: 50px;">🎈</div>
+                <div>
+                    <h3 class="fw-bold mb-1">Xin chào bé <span id="kidGreetingName"></span>!</h3>
+                    <p class="mb-0 text-white-50">Đây là hồ sơ cá nhân và bảng thành tích của bé. Hãy chăm chỉ rèn luyện và tích thật nhiều sao nhé!</p>
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <div class="text-end bg-white bg-opacity-25 p-2 px-3 rounded-4">
+                    <span class="fs-4 fw-bold text-warning" id="kidGreetingPoints">⭐ 0 sao</span>
+                    <div class="small text-white-50">Thành tích tích lũy</div>
+                </div>
+                <a href="/activities" class="btn btn-warning rounded-pill px-4 fw-bold text-dark shadow-sm">
+                    📋 Xem Nhiệm Vụ Hôm Nay
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats Bar (Dành cho Phụ huynh / Admin) -->
+    <div id="parentStatsBar" class="row g-3 mb-4">
+        <div class="col-sm-4">
+            <div class="bg-white p-3 rounded-4 shadow-sm border border-light d-flex align-items-center gap-3">
+                <div class="fs-1 text-primary">👨‍👩‍👧</div>
+                <div>
+                    <div class="fs-4 fw-bold text-dark" id="statTotalKids">0</div>
+                    <div class="small text-muted">Tổng số bé quản lý</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="bg-white p-3 rounded-4 shadow-sm border border-light d-flex align-items-center gap-3">
+                <div class="fs-1 text-success">👤</div>
+                <div>
+                    <div class="fs-4 fw-bold text-success" id="statLinkedKids">0</div>
+                    <div class="small text-muted">Đã có tài khoản con riêng</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="bg-white p-3 rounded-4 shadow-sm border border-light d-flex align-items-center gap-3">
+                <div class="fs-1 text-warning">⚠️</div>
+                <div>
+                    <div class="fs-4 fw-bold text-warning" id="statUnlinkedKids">0</div>
+                    <div class="small text-muted">Chưa liên kết tài khoản con</div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -27,7 +80,7 @@
         <div class="spinner-border text-primary" role="status">
             <span class="visually-hidden">Đang tải...</span>
         </div>
-        <p class="text-muted mt-2 small">Đang tải danh sách các bé...</p>
+        <p class="text-muted mt-2 small">Đang tải danh sách các bé và tài khoản con...</p>
     </div>
 
     <!-- Kids Grid -->
@@ -35,15 +88,15 @@
 
     <!-- Empty state -->
     <div id="emptyBox" class="text-center py-5 bg-white rounded-4 shadow-sm border border-light my-3" style="display: none;">
-        <div style="font-size: 50px;">🎈</div>
+        <div style="font-size: 55px;">🎈</div>
         <h5 class="fw-bold mt-2">Chưa có hồ sơ trẻ nào</h5>
-        <p class="text-muted small">Hãy nhấn nút <strong>"+ Thêm Bé Mới"</strong> phía trên để bắt đầu thêm hồ sơ bé yêu của bạn.</p>
+        <p class="text-muted small">Hãy nhấn nút <strong>"+ Thêm Bé Mới"</strong> để tạo hồ sơ bé yêu và cấp tài khoản con ngay.</p>
     </div>
 </div>
 
 <!-- ================= MODAL THÊM / CHỈNH SỬA BÉ ================= -->
 <div class="modal fade" id="modalKid" tabindex="-1" aria-labelledby="modalKidLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" style="max-width: 520px;">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 550px;">
         <div class="modal-content shadow-lg rounded-4">
             <div class="modal-header border-0 pb-0">
                 <h5 class="modal-title fw-bold" id="modalKidLabel">🧒 Thêm Hồ Sơ Trẻ Mới</h5>
@@ -84,7 +137,7 @@
 
                         <div class="col-12">
                             <label class="form-label fw-semibold small">Ghi chú sức khỏe & Dị ứng</label>
-                            <textarea id="kidHealth" class="form-control" rows="2" placeholder="Dị ứng đậu phộng, hải sản, cần uống thuốc vào lúc 8h..."></textarea>
+                            <textarea id="kidHealth" class="form-control" rows="2" placeholder="Dị ứng đậu phộng, hải sản, cần uống thuốc lúc 8h..."></textarea>
                         </div>
 
                         <div class="col-12">
@@ -93,9 +146,36 @@
                         </div>
 
                         <div class="col-12">
-                            <label class="form-label fw-semibold small">Ảnh đại diện (Tải lên hoặc để trống dùng avatar ngẫu nhiên)</label>
+                            <label class="form-label fw-semibold small">Ảnh đại diện</label>
                             <input type="file" id="kidAvatarFile" class="form-control" accept="image/*" />
                             <input type="hidden" id="kidAvatarUrl" value="" />
+                        </div>
+
+                        <!-- Khu vực tùy chọn tạo luôn tài khoản con (Chỉ hiện khi thêm mới) -->
+                        <div class="col-12" id="boxCreateChildAccountOption">
+                            <div class="p-3 rounded-4 bg-light border">
+                                <div class="form-check form-switch mb-2">
+                                    <input class="form-check-input" type="checkbox" id="chkCreateChildAccount" />
+                                    <label class="form-check-label fw-semibold small text-primary" for="chkCreateChildAccount">
+                                        ✨ Tạo luôn tài khoản con để bé tự đăng nhập
+                                    </label>
+                                </div>
+                                <div id="boxChildAccountInputs" style="display: none;" class="mt-2 pt-2 border-top">
+                                    <div class="row g-2">
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-semibold">Tên đăng nhập con <span class="text-danger">*</span></label>
+                                            <input type="text" id="newChildUsername" class="form-control form-control-sm" placeholder="Ví dụ: be_huy" />
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-semibold">Mật khẩu con <span class="text-danger">*</span></label>
+                                            <input type="password" id="newChildPassword" class="form-control form-control-sm" placeholder="••••••••" minlength="6" />
+                                        </div>
+                                        <div class="col-12">
+                                            <small class="text-muted">💡 Bé có thể dùng thông tin này để đăng nhập xem thời khóa biểu và tích lũy sao thưởng.</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -108,16 +188,145 @@
     </div>
 </div>
 
+<!-- ================= MODAL QUẢN LÝ / LIÊN KẾT TÀI KHOẢN CON ================= -->
+<div class="modal fade" id="modalSubAccount" tabindex="-1" aria-labelledby="modalSubAccountLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 520px;">
+        <div class="modal-content shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header border-0 pb-2">
+                <h5 class="modal-title fw-bold text-primary" id="modalSubAccountLabel">
+                    🔗 Quản Lý Tài Khoản Con
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <div class="px-3 pt-2">
+                <!-- Nav tabs -->
+                <ul class="nav nav-pills nav-fill bg-light p-1 rounded-pill" id="subAccountTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active rounded-pill fw-semibold small py-2" id="tab-link-existing" data-bs-toggle="pill" data-bs-target="#panel-link-existing" type="button" role="tab">
+                            🔗 Liên kết tài khoản có sẵn
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link rounded-pill fw-semibold small py-2" id="tab-create-new" data-bs-toggle="pill" data-bs-target="#panel-create-new" type="button" role="tab">
+                            ✨ Tạo tài khoản con mới
+                        </button>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="modal-body pt-3">
+                <div id="subAccountAlert"></div>
+                <input type="hidden" id="subAccountKidId" value="" />
+
+                <div class="tab-content">
+                    <!-- TAB 1: LIÊN KẾT TÀI KHOẢN CÓ SẴN -->
+                    <div class="tab-pane fade show active" id="panel-link-existing" role="tabpanel">
+                        <div class="alert alert-info py-2 small mb-3">
+                            📌 Nhập <strong>Tên đăng nhập (Username)</strong> hoặc <strong>Email</strong> của một tài khoản khác trong hệ thống để đưa vào làm tài khoản con của bạn.
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">Tìm tài khoản hoặc nhập Username / Email <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <input type="text" id="linkUserIdentifier" class="form-control" placeholder="Ví dụ: bebo2026 hoặc bebo@gmail.com" />
+                                <button class="btn btn-outline-secondary" type="button" id="btnSearchUser">🔍 Tìm</button>
+                            </div>
+                        </div>
+
+                        <!-- Gợi ý kết quả tìm kiếm tức thì -->
+                        <div id="searchUserResults" class="list-group mb-3" style="max-height: 180px; overflow-y: auto; display: none;"></div>
+
+                        <div class="d-grid mt-3">
+                            <button type="button" class="btn btn-primary rounded-pill py-2 fw-semibold shadow-sm" id="btnSubmitLinkExisting">
+                                Xác Nhận Liên Kết Làm Tài Khoản Con
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- TAB 2: TẠO TÀI KHOẢN CON MỚI -->
+                    <div class="tab-pane fade" id="panel-create-new" role="tabpanel">
+                        <div class="alert alert-success py-2 small mb-3">
+                            🎉 Cấp ngay một tài khoản mới tinh với Tên đăng nhập và Mật khẩu cho bé yêu. Bé có thể tự đăng nhập để theo dõi bảng sao thưởng và lịch sinh hoạt!
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label fw-semibold small">Tên đăng nhập của bé (Username) <span class="text-danger">*</span></label>
+                                <input type="text" id="createSubUsername" class="form-control" placeholder="Ví dụ: be_na_2026" required />
+                                <small class="text-muted" style="font-size: 11px;">Viết liền không dấu, dùng để đăng nhập</small>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold small">Mật khẩu đăng nhập cho bé <span class="text-danger">*</span></label>
+                                <input type="password" id="createSubPassword" class="form-control" placeholder="Tối thiểu 6 ký tự" minlength="6" required />
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold small">Email (Tùy chọn)</label>
+                                <input type="email" id="createSubEmail" class="form-control" placeholder="Để trống nếu bé chưa có email riêng" />
+                            </div>
+                        </div>
+
+                        <div class="d-grid mt-4">
+                            <button type="button" class="btn btn-success rounded-pill py-2 fw-semibold shadow-sm" id="btnSubmitCreateNewSub">
+                                Tạo Tài Khoản & Liên Kết Ngay
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ================= MODAL ĐỔI MẬT KHẨU TÀI KHOẢN CON ================= -->
+<div class="modal fade" id="modalResetPassword" tabindex="-1" aria-labelledby="modalResetPasswordLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+        <div class="modal-content shadow-lg rounded-4">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-dark" id="modalResetPasswordLabel">🔑 Đổi Mật Khẩu Cho Bé</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="formResetChildPassword">
+                <input type="hidden" id="resetPasswordKidId" value="" />
+                <div class="modal-body">
+                    <div id="resetPasswordAlert"></div>
+                    <p class="text-muted small mb-3">
+                        Bạn đang đặt lại mật khẩu cho tài khoản con: <strong class="text-primary" id="resetPasswordUsername"></strong>
+                    </p>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Mật khẩu mới (Tối thiểu 6 ký tự) <span class="text-danger">*</span></label>
+                        <input type="password" id="resetNewPassword" class="form-control" placeholder="••••••••" minlength="6" required />
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm" id="btnSaveNewPassword">Cập Nhật Mật Khẩu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
 <script>
     let kidsList = [];
+    let currentUser = null;
+    let isKidRole = false;
+
     const container = document.getElementById('kidsContainer');
     const loadingBox = document.getElementById('loadingBox');
     const emptyBox = document.getElementById('emptyBox');
-    const modalEl = document.getElementById('modalKid');
-    const modal = new bootstrap.Modal(modalEl);
+    const parentStatsBar = document.getElementById('parentStatsBar');
+    const kidGreetingBanner = document.getElementById('kidGreetingBanner');
 
-    // Lấy token nếu đã đăng nhập
+    const modalKid = new bootstrap.Modal(document.getElementById('modalKid'));
+    const modalSubAccount = new bootstrap.Modal(document.getElementById('modalSubAccount'));
+    const modalResetPassword = new bootstrap.Modal(document.getElementById('modalResetPassword'));
+
+    // Lấy token và header xác thực
     function getAuthHeaders() {
         const token = localStorage.getItem('authToken');
         const headers = { 'Content-Type': 'application/json' };
@@ -125,8 +334,24 @@
         return headers;
     }
 
+    // Đọc thông tin user đăng nhập
+    function checkCurrentAuth() {
+        const userStr = localStorage.getItem('authUser');
+        if (userStr) {
+            try {
+                currentUser = JSON.parse(userStr);
+                const roles = currentUser.roles || [];
+                isKidRole = roles.includes('Kid') || roles.includes('kid');
+            } catch (e) {
+                currentUser = null;
+                isKidRole = false;
+            }
+        }
+    }
+
     // Load danh sách trẻ
     async function loadKids() {
+        checkCurrentAuth();
         loadingBox.style.display = 'block';
         container.style.display = 'none';
         emptyBox.style.display = 'none';
@@ -136,6 +361,7 @@
             if (!res.ok) throw new Error('Không thể tải danh sách trẻ');
             kidsList = await res.json();
             renderKids(kidsList);
+            updateStats(kidsList);
         } catch (err) {
             document.getElementById('pageAlert').innerHTML = `<div class="alert alert-danger py-2 small">${err.message}</div>`;
         } finally {
@@ -150,6 +376,33 @@
         const ageDate = new Date(diff);
         const years = Math.abs(ageDate.getUTCFullYear() - 1970);
         return `${years} tuổi`;
+    }
+
+    // Cập nhật thống kê
+    function updateStats(list) {
+        if (isKidRole) {
+            parentStatsBar.style.display = 'none';
+            document.getElementById('btnOpenAddModal').style.display = 'none';
+            if (list.length > 0) {
+                const k = list[0];
+                kidGreetingBanner.classList.remove('d-none');
+                document.getElementById('kidGreetingName').textContent = k.fullName;
+                document.getElementById('kidGreetingPoints').textContent = `⭐ ${k.totalPoints || 0} sao`;
+            }
+            return;
+        }
+
+        parentStatsBar.style.display = 'flex';
+        document.getElementById('btnOpenAddModal').style.display = 'inline-block';
+        kidGreetingBanner.classList.add('d-none');
+
+        const total = list.length;
+        const linked = list.filter(k => k.kidUserId || (k.kidAccount && k.kidAccount.id) || k.hasKidAccount).length;
+        const unlinked = total - linked;
+
+        document.getElementById('statTotalKids').textContent = total;
+        document.getElementById('statLinkedKids').textContent = linked;
+        document.getElementById('statUnlinkedKids').textContent = unlinked;
     }
 
     // Render danh sách thẻ card
@@ -167,10 +420,70 @@
             const age = calculateAge(k.dateOfBirth);
             const genderBadge = k.gender === 'Nữ' ? 'bg-danger-subtle text-danger' : 'bg-primary-subtle text-primary';
 
+            // Thông tin tài khoản con
+            const hasSub = !!(k.kidUserId || (k.kidAccount && k.kidAccount.id) || k.hasKidAccount);
+            const subUsername = k.kidUserName || (k.kidAccount ? k.kidAccount.username : '');
+            const subEmail = k.kidUserEmail || (k.kidAccount ? k.kidAccount.email : '');
+            const subFullName = k.kidUserFullName || (k.kidAccount ? k.kidAccount.fullName : '');
+
+            // Khối hiển thị Sub-Account Box
+            let subAccountHtml = '';
+            if (hasSub) {
+                subAccountHtml = `
+                <div class="p-3 rounded-3 bg-success-subtle border border-success-subtle mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="fs-4">👦</span>
+                            <div>
+                                <div class="fw-bold text-success-emphasis d-flex align-items-center gap-1">
+                                    <span>Tài khoản con:</span>
+                                    <span class="badge bg-success text-white">${'@@' + (subUsername || 'con')}</span>
+                                </div>
+                                <div class="text-muted" style="font-size: 11px;">
+                                    ${subEmail ? `✉️ ${subEmail}` : 'Đã kết nối tài khoản riêng'}
+                                </div>
+                            </div>
+                        </div>
+                        ${!isKidRole ? `
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-light rounded-pill px-2 py-1 border shadow-sm" data-bs-toggle="dropdown" title="Tùy chọn tài khoản con">
+                                ⚙️
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                <li>
+                                    <button class="dropdown-item small" onclick="openResetPasswordModal(${k.id}, '${subUsername}')">
+                                        🔑 Đổi mật khẩu cho bé
+                                    </button>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <button class="dropdown-item small text-danger" onclick="unlinkChildAccount(${k.id}, '${k.fullName}')">
+                                        ❌ Hủy liên kết tài khoản con
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>` : ''}
+                    </div>
+                </div>`;
+            } else {
+                subAccountHtml = `
+                <div class="p-3 rounded-3 bg-warning-subtle border border-warning-subtle mb-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
+                    <div class="d-flex align-items-center gap-2 text-warning-emphasis small">
+                        <span>⚠️</span>
+                        <span>Chưa liên kết tài khoản con riêng</span>
+                    </div>
+                    ${!isKidRole ? `
+                    <button class="btn btn-sm btn-warning rounded-pill px-3 py-1 fw-semibold shadow-sm text-dark" onclick="openSubAccountModal(${k.id}, '${k.fullName}')">
+                        🔗 + Thêm tài khoản con
+                    </button>` : ''}
+                </div>`;
+            }
+
             return `
             <div class="col-md-6 col-lg-4">
                 <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden position-relative hover-shadow transition">
                     <div class="card-body p-4 d-flex flex-column">
+                        <!-- Header thẻ bé -->
                         <div class="d-flex align-items-center gap-3 mb-3">
                             <img src="${avatar}" alt="${k.fullName}" class="rounded-circle border border-2 border-primary-subtle bg-light" style="width: 64px; height: 64px; object-fit: cover;" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Kid'"/>
                             <div class="flex-grow-1">
@@ -183,7 +496,11 @@
                             </div>
                         </div>
 
-                        <div class="mb-3 small">
+                        <!-- Khối trạng thái Tài khoản con -->
+                        ${subAccountHtml}
+
+                        <!-- Thông tin chi tiết trường học / sức khỏe -->
+                        <div class="mb-3 small flex-grow-1">
                             <div class="d-flex align-items-center gap-2 text-secondary mb-1">
                                 <span>🏫</span>
                                 <span>${k.schoolName || 'Chưa cập nhật trường học'}</span>
@@ -198,6 +515,11 @@
                                 <span>🎨</span>
                                 <span>${k.interests}</span>
                             </div>` : ''}
+                            ${k.parentName ? `
+                            <div class="d-flex align-items-center gap-2 text-muted mt-2 pt-2 border-top">
+                                <span>👨‍👩‍👧</span>
+                                <span style="font-size: 11px;">Phụ huynh: <strong>${k.parentName}</strong></span>
+                            </div>` : ''}
                         </div>
 
                         <!-- Điểm sao thưởng tích lũy -->
@@ -205,24 +527,26 @@
                             <div class="d-flex align-items-center gap-1 text-warning fw-bold fs-5">
                                 <span>⭐</span>
                                 <span class="text-dark">${k.totalPoints || 0}</span>
-                                <span class="small text-muted fw-normal fs-6">sao</span>
+                                <span class="small text-muted fw-normal fs-6">sao tích lũy</span>
                             </div>
-                            <button class="btn btn-sm btn-outline-warning rounded-pill px-2 py-0 fw-bold" onclick="addQuickPoints(${k.id}, 5)" title="Thưởng nóng 5 sao cho bé">
+                            ${!isKidRole ? `
+                            <button class="btn btn-sm btn-outline-warning rounded-pill px-3 py-1 fw-bold" onclick="addQuickPoints(${k.id}, 5)" title="Thưởng nóng 5 sao cho bé">
                                 +5 ⭐
-                            </button>
+                            </button>` : ''}
                         </div>
 
-                        <!-- Actions -->
+                        <!-- Các nút hành động -->
                         <div class="d-flex gap-2 mt-3">
-                            <a href="/activities?kidId=${k.id}" class="btn btn-sm btn-light rounded-pill flex-grow-1 text-primary fw-semibold">
-                                📋 Lịch trình
+                            <a href="/activities?kidId=${k.id}" class="btn btn-sm btn-light rounded-pill flex-grow-1 text-primary fw-semibold border">
+                                📋 Lịch & Nhiệm Vụ
                             </a>
+                            ${!isKidRole ? `
                             <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="openEditModal(${k.id})">
                                 Sửa
                             </button>
                             <button class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="deleteKid(${k.id}, '${k.fullName}')">
                                 Xóa
-                            </button>
+                            </button>` : ''}
                         </div>
                     </div>
                 </div>
@@ -230,16 +554,23 @@
         }).join('');
     }
 
-    // Mở modal thêm mới
+    // Toggle hiện/ẩn trường nhập tài khoản con khi thêm bé
+    document.getElementById('chkCreateChildAccount')?.addEventListener('change', (e) => {
+        document.getElementById('boxChildAccountInputs').style.display = e.target.checked ? 'block' : 'none';
+    });
+
+    // Mở modal thêm bé mới
     document.getElementById('btnOpenAddModal')?.addEventListener('click', () => {
         document.getElementById('formKid').reset();
         document.getElementById('kidId').value = '';
         document.getElementById('modalKidLabel').textContent = '🧒 Thêm Hồ Sơ Trẻ Mới';
         document.getElementById('modalKidAlert').innerHTML = '';
-        modal.show();
+        document.getElementById('boxCreateChildAccountOption').style.display = 'block';
+        document.getElementById('boxChildAccountInputs').style.display = 'none';
+        modalKid.show();
     });
 
-    // Mở modal chỉnh sửa
+    // Mở modal chỉnh sửa bé
     window.openEditModal = function(id) {
         const k = kidsList.find(x => x.id === id);
         if (!k) return;
@@ -253,13 +584,42 @@
         document.getElementById('kidHealth').value = k.healthNotes || '';
         document.getElementById('kidInterests').value = k.interests || '';
         document.getElementById('kidAvatarUrl').value = k.avatarUrl || '';
+        document.getElementById('boxCreateChildAccountOption').style.display = 'none';
 
         document.getElementById('modalKidLabel').textContent = `✏️ Chỉnh Sửa: ${k.fullName}`;
         document.getElementById('modalKidAlert').innerHTML = '';
-        modal.show();
+        modalKid.show();
     };
 
-    // Xử lý upload ảnh nếu có
+    // Mở modal quản lý/thêm tài khoản con
+    window.openSubAccountModal = function(kidId, kidName) {
+        document.getElementById('subAccountKidId').value = kidId;
+        document.getElementById('modalSubAccountLabel').innerHTML = `🔗 Quản Lý Tài Khoản Con: <span class="text-dark">${kidName}</span>`;
+        document.getElementById('subAccountAlert').innerHTML = '';
+        document.getElementById('linkUserIdentifier').value = '';
+        document.getElementById('searchUserResults').style.display = 'none';
+        document.getElementById('createSubUsername').value = '';
+        document.getElementById('createSubPassword').value = '';
+        document.getElementById('createSubEmail').value = '';
+        
+        // Mặc định chọn tab 1
+        const tab1 = document.getElementById('tab-link-existing');
+        const trigger = new bootstrap.Tab(tab1);
+        trigger.show();
+
+        modalSubAccount.show();
+    };
+
+    // Mở modal đổi mật khẩu con
+    window.openResetPasswordModal = function(kidId, username) {
+        document.getElementById('resetPasswordKidId').value = kidId;
+        document.getElementById('resetPasswordUsername').textContent = '@@' + username;
+        document.getElementById('resetNewPassword').value = '';
+        document.getElementById('resetPasswordAlert').innerHTML = '';
+        modalResetPassword.show();
+    };
+
+    // Xử lý upload avatar nếu có
     async function handleAvatarUpload() {
         const fileInput = document.getElementById('kidAvatarFile');
         if (!fileInput.files || fileInput.files.length === 0) return null;
@@ -276,7 +636,7 @@
         return data.url;
     }
 
-    // Submit form thêm / sửa
+    // Submit form thêm / sửa bé
     document.getElementById('formKid')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const alertBox = document.getElementById('modalKidAlert');
@@ -293,6 +653,8 @@
             const uploadedUrl = await handleAvatarUpload();
             if (uploadedUrl) avatarUrl = uploadedUrl;
 
+            const shouldCreateSub = !isEdit && document.getElementById('chkCreateChildAccount')?.checked;
+
             const payload = {
                 fullName: document.getElementById('kidFullName').value.trim(),
                 nickname: document.getElementById('kidNickname').value.trim() || null,
@@ -301,7 +663,10 @@
                 schoolName: document.getElementById('kidSchool').value.trim() || null,
                 healthNotes: document.getElementById('kidHealth').value.trim() || null,
                 interests: document.getElementById('kidInterests').value.trim() || null,
-                avatarUrl: avatarUrl || null
+                avatarUrl: avatarUrl || null,
+                createSubAccount: shouldCreateSub,
+                subAccountUsername: shouldCreateSub ? document.getElementById('newChildUsername').value.trim() : null,
+                subAccountPassword: shouldCreateSub ? document.getElementById('newChildPassword').value : null
             };
 
             const url = isEdit ? `/api/kids/${id}` : '/api/kids';
@@ -316,13 +681,189 @@
             const data = await res.json();
             if (!res.ok) throw new Error(data.message || 'Lỗi khi lưu hồ sơ');
 
-            modal.hide();
+            modalKid.hide();
             await loadKids();
         } catch (err) {
             alertBox.innerHTML = `<div class="alert alert-danger py-2 small">${err.message}</div>`;
         } finally {
             btn.disabled = false;
             btn.innerHTML = 'Lưu Hồ Sơ';
+        }
+    });
+
+    // Tìm kiếm tài khoản khác để liên kết làm con
+    async function searchCandidateAccounts() {
+        const kw = document.getElementById('linkUserIdentifier').value.trim();
+        const resultsBox = document.getElementById('searchUserResults');
+        if (!kw) {
+            resultsBox.style.display = 'none';
+            return;
+        }
+
+        try {
+            const res = await fetch(`/api/kids/search-subaccounts?keyword=${encodeURIComponent(kw)}`, {
+                headers: getAuthHeaders()
+            });
+            if (!res.ok) return;
+            const users = await res.json();
+            if (!users || users.length === 0) {
+                resultsBox.innerHTML = '<div class="p-2 text-muted small text-center">Không tìm thấy tài khoản phù hợp</div>';
+                resultsBox.style.display = 'block';
+                return;
+            }
+
+            resultsBox.innerHTML = users.map(u => `
+                <button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2" onclick="selectCandidateUser('${u.userName}')" ${u.isAlreadyLinked ? 'disabled' : ''}>
+                    <div>
+                        <strong class="text-primary">${'@@' + u.userName}</strong>
+                        <span class="small text-muted ms-2">${u.fullName || ''} (${u.email || ''})</span>
+                    </div>
+                    ${u.isAlreadyLinked 
+                        ? `<span class="badge bg-secondary-subtle text-secondary small">Đã là con của bé ${u.linkedKidName || ''}</span>`
+                        : `<span class="badge bg-primary-subtle text-primary small">Chọn</span>`}
+                </button>
+            `).join('');
+            resultsBox.style.display = 'block';
+        } catch (_) {}
+    }
+
+    document.getElementById('btnSearchUser')?.addEventListener('click', searchCandidateAccounts);
+    document.getElementById('linkUserIdentifier')?.addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') searchCandidateAccounts();
+    });
+
+    window.selectCandidateUser = function(username) {
+        document.getElementById('linkUserIdentifier').value = username;
+        document.getElementById('searchUserResults').style.display = 'none';
+    };
+
+    // Submit TAB 1: Liên kết tài khoản có sẵn
+    document.getElementById('btnSubmitLinkExisting')?.addEventListener('click', async () => {
+        const kidId = document.getElementById('subAccountKidId').value;
+        const identifier = document.getElementById('linkUserIdentifier').value.trim();
+        const alertBox = document.getElementById('subAccountAlert');
+        const btn = document.getElementById('btnSubmitLinkExisting');
+
+        if (!identifier) {
+            alertBox.innerHTML = '<div class="alert alert-warning py-2 small">Vui lòng nhập Username hoặc Email tài khoản cần liên kết.</div>';
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang xử lý...';
+        alertBox.innerHTML = '';
+
+        try {
+            const res = await fetch(`/api/kids/${kidId}/link-account`, {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ usernameOrEmail: identifier })
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Không thể liên kết tài khoản');
+
+            modalSubAccount.hide();
+            await loadKids();
+            alert(data.message);
+        } catch (err) {
+            alertBox.innerHTML = `<div class="alert alert-danger py-2 small">${err.message}</div>`;
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = 'Xác Nhận Liên Kết Làm Tài Khoản Con';
+        }
+    });
+
+    // Submit TAB 2: Tạo tài khoản con mới
+    document.getElementById('btnSubmitCreateNewSub')?.addEventListener('click', async () => {
+        const kidId = document.getElementById('subAccountKidId').value;
+        const username = document.getElementById('createSubUsername').value.trim();
+        const password = document.getElementById('createSubPassword').value;
+        const email = document.getElementById('createSubEmail').value.trim();
+        const alertBox = document.getElementById('subAccountAlert');
+        const btn = document.getElementById('btnSubmitCreateNewSub');
+
+        if (!username || !password) {
+            alertBox.innerHTML = '<div class="alert alert-warning py-2 small">Vui lòng nhập đầy đủ Tên đăng nhập và Mật khẩu cho bé.</div>';
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang tạo...';
+        alertBox.innerHTML = '';
+
+        try {
+            const res = await fetch(`/api/kids/${kidId}/create-subaccount`, {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({
+                    username,
+                    password,
+                    email: email || null
+                })
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Không thể tạo tài khoản con');
+
+            modalSubAccount.hide();
+            await loadKids();
+            alert(data.message);
+        } catch (err) {
+            alertBox.innerHTML = `<div class="alert alert-danger py-2 small">${err.message}</div>`;
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = 'Tạo Tài Khoản & Liên Kết Ngay';
+        }
+    });
+
+    // Hủy liên kết tài khoản con
+    window.unlinkChildAccount = async function(kidId, kidName) {
+        if (!confirm(`Bạn có chắc chắn muốn hủy liên kết tài khoản con khỏi hồ sơ bé "${kidName}" không?`)) return;
+
+        try {
+            const res = await fetch(`/api/kids/${kidId}/unlink-account`, {
+                method: 'POST',
+                headers: getAuthHeaders()
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Không thể hủy liên kết');
+            await loadKids();
+            alert(data.message);
+        } catch (err) {
+            alert(err.message);
+        }
+    };
+
+    // Submit đổi mật khẩu tài khoản con
+    document.getElementById('formResetChildPassword')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const kidId = document.getElementById('resetPasswordKidId').value;
+        const newPassword = document.getElementById('resetNewPassword').value;
+        const alertBox = document.getElementById('resetPasswordAlert');
+        const btn = document.getElementById('btnSaveNewPassword');
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang cập nhật...';
+        alertBox.innerHTML = '';
+
+        try {
+            const res = await fetch(`/api/kids/${kidId}/reset-subaccount-password`, {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ newPassword })
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Đổi mật khẩu thất bại');
+
+            modalResetPassword.hide();
+            alert(data.message);
+        } catch (err) {
+            alertBox.innerHTML = `<div class="alert alert-danger py-2 small">${err.message}</div>`;
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = 'Cập Nhật Mật Khẩu';
         }
     });
 
@@ -340,7 +881,7 @@
         } catch (_) {}
     };
 
-    // Xóa bé
+    // Xóa hồ sơ bé
     window.deleteKid = async function(id, name) {
         if (!confirm(`Bạn có chắc chắn muốn xóa hồ sơ bé "${name}" không?`)) return;
 
@@ -366,7 +907,9 @@
         const filtered = kidsList.filter(k => 
             (k.fullName && k.fullName.toLowerCase().includes(kw)) ||
             (k.nickname && k.nickname.toLowerCase().includes(kw)) ||
-            (k.schoolName && k.schoolName.toLowerCase().includes(kw))
+            (k.schoolName && k.schoolName.toLowerCase().includes(kw)) ||
+            (k.kidUserName && k.kidUserName.toLowerCase().includes(kw)) ||
+            (k.kidAccount && k.kidAccount.username && k.kidAccount.username.toLowerCase().includes(kw))
         );
         renderKids(filtered);
     });

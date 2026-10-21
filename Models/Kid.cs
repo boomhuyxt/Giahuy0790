@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace Giahuy0790.Models;
 
@@ -48,6 +49,7 @@ public class Kid
     public string? ParentId { get; set; }
 
     [ForeignKey(nameof(ParentId))]
+    [JsonIgnore]
     public ApplicationUser? Parent { get; set; }
 
     // Liên kết với tài khoản riêng của Trẻ (nếu trẻ tự đăng nhập bằng role Kid)
@@ -55,6 +57,7 @@ public class Kid
     public string? KidUserId { get; set; }
 
     [ForeignKey(nameof(KidUserId))]
+    [JsonIgnore]
     public ApplicationUser? KidUser { get; set; }
 
     [Column("total_points")]
@@ -68,4 +71,48 @@ public class Kid
 
     // Danh sách lịch sinh hoạt và hoạt động của trẻ
     public ICollection<KidActivity> Activities { get; set; } = new List<KidActivity>();
+
+    // ==========================================
+    // Các trường trợ giúp Serialized cho API hiển thị Tài khoản con & Phụ huynh an toàn
+    // ==========================================
+    [NotMapped]
+    public string? ParentName => Parent?.FullName ?? Parent?.UserName;
+
+    [NotMapped]
+    public string? ParentEmail => Parent?.Email;
+
+    [NotMapped]
+    public bool HasKidAccount => !string.IsNullOrEmpty(KidUserId);
+
+    [NotMapped]
+    public string? KidUserName => KidUser?.UserName;
+
+    [NotMapped]
+    public string? KidUserEmail => KidUser?.Email;
+
+    [NotMapped]
+    public string? KidUserFullName => KidUser?.FullName;
+
+    [NotMapped]
+    public string? KidUserAvatar => KidUser?.AvatarUrl;
+
+    [NotMapped]
+    public object? KidAccount => KidUser == null ? null : new
+    {
+        id = KidUser.Id,
+        username = KidUser.UserName,
+        email = KidUser.Email,
+        fullName = KidUser.FullName,
+        avatarUrl = KidUser.AvatarUrl
+    };
+
+    [NotMapped]
+    public object? ParentAccount => Parent == null ? null : new
+    {
+        id = Parent.Id,
+        username = Parent.UserName,
+        email = Parent.Email,
+        fullName = Parent.FullName,
+        avatarUrl = Parent.AvatarUrl
+    };
 }

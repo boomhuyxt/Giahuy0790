@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace Giahuy0790.Models;
 
@@ -19,6 +20,7 @@ public class KidActivity
     public int KidId { get; set; }
 
     [ForeignKey(nameof(KidId))]
+    [JsonIgnore]
     public Kid? Kid { get; set; }
 
     [Column("title")]

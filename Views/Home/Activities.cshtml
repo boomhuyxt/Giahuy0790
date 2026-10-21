@@ -159,8 +159,27 @@
         const urlKidId = params.get('kidId');
 
         try {
+            const userStr = localStorage.getItem('authUser');
+            let isKidUser = false;
+            if (userStr) {
+                try {
+                    const u = JSON.parse(userStr);
+                    isKidUser = (u.roles || []).includes('Kid') || (u.roles || []).includes('kid');
+                } catch (_) {}
+            }
+            if (isKidUser) {
+                const addBtn = document.getElementById('btnOpenAddActivity');
+                if (addBtn) addBtn.style.display = 'none';
+            }
+
             const res = await fetch('/api/kids', { headers: getAuthHeaders() });
             allKids = await res.json();
+
+            if (isKidUser && allKids.length === 1) {
+                selectKid.style.display = 'none';
+            } else {
+                selectKid.style.display = 'inline-block';
+            }
 
             selectKid.innerHTML = '<option value="">-- Chọn Bé Yêu --</option>' +
                 allKids.map(k => `<option value="${k.id}">${k.fullName} ${k.nickname ? `(${k.nickname})` : ''}</option>`).join('');
@@ -224,6 +243,15 @@
         emptyBox.style.display = 'none';
         activitiesCard.style.display = 'block';
 
+        const userStr = localStorage.getItem('authUser');
+        let isKidUser = false;
+        if (userStr) {
+            try {
+                const u = JSON.parse(userStr);
+                isKidUser = (u.roles || []).includes('Kid') || (u.roles || []).includes('kid');
+            } catch (_) {}
+        }
+
         tableBody.innerHTML = list.map(a => {
             const isCompleted = a.status === 'Completed';
             const statusBadge = isCompleted 
@@ -247,9 +275,10 @@
                     <button class="btn btn-sm btn-success rounded-pill px-3 py-1 fw-semibold me-1" onclick="markComplete(${a.id})">
                         Hoàn thành
                     </button>` : ''}
+                    ${!isKidUser ? `
                     <button class="btn btn-sm btn-outline-danger rounded-pill px-2 py-1" onclick="deleteActivity(${a.id})">
                         Xóa
-                    </button>
+                    </button>` : ''}
                 </td>
             </tr>`;
         }).join('');
