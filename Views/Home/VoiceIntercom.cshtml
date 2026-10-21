@@ -76,8 +76,8 @@
 
     /* PTT Big Button */
     .apple-ptt-button {
-        width: 130px;
-        height: 130px;
+        width: 140px;
+        height: 140px;
         border-radius: 50%;
         background: linear-gradient(135deg, #0071e3 0%, #0056b3 100%);
         border: 4px solid #ffffff;
@@ -89,6 +89,7 @@
         justify-content: center;
         cursor: pointer;
         user-select: none;
+        touch-action: manipulation;
         transition: all 0.2s ease;
         outline: none;
     }
@@ -96,18 +97,17 @@
         transform: scale(1.03);
         box-shadow: 0 10px 28px rgba(0, 113, 227, 0.45);
     }
-    .apple-ptt-button:active,
     .apple-ptt-button.recording {
-        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
         transform: scale(0.96);
-        box-shadow: 0 0 0 10px rgba(0, 113, 227, 0.2), 0 8px 24px rgba(0, 113, 227, 0.4);
-        animation: applePulse 1.5s infinite;
+        box-shadow: 0 0 0 10px rgba(220, 38, 38, 0.2), 0 8px 24px rgba(220, 38, 38, 0.4);
+        animation: applePulseRed 1.4s infinite;
     }
 
-    @@keyframes applePulse {
-        0% { box-shadow: 0 0 0 0 rgba(0, 113, 227, 0.4); }
-        70% { box-shadow: 0 0 0 16px rgba(0, 113, 227, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(0, 113, 227, 0); }
+    @@keyframes applePulseRed {
+        0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.5); }
+        70% { box-shadow: 0 0 0 16px rgba(220, 38, 38, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
     }
 
     /* Audio wave visualizer bar */
@@ -156,7 +156,7 @@
                     Bộ Đàm Gia Đình
                 </h3>
                 <p class="text-muted mb-0 small">
-                    Đàm thoại giọng nói tức thì giữa Ba Mẹ và Bé. Nhấn nút để nói và gửi tin nhắn tức thì.
+                    Đàm thoại giọng nói tức thì giữa Ba Mẹ và Bé. Nhấn nút để nói và gửi tin nhắn thoại.
                 </p>
             </div>
             <div class="d-flex gap-2 flex-wrap align-items-center">
@@ -192,7 +192,7 @@
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
             <div class="d-flex align-items-center gap-2 flex-wrap">
                 <span class="fw-semibold small text-muted">
-                    <i class="bi bi-person-circle me-1" style="color: var(--apple-blue);"></i> Chọn bé đàm thoại:
+                    <i class="bi bi-person-circle me-1" style="color: var(--apple-blue);"></i> Đang kết nối với:
                 </span>
                 <div id="kidSelectorPills" class="d-flex flex-wrap gap-2">
                     <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
@@ -217,7 +217,7 @@
         </div>
     </div>
 
-    <!-- GIAO DIỆN CHÍNH: 2 CỘT (CHUẨN APPLE) -->
+    <!-- GIAO DIỆN CHÍNH: 2 CỘT -->
     <div class="row g-4" id="intercomMainContent" style="display: none;">
         
         <!-- CỘT TRÁI: DANH SÁCH TIN NHẮN THOẠI (FEED) -->
@@ -247,7 +247,7 @@
                     <div id="feedEmptyBox" class="text-center py-5 my-auto" style="display: none;">
                         <div class="mb-2" style="font-size: 2.5rem; color: var(--apple-gray);">🎙️</div>
                         <h6 class="fw-bold mb-1" style="color: var(--apple-black);">Chưa có tin nhắn thoại nào</h6>
-                        <p class="text-muted small mb-0">Nhấn giữ hoặc bấm nút bộ đàm bên phải để bắt đầu cuộc trò chuyện!</p>
+                        <p class="text-muted small mb-0">Nhấn nút bên phải để ghi âm và gửi tin nhắn đầu tiên!</p>
                     </div>
                     <!-- Message bubbles injected here -->
                     <div id="voiceMessagesList" class="d-flex flex-column gap-3"></div>
@@ -302,9 +302,9 @@
 
                 <!-- Khu vực nút bấm bộ đàm -->
                 <div class="text-center py-2">
-                    <button type="button" class="apple-ptt-button" id="btnPtt" title="Bấm hoặc giữ để nói">
+                    <button type="button" class="apple-ptt-button" id="btnPtt" title="Bấm để nói, bấm lần nữa để gửi">
                         <i class="bi bi-mic-fill fs-1 mb-1" id="btnPttIcon"></i>
-                        <span class="small fw-semibold" id="btnPttText" style="font-size: 12px;">BẤM ĐỂ NÓI</span>
+                        <span class="small fw-semibold" id="btnPttText" style="font-size: 13px;">BẤM ĐỂ NÓI</span>
                     </button>
 
                     <!-- Phím điều khiển nhanh khi đang ghi âm -->
@@ -318,7 +318,20 @@
                     </div>
 
                     <div class="mt-3 text-muted small" style="font-size: 12px;">
-                        💡 <em>Nhấn 1 lần để nói, nhấn lần nữa để gửi ngay. Hoặc giữ nút để nói và thả tay để gửi!</em>
+                        💡 <em>Bấm 1 lần để nói, bấm lần nữa để gửi ngay. Hoặc giữ nút để nói và thả tay để gửi!</em>
+                    </div>
+
+                    <!-- Tùy chọn gửi file âm thanh hoặc gửi tin nhắn mẫu kiểm tra -->
+                    <div class="mt-3 pt-3 border-top d-flex flex-column gap-2" style="border-color: var(--apple-border) !important;">
+                        <div class="d-flex justify-content-center gap-2 flex-wrap">
+                            <label class="btn btn-sm apple-btn-outline py-1 px-3 m-0" style="cursor: pointer;" title="Chọn file ghi âm từ máy tính hoặc điện thoại để gửi">
+                                <i class="bi bi-paperclip me-1"></i> Gửi file âm thanh
+                                <input type="file" id="fileAudioUpload" accept="audio/*,.webm,.ogg,.wav,.mp3,.m4a,.mp4" style="display: none;" onchange="handleAudioFileUpload(this)" />
+                            </label>
+                            <button type="button" class="btn btn-sm apple-btn-outline py-1 px-3" onclick="sendTestVoiceMessage()" title="Tự động tạo âm thanh mẫu và gửi để kiểm tra đường truyền">
+                                <i class="bi bi-soundwave me-1"></i> Gửi tin mẫu kiểm tra
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -344,8 +357,9 @@
     let pollInterval = null;
     let currentlyPlayingAudio = null;
     let isRecording = false;
-    let pttHoldTimer = null;
-    let pttHoldTriggered = false;
+    let isStarting = false;
+    let isUploading = false;
+    let pointerPressStartTime = 0;
 
     function getAuthHeaders() {
         const token = localStorage.getItem('authToken');
@@ -366,8 +380,8 @@
 
             if (type === 'start') {
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
-                osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.08); // E5
+                osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+                osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.08);
                 gain.gain.setValueAtTime(0.12, ctx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.16);
                 osc.start(ctx.currentTime);
@@ -382,8 +396,8 @@
                 osc.stop(ctx.currentTime + 0.16);
             } else if (type === 'incoming') {
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
-                osc.frequency.setValueAtTime(880, ctx.currentTime + 0.08); // A5
+                osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+                osc.frequency.setValueAtTime(880, ctx.currentTime + 0.08);
                 gain.gain.setValueAtTime(0.15, ctx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.22);
                 osc.start(ctx.currentTime);
@@ -395,7 +409,6 @@
     document.addEventListener('DOMContentLoaded', async () => {
         await initIntercomPage();
 
-        // Lắng nghe đăng nhập thành công từ modal
         window.addEventListener('storage', async (e) => {
             if (e.key === 'authToken') await initIntercomPage();
         });
@@ -426,7 +439,7 @@
             mainContent.style.display = 'flex';
 
             if (isKidRole) {
-                // Tài khoản con
+                // Kênh của bé
                 channelSelector.style.display = 'none';
                 kidSelfNotice.style.display = 'block';
                 document.getElementById('kidSelfName').textContent = user.fullName || user.username;
@@ -434,7 +447,7 @@
 
                 await loadVoiceMessages(true);
             } else {
-                // Tài khoản Phụ huynh / Admin
+                // Kênh của Phụ huynh / Admin
                 channelSelector.style.display = 'block';
                 kidSelfNotice.style.display = 'none';
                 await loadKidsList();
@@ -445,12 +458,11 @@
             // Tự động kiểm tra tin nhắn mới mỗi 5 giây
             if (pollInterval) clearInterval(pollInterval);
             pollInterval = setInterval(async () => {
-                if (document.visibilityState === 'visible' && !isRecording) {
+                if (document.visibilityState === 'visible' && !isRecording && !isUploading) {
                     await loadVoiceMessages(false);
                 }
             }, 5000);
 
-            // Kết nối SignalR Real-time nếu có Hub
             setupSignalRListener();
 
         } catch (e) {
@@ -485,6 +497,10 @@
         const pillsContainer = document.getElementById('kidSelectorPills');
         try {
             const res = await fetch('/api/kids', { headers: getAuthHeaders() });
+            if (res.status === 401) {
+                handleAuthExpired();
+                return;
+            }
             if (!res.ok) throw new Error('Không thể tải danh sách bé');
             kidsList = await res.json();
 
@@ -530,7 +546,7 @@
 
         const selectedKid = kidsList.find(k => k.id === currentKidId);
         if (selectedKid) {
-            document.getElementById('currentChannelLabel').innerHTML = `Đàm thoại với: <strong style="color: var(--apple-blue);">${selectedKid.fullName}</strong>`;
+            document.getElementById('currentChannelLabel').innerHTML = `Đang đàm thoại với: <strong style="color: var(--apple-blue);">${selectedKid.fullName}</strong>`;
             document.getElementById('lcdChannelName').textContent = `CH: ${selectedKid.fullName.toUpperCase().substring(0, 16)}`;
         }
     }
@@ -559,6 +575,10 @@
         try {
             const url = (!isKidRole && currentKidId) ? `/api/voicemessages?kidId=${currentKidId}` : '/api/voicemessages';
             const res = await fetch(url, { headers: getAuthHeaders() });
+            if (res.status === 401) {
+                handleAuthExpired();
+                return;
+            }
             if (!res.ok) {
                 loadingBox.style.display = 'none';
                 return;
@@ -709,18 +729,16 @@
         } catch (_) {}
     };
 
-    // 8. Thiết lập điều khiển ghi âm Push-To-Talk
+    // 8. Điều khiển bộ đàm Push-To-Talk và Tap-to-Talk chuẩn Apple
     function setupPttControls() {
         const btnPtt = document.getElementById('btnPtt');
         const btnCancel = document.getElementById('btnCancelRecord');
         const btnSend = document.getElementById('btnSendRecord');
 
-        // Click để Bắt đầu / Bấm lần nữa để Gửi
+        // Bấm để bắt đầu hoặc bấm để gửi
         btnPtt.addEventListener('click', async (e) => {
-            if (pttHoldTriggered) {
-                pttHoldTriggered = false;
-                return;
-            }
+            e.preventDefault();
+            if (isStarting || isUploading) return;
 
             if (!isRecording) {
                 await startRecording();
@@ -729,30 +747,18 @@
             }
         });
 
-        // Hỗ trợ Nhấn Giữ để Nói (Push-to-Talk)
-        const onHoldStart = (e) => {
-            if (isRecording) return;
-            pttHoldTimer = setTimeout(async () => {
-                pttHoldTriggered = true;
-                await startRecording();
-            }, 300);
-        };
+        // Giữ để nói (Push-To-Talk)
+        btnPtt.addEventListener('pointerdown', (e) => {
+            pointerPressStartTime = Date.now();
+        });
 
-        const onHoldEnd = async (e) => {
-            if (pttHoldTimer) {
-                clearTimeout(pttHoldTimer);
-                pttHoldTimer = null;
-            }
-            if (pttHoldTriggered && isRecording) {
-                pttHoldTriggered = false;
+        btnPtt.addEventListener('pointerup', async (e) => {
+            const pressDuration = Date.now() - pointerPressStartTime;
+            // Nếu người dùng đã nhấn giữ hơn 700ms thì thả tay ra sẽ tự động gửi ngay
+            if (isRecording && pressDuration >= 700) {
                 await stopAndSendRecording();
             }
-        };
-
-        btnPtt.addEventListener('mousedown', onHoldStart);
-        btnPtt.addEventListener('mouseup', onHoldEnd);
-        btnPtt.addEventListener('touchstart', onHoldStart, { passive: true });
-        btnPtt.addEventListener('touchend', onHoldEnd);
+        });
 
         btnCancel.addEventListener('click', cancelRecording);
         btnSend.addEventListener('click', async () => {
@@ -760,16 +766,16 @@
         });
     }
 
-    // Bắt đầu ghi âm an toàn qua microphone
+    // Bắt đầu thu âm qua microphone
     async function startRecording() {
-        if (isRecording) return;
+        if (isRecording || isStarting || isUploading) return;
+        isStarting = true;
 
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            alert('Trình duyệt của bạn không hỗ trợ thu âm microphone.');
-            return;
-        }
+        const lcdStatus = document.getElementById('lcdStatusText');
+        if (lcdStatus) lcdStatus.textContent = 'Đang mở microphone...';
 
         try {
+            // Yêu cầu quyền truy cập micro
             mediaStream = await navigator.mediaDevices.getUserMedia({
                 audio: {
                     echoCancellation: true,
@@ -780,18 +786,24 @@
 
             audioChunks = [];
 
-            // Chọn MIME type tương thích tối đa (Chrome, Safari iOS, Firefox)
+            // Chọn định dạng MIME tối ưu
             let chosenMime = '';
-            if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
-                chosenMime = 'audio/webm;codecs=opus';
-            } else if (MediaRecorder.isTypeSupported('audio/webm')) {
-                chosenMime = 'audio/webm';
-            } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
-                chosenMime = 'audio/mp4';
-            } else if (MediaRecorder.isTypeSupported('audio/aac')) {
-                chosenMime = 'audio/aac';
-            } else if (MediaRecorder.isTypeSupported('audio/ogg')) {
-                chosenMime = 'audio/ogg';
+            if (typeof MediaRecorder !== 'undefined') {
+                const mimeCandidates = [
+                    'audio/webm;codecs=opus',
+                    'audio/webm',
+                    'audio/mp4',
+                    'audio/aac',
+                    'audio/ogg;codecs=opus',
+                    'audio/ogg',
+                    'audio/wav'
+                ];
+                for (const m of mimeCandidates) {
+                    if (MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(m)) {
+                        chosenMime = m;
+                        break;
+                    }
+                }
             }
 
             const options = chosenMime ? { mimeType: chosenMime } : {};
@@ -803,6 +815,7 @@
                 }
             };
 
+            // timeslice 200ms gom chunk đều đặn
             mediaRecorder.start(200);
             isRecording = true;
             recordStartTime = Date.now();
@@ -812,26 +825,42 @@
             startRecordTimer();
             startVisualizer(mediaStream);
 
+            if (lcdStatus) lcdStatus.textContent = 'Đang ghi âm... Bấm lại hoặc bấm "Gửi ngay" khi nói xong!';
+
         } catch (err) {
             console.error('Lỗi mở microphone:', err);
             isRecording = false;
             updatePttUi(false);
-            alert('Không thể mở microphone! Vui lòng cấp quyền truy cập microphone cho trình duyệt.');
+
+            if (lcdStatus) lcdStatus.textContent = '❌ Không thể truy cập microphone.';
+
+            if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+                alert('Trình duyệt chưa được cấp quyền Microphone. Vui lòng nhấn vào biểu tượng ổ khóa/cài đặt cạnh thanh địa chỉ web, chọn "Cho phép Microphone" và thử lại!');
+            } else if (err.name === 'NotFoundError') {
+                alert('Không tìm thấy microphone trên máy. Bạn có thể sử dụng nút "Gửi file âm thanh" bên dưới để gửi tin nhắn thoại!');
+            } else {
+                alert('Không thể mở microphone: ' + err.message);
+            }
+        } finally {
+            isStarting = false;
         }
     }
 
-    // Dừng và gửi bản ghi âm lên server
+    // Dừng và gửi bản ghi âm
     async function stopAndSendRecording() {
-        if (!mediaRecorder || !isRecording) return;
-
-        playAppleBeep('end');
+        if (!mediaRecorder || !isRecording || isUploading) return;
         isRecording = false;
+        isUploading = true;
+
         clearInterval(recordTimerInterval);
         stopVisualizer();
+        playAppleBeep('end');
 
         const duration = Math.max(1, Math.round((Date.now() - recordStartTime) / 1000));
+        const lcdStatus = document.getElementById('lcdStatusText');
+        if (lcdStatus) lcdStatus.textContent = 'Đang gửi tin nhắn thoại...';
 
-        // Flush dữ liệu cuối cùng từ MediaRecorder
+        // Xả nốt dữ liệu còn trong đệm
         try {
             if (mediaRecorder.state === 'recording') {
                 mediaRecorder.requestData();
@@ -839,28 +868,36 @@
         } catch (_) {}
 
         mediaRecorder.onstop = async () => {
-            // Tắt stream sau khi đã chốt xong data
-            if (mediaStream) {
-                mediaStream.getTracks().forEach(t => t.stop());
-                mediaStream = null;
-            }
+            try {
+                // Tắt stream micro sau khi kết thúc
+                if (mediaStream) {
+                    mediaStream.getTracks().forEach(t => t.stop());
+                    mediaStream = null;
+                }
 
-            const mime = mediaRecorder.mimeType || 'audio/webm';
-            const blob = new Blob(audioChunks, { type: mime });
+                const mime = mediaRecorder.mimeType || 'audio/webm';
+                const blob = new Blob(audioChunks, { type: mime });
 
-            if (blob.size === 0) {
-                alert('Bản ghi âm quá ngắn hoặc không có âm thanh. Vui lòng thử lại!');
+                if (blob.size === 0) {
+                    alert('Bản ghi âm quá ngắn hoặc không có tiếng. Vui lòng nói to hơn và thử lại!');
+                    updatePttUi(false);
+                    return;
+                }
+
+                await uploadVoiceMessage(blob, duration, mime);
+            } catch (err) {
+                console.error('Lỗi xử lý file ghi âm:', err);
+                alert('Lỗi: ' + err.message);
+            } finally {
+                isUploading = false;
                 updatePttUi(false);
-                return;
             }
-
-            await uploadVoiceMessage(blob, duration, mime);
-            updatePttUi(false);
         };
 
         try {
             mediaRecorder.stop();
-        } catch (_) {
+        } catch (e) {
+            isUploading = false;
             updatePttUi(false);
         }
     }
@@ -868,6 +905,9 @@
     // Hủy ghi âm
     function cancelRecording() {
         isRecording = false;
+        isStarting = false;
+        isUploading = false;
+
         clearInterval(recordTimerInterval);
         stopVisualizer();
 
@@ -882,23 +922,25 @@
         updatePttUi(false);
 
         const lcdStatus = document.getElementById('lcdStatusText');
-        lcdStatus.textContent = 'Đã hủy bản ghi âm.';
-        setTimeout(() => {
-            lcdStatus.textContent = 'Sẵn sàng đàm thoại. Bấm nút dưới để nói!';
-        }, 1500);
+        if (lcdStatus) {
+            lcdStatus.textContent = 'Đã hủy bản ghi âm.';
+            setTimeout(() => {
+                lcdStatus.textContent = 'Sẵn sàng đàm thoại. Bấm nút dưới để nói!';
+            }, 1500);
+        }
     }
 
     // Gửi file âm thanh lên server
     async function uploadVoiceMessage(blob, duration, mimeType) {
         const lcdStatus = document.getElementById('lcdStatusText');
-        lcdStatus.textContent = 'Đang gửi tin nhắn thoại...';
+        if (lcdStatus) lcdStatus.textContent = 'Đang truyền tín hiệu bộ đàm...';
 
-        // Xác định phần mở rộng tương thích chuẩn
         let ext = 'webm';
         if (mimeType.includes('mp4')) ext = 'mp4';
         else if (mimeType.includes('ogg')) ext = 'ogg';
         else if (mimeType.includes('wav')) ext = 'wav';
         else if (mimeType.includes('aac')) ext = 'aac';
+        else if (mimeType.includes('mpeg') || mimeType.includes('mp3')) ext = 'mp3';
 
         const fileName = `voice_${Date.now()}.${ext}`;
         const formData = new FormData();
@@ -910,29 +952,119 @@
 
         try {
             const token = localStorage.getItem('authToken');
+            if (!token) {
+                handleAuthExpired();
+                return;
+            }
+
             const res = await fetch('/api/voicemessages/send', {
                 method: 'POST',
-                headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+                headers: { 'Authorization': `Bearer ${token}` },
                 body: formData
             });
+
+            if (res.status === 401) {
+                handleAuthExpired();
+                return;
+            }
 
             if (!res.ok) {
                 const errData = await res.json().catch(() => ({}));
                 throw new Error(errData.message || 'Lỗi gửi tin nhắn thoại từ máy chủ');
             }
 
-            lcdStatus.textContent = '✅ Đã gửi tin nhắn thoại thành công!';
+            if (lcdStatus) lcdStatus.textContent = '✅ Đã gửi tin nhắn thoại thành công!';
             await loadVoiceMessages(false);
 
             setTimeout(() => {
-                lcdStatus.textContent = 'Sẵn sàng đàm thoại. Bấm nút dưới để nói!';
+                if (lcdStatus) lcdStatus.textContent = 'Sẵn sàng đàm thoại. Bấm nút dưới để nói!';
             }, 2500);
 
         } catch (err) {
-            console.error('Lỗi gửi tin:', err);
-            lcdStatus.textContent = '❌ ' + err.message;
+            console.error('Lỗi upload:', err);
+            if (lcdStatus) lcdStatus.textContent = '❌ ' + err.message;
             alert('Lỗi gửi tin nhắn giọng nói: ' + err.message);
         }
+    }
+
+    // Xử lý khi phiên đăng nhập hết hạn
+    function handleAuthExpired() {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('authUser');
+        alert('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại để tiếp tục đàm thoại.');
+        const modal = new bootstrap.Modal(document.getElementById('modalLogin'));
+        modal.show();
+    }
+
+    // Tùy chọn 1: Người dùng chọn file âm thanh từ máy để gửi
+    window.handleAudioFileUpload = async function(input) {
+        if (!input.files || input.files.length === 0) return;
+        const file = input.files[0];
+
+        if (file.size > 20 * 1024 * 1024) {
+            alert('Dung lượng file âm thanh không được vượt quá 20MB.');
+            input.value = '';
+            return;
+        }
+
+        const lcdStatus = document.getElementById('lcdStatusText');
+        if (lcdStatus) lcdStatus.textContent = `Đang gửi file âm thanh "${file.name}"...`;
+
+        try {
+            await uploadVoiceMessage(file, 5, file.type || 'audio/webm');
+        } finally {
+            input.value = '';
+        }
+    };
+
+    // Tùy chọn 2: Gửi tin nhắn thoại mẫu kiểm tra bộ đàm
+    window.sendTestVoiceMessage = async function() {
+        const lcdStatus = document.getElementById('lcdStatusText');
+        if (lcdStatus) lcdStatus.textContent = 'Đang tạo âm thanh mẫu và gửi kiểm tra...';
+
+        try {
+            // Tạo 1 file WAV mẫu (tiếng beep 440Hz 1 giây) bằng AudioContext Offline
+            const sampleRate = 8000;
+            const numFrames = sampleRate * 1; // 1s
+            const wavBuffer = createSineWaveWav(440, sampleRate, 1);
+            const blob = new Blob([wavBuffer], { type: 'audio/wav' });
+
+            await uploadVoiceMessage(blob, 1, 'audio/wav');
+        } catch (err) {
+            alert('Lỗi gửi tin mẫu: ' + err.message);
+        }
+    };
+
+    // Tạo WAV PCM 16-bit Mono đơn giản
+    function createSineWaveWav(freq, sampleRate, durationSec) {
+        const numSamples = sampleRate * durationSec;
+        const buffer = new ArrayBuffer(44 + numSamples * 2);
+        const view = new DataView(buffer);
+
+        function writeString(offset, str) {
+            for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
+        }
+
+        writeString(0, 'RIFF');
+        view.setUint32(4, 36 + numSamples * 2, true);
+        writeString(8, 'WAVE');
+        writeString(12, 'fmt ');
+        view.setUint32(16, 16, true);
+        view.setUint16(20, 1, true); // PCM
+        view.setUint16(22, 1, true); // Mono
+        view.setUint32(24, sampleRate, true);
+        view.setUint32(28, sampleRate * 2, true);
+        view.setUint16(32, 2, true);
+        view.setUint16(34, 16, true);
+        writeString(36, 'data');
+        view.setUint32(40, numSamples * 2, true);
+
+        for (let i = 0; i < numSamples; i++) {
+            const t = i / sampleRate;
+            const sample = Math.sin(2 * Math.PI * freq * t) * 0.4 * 32767;
+            view.setInt16(44 + i * 2, sample, true);
+        }
+        return buffer;
     }
 
     function updatePttUi(recording) {
@@ -975,11 +1107,11 @@
             const secs = String(elapsed % 60).padStart(2, '0');
             timerEl.textContent = `${mins}:${secs}`;
 
-            // Tự động dừng và gửi sau 60 giây
+            // Tự động dừng sau 60s
             if (elapsed >= 60) {
                 stopAndSendRecording();
             }
-        }, 300);
+        }, 250);
     }
 
     function startVisualizer(stream) {
