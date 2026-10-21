@@ -37,6 +37,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
     // Bảng Vùng an toàn (Geofences)
     public DbSet<KidGeofence> KidGeofences => Set<KidGeofence>();
 
+    // Bảng Tin nhắn thoại & Bộ đàm gia đình (Voice Messages & Walkie-Talkie)
+    public DbSet<VoiceMessage> VoiceMessages => Set<VoiceMessage>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // Bắt buộc gọi base.OnModelCreating để khởi tạo các bảng của Identity (AspNetUsers, AspNetRoles...)
@@ -231,6 +234,27 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
             entity.HasOne(g => g.Kid)
                   .WithMany(k => k.Geofences)
                   .HasForeignKey(g => g.KidId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Cấu hình Bảng VoiceMessages (Bộ đàm & Tin nhắn thoại gia đình)
+        modelBuilder.Entity<VoiceMessage>(entity =>
+        {
+            entity.ToTable("voice_messages");
+            entity.HasKey(v => v.Id);
+            entity.Property(v => v.SenderId).HasMaxLength(100).IsRequired();
+            entity.Property(v => v.SenderName).HasMaxLength(100).IsRequired();
+            entity.Property(v => v.SenderRole).HasMaxLength(20).IsRequired();
+            entity.Property(v => v.AudioUrl).HasMaxLength(500).IsRequired();
+            entity.Property(v => v.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+            entity.HasIndex(v => v.KidId);
+            entity.HasIndex(v => v.SenderId);
+            entity.HasIndex(v => new { v.KidId, v.CreatedAt });
+
+            entity.HasOne(v => v.Kid)
+                  .WithMany()
+                  .HasForeignKey(v => v.KidId)
                   .OnDelete(DeleteBehavior.Cascade);
         });
     }

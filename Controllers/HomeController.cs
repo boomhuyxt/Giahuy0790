@@ -45,6 +45,14 @@ namespace Giahuy0790.Controllers
             return View();
         }
 
+        [HttpGet("intercom")]
+        [HttpGet("voice")]
+        [HttpGet("walkie-talkie")]
+        public IActionResult VoiceIntercom()
+        {
+            return View();
+        }
+
         [HttpGet("join-family")]
         public IActionResult JoinFamily()
         {

@@ -728,6 +728,90 @@ namespace Giahuy0790.Migrations
                     b.ToTable("kid_screen_times", (string)null);
                 });
 
+            modelBuilder.Entity("Giahuy0790.Models.VoiceMessage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AudioUrl")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("audio_url");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<int>("DurationSeconds")
+                        .HasColumnType("integer")
+                        .HasColumnName("duration_seconds");
+
+                    b.Property<int?>("FamilyGroupId")
+                        .HasColumnType("integer")
+                        .HasColumnName("family_group_id");
+
+                    b.Property<long>("FileSizeBytes")
+                        .HasColumnType("bigint")
+                        .HasColumnName("file_size_bytes");
+
+                    b.Property<DateTime?>("HeardAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("heard_at");
+
+                    b.Property<bool>("IsHeard")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_heard");
+
+                    b.Property<int>("KidId")
+                        .HasColumnType("integer")
+                        .HasColumnName("kid_id");
+
+                    b.Property<string>("ParentId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("parent_id");
+
+                    b.Property<string>("SenderAvatarUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("sender_avatar_url");
+
+                    b.Property<string>("SenderId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("sender_id");
+
+                    b.Property<string>("SenderName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("sender_name");
+
+                    b.Property<string>("SenderRole")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("sender_role");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("KidId");
+
+                    b.HasIndex("SenderId");
+
+                    b.HasIndex("KidId", "CreatedAt");
+
+                    b.ToTable("voice_messages", (string)null);
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -996,6 +1080,17 @@ namespace Giahuy0790.Migrations
                     b.HasOne("Giahuy0790.Models.Kid", "Kid")
                         .WithOne("ScreenTime")
                         .HasForeignKey("Giahuy0790.Models.KidScreenTime", "KidId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Kid");
+                });
+
+            modelBuilder.Entity("Giahuy0790.Models.VoiceMessage", b =>
+                {
+                    b.HasOne("Giahuy0790.Models.Kid", "Kid")
+                        .WithMany()
+                        .HasForeignKey("KidId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

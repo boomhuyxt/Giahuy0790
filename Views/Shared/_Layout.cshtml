@@ -67,6 +67,12 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link position-relative" href="/intercom">
+                                <i class="pixelart-icons-font-radio i8-sm text-danger"></i> Bộ Đàm
+                                <span id="navVoiceBadge" class="badge rounded-pill bg-danger ms-1 d-none" style="font-size: 10px;">0</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link" href="/activities">
                                 <i class="pixelart-icons-font-calendar i8-sm text-warning"></i> Lịch & Hoạt động
                             </a>
@@ -379,6 +385,15 @@
         </div>
     </div>
 
+    <!-- Floating Walkie-Talkie Button cho cả Phụ huynh và Bé -->
+    <a href="/intercom" id="floatingWalkieTalkieBtn" class="shadow-lg pixel-font text-decoration-none" style="display: none; position: fixed; bottom: 20px; left: 20px; z-index: 1040; background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); border: 2px solid var(--pixel-ruby); border-radius: 8px; padding: 8px 14px; color: #fff; font-size: 12px; backdrop-filter: blur(8px);">
+        <div class="d-flex align-items-center gap-2">
+            <i class="pixelart-icons-font-radio i8-xs text-danger i8-pulse"></i>
+            <span>Bộ Đàm:</span>
+            <span id="floatingWalkieBadge" class="badge bg-danger rounded-pill">0</span>
+        </div>
+    </a>
+
     <footer class="footer mt-auto">
         <div class="container d-flex flex-wrap justify-content-between align-items-center py-2">
             <div class="d-flex align-items-center gap-2">
@@ -396,6 +411,10 @@
                 <span class="text-muted">·</span>
                 <a href="/screentime" class="text-decoration-none text-muted">
                     <i class="pixelart-icons-font-clock i8-xs me-1 text-primary"></i> Đặt Giờ Máy
+                </a>
+                <span class="text-muted">·</span>
+                <a href="/intercom" class="text-decoration-none text-muted">
+                    <i class="pixelart-icons-font-radio i8-xs me-1 text-danger"></i> Bộ Đàm Gia Đình
                 </a>
                 <span class="text-muted">·</span>
                 <a href="/activities" class="text-decoration-none text-muted">
@@ -556,6 +575,63 @@
             window.location.href = '/';
         };
 
+        // ===== BỘ ĐÀM THOẠI & THÔNG BÁO TIN NHẮN GIỌNG NÓI =====
+        let unreadVoiceTimer = null;
+        let lastUnreadVoiceCount = 0;
+
+        async function checkUnreadVoiceCount() {
+            const token = localStorage.getItem('authToken');
+            if (!token) return;
+
+            try {
+                const res = await fetch('/api/voicemessages/unread-count', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) return;
+
+                const data = await res.json();
+                const count = data.unreadCount || 0;
+
+                const navBadge = document.getElementById('navVoiceBadge');
+                const floatBadge = document.getElementById('floatingWalkieBadge');
+                const floatBtn = document.getElementById('floatingWalkieTalkieBtn');
+
+                if (floatBtn) floatBtn.style.display = 'block';
+
+                if (count > 0) {
+                    if (navBadge) {
+                        navBadge.textContent = count;
+                        navBadge.classList.remove('d-none');
+                    }
+                    if (floatBadge) {
+                        floatBadge.textContent = count;
+                        floatBadge.classList.remove('d-none');
+                    }
+                    // Phát chuông khi có tin mới xuất hiện
+                    if (count > lastUnreadVoiceCount && lastUnreadVoiceCount >= 0) {
+                        try {
+                            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                            const osc = ctx.createOscillator();
+                            const gain = ctx.createGain();
+                            osc.connect(gain);
+                            gain.connect(ctx.destination);
+                            osc.type = 'sine';
+                            osc.frequency.setValueAtTime(659.25, ctx.currentTime);
+                            osc.frequency.setValueAtTime(1046.5, ctx.currentTime + 0.1);
+                            gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+                            osc.start(ctx.currentTime);
+                            osc.stop(ctx.currentTime + 0.25);
+                        } catch (_) {}
+                    }
+                } else {
+                    if (navBadge) navBadge.classList.add('d-none');
+                    if (floatBadge) floatBadge.textContent = '0';
+                }
+                lastUnreadVoiceCount = count;
+            } catch (_) {}
+        }
+
         const updateAuthUI = () => {
             const userStr = localStorage.getItem('authUser');
             const guestBox = document.getElementById('authNavGuest');
@@ -579,6 +655,11 @@
                     } else {
                         stopKidScreenTimeGuardian();
                     }
+
+                    // Kích hoạt theo dõi thông báo bộ đàm
+                    checkUnreadVoiceCount();
+                    if (unreadVoiceTimer) clearInterval(unreadVoiceTimer);
+                    unreadVoiceTimer = setInterval(checkUnreadVoiceCount, 10000);
                     return;
                 } catch (e) {
                     localStorage.removeItem('authUser');
@@ -588,14 +669,27 @@
             userBox.classList.add('d-none');
             userBox.classList.remove('d-flex');
             stopKidScreenTimeGuardian();
+
+            if (unreadVoiceTimer) {
+                clearInterval(unreadVoiceTimer);
+                unreadVoiceTimer = null;
+            }
+            const navBadge = document.getElementById('navVoiceBadge');
+            if (navBadge) navBadge.classList.add('d-none');
+            const floatBtn = document.getElementById('floatingWalkieTalkieBtn');
+            if (floatBtn) floatBtn.style.display = 'none';
         };
 
         document.getElementById('btnNavLogout')?.addEventListener('click', () => {
             localStorage.removeItem('authToken');
             localStorage.removeItem('authUser');
             stopKidScreenTimeGuardian();
+            if (unreadVoiceTimer) {
+                clearInterval(unreadVoiceTimer);
+                unreadVoiceTimer = null;
+            }
             updateAuthUI();
-            if (window.location.pathname.toLowerCase().includes('kids') || window.location.pathname.toLowerCase().includes('screentime')) {
+            if (window.location.pathname.toLowerCase().includes('kids') || window.location.pathname.toLowerCase().includes('screentime') || window.location.pathname.toLowerCase().includes('intercom')) {
                 window.location.reload();
             } else {
                 alert('Đã đăng xuất thành công.');
