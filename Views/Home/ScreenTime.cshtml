@@ -32,8 +32,28 @@
     <!-- Alert placeholder -->
     <div id="pageAlert"></div>
 
+    <!-- Thông báo khi chưa đăng nhập tài khoản Phụ huynh -->
+    <div id="authRequiredNotice" class="alert alert-warning py-3 px-4 rounded-3 d-flex flex-wrap align-items-center justify-content-between mb-4 shadow-sm" style="display: none;">
+        <div class="d-flex align-items-center gap-2 mb-2 mb-sm-0">
+            <i class="pixelart-icons-font-alert i8-sm text-warning"></i>
+            <span>Bạn chưa đăng nhập. Vui lòng đăng nhập tài khoản <strong>Phụ huynh</strong> để đặt lịch và khóa máy cho bé.</span>
+        </div>
+        <button class="btn btn-warning btn-sm fw-bold pixel-font" data-bs-toggle="modal" data-bs-target="#modalLogin">
+            <i class="pixelart-icons-font-user i8-xs me-1"></i> Đăng Nhập Ngay
+        </button>
+    </div>
+
+    <!-- Banner khi tài khoản con (Kid) đăng nhập xem giờ dùng máy -->
+    <div id="kidScreenTimeNotice" class="alert alert-info py-3 px-4 rounded-3 d-flex flex-wrap align-items-center justify-content-between mb-4 shadow-sm" style="display: none;">
+        <div class="d-flex align-items-center gap-2">
+            <i class="pixelart-icons-font-gamepad i8-sm text-primary"></i>
+            <span>Xin chào <strong id="kidNoticeName">bé yêu</strong>! Dưới đây là thời gian biểu và giờ dùng máy tính / điện thoại của bạn do ba mẹ thiết lập.</span>
+        </div>
+        <span class="badge bg-primary text-white pixel-font">KID MODE</span>
+    </div>
+
     <!-- KHỐI CHỌN BÉ CẦN QUẢN LÝ THỜI GIAN -->
-    <div class="apple-card-static p-3 mb-4">
+    <div class="apple-card-static p-3 mb-4" id="kidSelectorContainer">
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
             <div class="d-flex align-items-center gap-2 flex-wrap">
                 <span class="fw-bold text-secondary small d-flex align-items-center gap-1">
@@ -148,8 +168,8 @@
         </div>
 
         <!-- FORM CẤU HÌNH THỜI GIAN BIỂU & GIỜ GIỚI HẠN -->
-        <div class="row g-4 mb-4">
-            <div class="col-lg-7">
+        <div class="row g-4 mb-4" id="screenTimeRow">
+            <div class="col-lg-7" id="parentSettingsCol">
                 <div class="apple-card p-4 border-2">
                     <h5 class="fw-bold mb-3 d-flex align-items-center gap-2 pixel-font">
                         <i class="pixelart-icons-font-sliders i8-md text-primary"></i>
@@ -284,7 +304,7 @@
             </div>
 
             <!-- Cột Phải: TRÌNH MÔ PHỎNG MÀN HÌNH MÁY BÉ (KID'S DEVICE SIMULATOR) -->
-            <div class="col-lg-5">
+            <div class="col-lg-5" id="simulatorCol">
                 <div class="apple-card p-4 border-2 h-100 d-flex flex-column justify-content-between">
                     <div>
                         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -382,28 +402,142 @@
     let currentKidId = null;
     let kidsList = [];
     let currentScreenTimeData = null;
+    let isKidRole = false;
+    let pollInterval = null;
+
+    function getAuthHeaders() {
+        const token = localStorage.getItem('authToken');
+        return {
+            'Content-Type': 'application/json',
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        };
+    }
 
     document.addEventListener('DOMContentLoaded', async () => {
-        await loadKidsList();
+        await initPage();
     });
 
-    // 1. Tải danh sách bé
+    async function initPage() {
+        const userStr = localStorage.getItem('authUser');
+        const token = localStorage.getItem('authToken');
+        const authNotice = document.getElementById('authRequiredNotice');
+        const kidNotice = document.getElementById('kidScreenTimeNotice');
+        const kidSelectorContainer = document.getElementById('kidSelectorContainer');
+        const parentSettingsCol = document.getElementById('parentSettingsCol');
+        const simulatorCol = document.getElementById('simulatorCol');
+        const mainContent = document.getElementById('screenTimeMainContent');
+        const emptyState = document.getElementById('screenTimeEmptyState');
+
+        if (!token || !userStr) {
+            authNotice.style.display = 'flex';
+            kidNotice.style.display = 'none';
+            kidSelectorContainer.style.display = 'none';
+            mainContent.style.display = 'none';
+            emptyState.style.display = 'none';
+            return;
+        }
+
+        try {
+            const user = JSON.parse(userStr);
+            const roles = user.roles || [];
+            isKidRole = roles.includes('Kid') || roles.includes('kid');
+
+            if (isKidRole) {
+                // Chế độ tài khoản con: Ẩn cài đặt của phụ huynh, hiển thị bảng theo dõi giờ dùng máy của bé
+                authNotice.style.display = 'none';
+                kidNotice.style.display = 'flex';
+                document.getElementById('kidNoticeName').textContent = user.fullName || user.username;
+                kidSelectorContainer.style.display = 'none';
+                parentSettingsCol.style.display = 'none';
+                simulatorCol.className = 'col-lg-12';
+
+                // Ẩn các nút điều khiển của phụ huynh
+                document.getElementById('btnQuickLock').parentElement.style.display = 'none';
+                const bonusBox = document.querySelector('button[onclick*="addBonusMinutes"]')?.parentElement?.parentElement;
+                if (bonusBox) bonusBox.style.display = 'none';
+
+                await loadKidSelfScreenTime();
+            } else {
+                // Chế độ Phụ huynh / Admin
+                authNotice.style.display = 'none';
+                kidNotice.style.display = 'none';
+                kidSelectorContainer.style.display = 'block';
+                parentSettingsCol.style.display = 'block';
+                simulatorCol.className = 'col-lg-5';
+
+                await loadKidsList();
+            }
+
+            // Thiết lập chu kỳ cập nhật tự động thời gian thực mỗi 8 giây
+            if (pollInterval) clearInterval(pollInterval);
+            pollInterval = setInterval(async () => {
+                if (document.visibilityState === 'visible') {
+                    if (isKidRole) {
+                        await loadKidSelfScreenTime(true);
+                    } else if (currentKidId) {
+                        await loadScreenTimeData(currentKidId, true);
+                    }
+                }
+            }, 8000);
+
+        } catch (e) {
+            console.error('Lỗi khởi tạo:', e);
+            authNotice.style.display = 'flex';
+        }
+    }
+
+    // Tải thông tin Screen Time cho chính tài khoản con đang đăng nhập
+    async function loadKidSelfScreenTime(isPolling = false) {
+        const mainContent = document.getElementById('screenTimeMainContent');
+        try {
+            const res = await fetch('/api/screentime/my-status', {
+                headers: getAuthHeaders()
+            });
+
+            if (!res.ok) {
+                if (!isPolling) {
+                    showAlert('Chưa tìm thấy hồ sơ liên kết với tài khoản con này.', 'warning');
+                }
+                return;
+            }
+
+            const data = await res.json();
+            currentKidId = data.kidId;
+            currentScreenTimeData = {
+                kid: { id: data.kidId, fullName: data.fullName, avatarUrl: data.avatarUrl },
+                settings: data.settings,
+                status: data.status
+            };
+
+            mainContent.style.display = 'block';
+            populateUI(currentScreenTimeData, isPolling);
+
+        } catch (err) {
+            if (!isPolling) console.error(err);
+        }
+    }
+
+    // 1. Tải danh sách bé cho Phụ huynh
     async function loadKidsList() {
         const pillsContainer = document.getElementById('kidSelectorPills');
         const emptyState = document.getElementById('screenTimeEmptyState');
         const mainContent = document.getElementById('screenTimeMainContent');
 
         try {
-            const res = await fetch('/api/kids');
+            const res = await fetch('/api/kids', {
+                headers: getAuthHeaders()
+            });
             if (!res.ok) throw new Error('Không thể tải danh sách bé');
             kidsList = await res.json();
 
             if (!kidsList || kidsList.length === 0) {
-                pillsContainer.innerHTML = '<span class="text-muted small">Chưa có bé nào</span>';
+                pillsContainer.innerHTML = '<span class="text-muted small">Chưa có bé nào trong gia đình</span>';
                 emptyState.style.display = 'block';
                 mainContent.style.display = 'none';
                 return;
             }
+
+            emptyState.style.display = 'none';
 
             // Kiểm tra xem URL có query param ?kidId=... không
             const urlParams = new URLSearchParams(window.location.search);
@@ -455,49 +589,58 @@
     }
 
     // 4. Tải dữ liệu Screen Time của bé
-    async function loadScreenTimeData(kidId) {
+    async function loadScreenTimeData(kidId, isPolling = false) {
         if (!kidId) return;
         const mainContent = document.getElementById('screenTimeMainContent');
 
         try {
-            const res = await fetch(`/api/screentime/${kidId}`);
+            const res = await fetch(`/api/screentime/${kidId}`, {
+                headers: getAuthHeaders()
+            });
             if (!res.ok) throw new Error('Không thể tải cấu hình Screen Time');
             
             const data = await res.json();
             currentScreenTimeData = data;
             mainContent.style.display = 'block';
 
-            populateUI(data);
+            populateUI(data, isPolling);
 
         } catch (err) {
-            console.error(err);
-            showAlert('Lỗi khi tải dữ liệu cấu hình giờ dùng máy: ' + err.message, 'danger');
+            if (!isPolling) {
+                console.error(err);
+                showAlert('Lỗi khi tải dữ liệu cấu hình giờ dùng máy: ' + err.message, 'danger');
+            }
         }
     }
 
     // 5. Cập nhật dữ liệu lên giao diện
-    function populateUI(data) {
+    function populateUI(data, isPolling = false) {
         const { settings, status, kid } = data;
 
-        // Điền vào form cài đặt
-        document.getElementById('inputDeviceName').value = settings.deviceName || 'Máy của bé';
-        document.getElementById('inputDailyLimit').value = settings.dailyLimitMinutes;
-        document.getElementById('inputWeekendLimit').value = settings.weekendLimitMinutes;
-        document.getElementById('checkDailyLimitEnabled').checked = settings.isDailyLimitEnabled;
+        // Nếu không phải polling (hoặc người dùng không đang nhập form), điền vào form cài đặt
+        if (!isPolling) {
+            document.getElementById('inputDeviceName').value = settings.deviceName || 'Máy của bé';
+            document.getElementById('inputDailyLimit').value = settings.dailyLimitMinutes;
+            document.getElementById('inputWeekendLimit').value = settings.weekendLimitMinutes;
+            document.getElementById('checkDailyLimitEnabled').checked = settings.isDailyLimitEnabled;
 
-        document.getElementById('checkBedtimeEnabled').checked = settings.isBedtimeEnabled;
-        document.getElementById('inputBedtimeStart').value = settings.bedtimeStart || '21:30';
-        document.getElementById('inputBedtimeEnd').value = settings.bedtimeEnd || '06:30';
+            document.getElementById('checkBedtimeEnabled').checked = settings.isBedtimeEnabled;
+            document.getElementById('inputBedtimeStart').value = settings.bedtimeStart || '21:30';
+            document.getElementById('inputBedtimeEnd').value = settings.bedtimeEnd || '06:30';
 
-        document.getElementById('checkWindowEnabled').checked = settings.isAllowedWindowEnabled;
-        document.getElementById('inputWindowStart').value = settings.allowedStartTime || '07:00';
-        document.getElementById('inputWindowEnd').value = settings.allowedEndTime || '21:00';
+            document.getElementById('checkWindowEnabled').checked = settings.isAllowedWindowEnabled;
+            document.getElementById('inputWindowStart').value = settings.allowedStartTime || '07:00';
+            document.getElementById('inputWindowEnd').value = settings.allowedEndTime || '21:00';
 
-        document.getElementById('inputLockMessage').value = settings.lockMessage || '';
+            document.getElementById('inputLockMessage').value = settings.lockMessage || '';
+        }
 
         // Hiển thị Card trạng thái
         document.getElementById('lblDeviceName').textContent = settings.deviceName || 'Thiết bị của bé';
         document.getElementById('lblServerTime').textContent = status.currentTimeVn || '';
+        if (kid && kid.fullName) {
+            document.getElementById('simKidName').textContent = kid.fullName;
+        }
 
         // Trạng thái online
         const badgeOnline = document.getElementById('badgeOnlineStatus');
@@ -596,7 +739,7 @@
         }
     }
 
-    // 7. Lưu biểu mẫu cài đặt
+    // 7. Lưu biểu mẫu cài đặt (Dành cho Phụ huynh)
     document.getElementById('formScreenTimeSettings')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         if (!currentKidId) return;
@@ -622,12 +765,14 @@
         try {
             const res = await fetch(`/api/screentime/${currentKidId}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getAuthHeaders(),
                 body: JSON.stringify(payload)
             });
 
-            if (!res.ok) throw new Error('Không thể lưu cài đặt');
-            const data = await res.json();
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                throw new Error(errData.message || 'Không thể lưu cài đặt');
+            }
             
             showAlert('✅ Đã lưu cấu hình lịch trình & giờ giới hạn máy thành công!', 'success');
             await loadScreenTimeData(currentKidId);
@@ -649,12 +794,14 @@
         try {
             const res = await fetch(`/api/screentime/${currentKidId}/quick-lock`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getAuthHeaders(),
                 body: JSON.stringify({ isLocked: lock, reason: lock ? 'Phụ huynh đã tạm khóa máy từ xa' : null })
             });
 
-            if (!res.ok) throw new Error(`Không thể ${actionText}`);
-            const data = await res.json();
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                throw new Error(errData.message || `Không thể ${actionText}`);
+            }
             
             showAlert(lock ? '🔒 Đã khóa máy của bé ngay lập tức!' : '🔓 Đã mở khóa máy cho bé!', lock ? 'warning' : 'success');
             await loadScreenTimeData(currentKidId);
@@ -672,12 +819,11 @@
         try {
             const res = await fetch(`/api/screentime/${currentKidId}/add-bonus`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getAuthHeaders(),
                 body: JSON.stringify({ minutes: mins })
             });
 
             if (!res.ok) throw new Error('Không thể cộng thêm giờ');
-            const data = await res.json();
 
             showAlert(`⭐ Đã thưởng thêm +${mins} phút dùng máy hôm nay cho bé!`, 'success');
             await loadScreenTimeData(currentKidId);
@@ -695,7 +841,8 @@
 
         try {
             const res = await fetch(`/api/screentime/${currentKidId}/reset-usage`, {
-                method: 'POST'
+                method: 'POST',
+                headers: getAuthHeaders()
             });
 
             if (!res.ok) throw new Error('Không thể đặt lại thời gian');
@@ -715,7 +862,7 @@
         try {
             const res = await fetch(`/api/screentime/${currentKidId}/heartbeat`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getAuthHeaders(),
                 body: JSON.stringify({ deviceName: document.getElementById('inputDeviceName').value, incrementMinutes: increment })
             });
 

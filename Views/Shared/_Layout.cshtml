@@ -305,6 +305,80 @@
         </div>
     </div>
 
+    <!-- ================= FULLSCREEN 8-BIT SCREEN TIME LOCK OVERLAY CHO MÁY BÉ ================= -->
+    <div id="kidScreenTimeLockOverlay" style="display: none; position: fixed; inset: 0; z-index: 999999; background: radial-gradient(circle at center, #2e1065 0%, #09090b 100%); color: #fff; overflow-y: auto;">
+        <div class="d-flex flex-column align-items-center justify-content-center min-vh-100 p-4 text-center">
+            <div class="apple-card p-4 p-md-5 border-2 shadow-lg" style="max-width: 580px; width: 100%; border-color: var(--pixel-ruby); background: rgba(24, 24, 27, 0.95); backdrop-filter: blur(12px);">
+                <!-- Icon khóa 8-bit đập nhịp -->
+                <div class="mb-3">
+                    <i class="pixelart-icons-font-lock i8-xl text-danger i8-bounce" style="font-size: 64px;"></i>
+                </div>
+
+                <!-- Tiêu đề lớn Pixel font -->
+                <h2 class="pixel-font text-danger fw-bold mb-2" style="font-size: 26px; letter-spacing: 1px;">
+                    MÁY BÉ ĐÃ BỊ KHÓA
+                </h2>
+                <div class="badge bg-danger-subtle text-danger px-3 py-1 mb-3 pixel-font" style="font-size: 11px;">
+                    <i class="pixelart-icons-font-shield i8-xs me-1"></i> KIDCARE SCREEN LOCK ACTIVE
+                </div>
+
+                <!-- Lý do khóa máy -->
+                <div class="p-3 rounded-3 border border-danger-subtle bg-danger bg-opacity-10 text-danger-emphasis mb-3">
+                    <div class="fw-bold small mb-1" id="kidLockReasonTitle">LÝ DO KHÓA MÁY:</div>
+                    <div class="fs-6" id="kidLockReasonText">Phụ huynh đã tạm khóa máy từ xa hoặc đã hết giờ sử dụng hôm nay.</div>
+                </div>
+
+                <!-- Lời nhắn từ phụ huynh -->
+                <div class="p-3 rounded-3 border border-secondary-subtle bg-dark bg-opacity-50 text-light small mb-3 text-start" id="boxKidLockParentMsg" style="display: none;">
+                    <div class="text-warning fw-bold mb-1 d-flex align-items-center gap-1">
+                        <i class="pixelart-icons-font-mail i8-xs"></i> Lời nhắn từ Ba Mẹ:
+                    </div>
+                    <div class="fst-italic" id="kidLockParentMessage"></div>
+                </div>
+
+                <!-- Thống kê giờ dùng -->
+                <div class="row g-2 mb-3 small">
+                    <div class="col-6">
+                        <div class="p-2 rounded-2 bg-body-tertiary border text-center">
+                            <span class="text-muted d-block" style="font-size: 11px;">Đã dùng hôm nay</span>
+                            <strong class="text-primary pixel-font" id="kidLockUsedTime">-- phút</strong>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-2 rounded-2 bg-body-tertiary border text-center">
+                            <span class="text-muted d-block" style="font-size: 11px;">Giờ hiện tại</span>
+                            <strong class="text-warning pixel-font" id="kidLockCurrentTime">--:--</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lời khuyên 8-bit thân thiện -->
+                <p class="text-muted small mb-4">
+                    🌟 Bé hãy tạm rời xa màn hình, ra ngoài vận động hoặc đọc sách cùng gia đình nhé! Khi ba mẹ mở khóa, màn hình sẽ tự động mở lại cho bé.
+                </p>
+
+                <!-- Nút hành động -->
+                <div class="d-flex gap-2 justify-content-center">
+                    <button type="button" class="btn btn-outline-light btn-sm px-3 pixel-font" onclick="checkKidScreenTimeLock(true)">
+                        <i class="pixelart-icons-font-reload i8-xs me-1"></i> Kiểm Tra Lại
+                    </button>
+                    <button type="button" class="btn btn-danger btn-sm px-3 pixel-font" onclick="logoutFromLockScreen()">
+                        <i class="pixelart-icons-font-user i8-xs me-1"></i> Đăng Xuất
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Screen Time Pill cho bé khi đang duyệt web -->
+    <div id="kidScreenTimeFloatingPill" class="shadow-lg pixel-font" style="display: none; position: fixed; bottom: 20px; right: 20px; z-index: 1040; background: rgba(15, 23, 42, 0.9); border: 2px solid var(--pixel-gold); border-radius: 8px; padding: 8px 14px; color: #fff; font-size: 12px; backdrop-filter: blur(8px);">
+        <div class="d-flex align-items-center gap-2">
+            <i class="pixelart-icons-font-clock i8-xs text-warning"></i>
+            <span>Giờ máy còn:</span>
+            <strong id="floatingRemainingMins" class="text-warning">-- phút</strong>
+        </div>
+    </div>
+
     <footer class="footer mt-auto">
         <div class="container d-flex flex-wrap justify-content-between align-items-center py-2">
             <div class="d-flex align-items-center gap-2">
@@ -345,6 +419,143 @@
             document.getElementById('loginPassword').value = password;
         };
 
+        // ===== BẢO VỆ & KHÓA MÀN HÌNH MÁY BÉ REALTIME (KID SCREEN TIME GUARDIAN) =====
+        let kidHeartbeatTimer = null;
+
+        function startKidScreenTimeGuardian() {
+            checkKidScreenTimeLock();
+            if (kidHeartbeatTimer) clearInterval(kidHeartbeatTimer);
+            kidHeartbeatTimer = setInterval(sendKidHeartbeat, 30000); // Gửi tín hiệu mỗi 30s
+        }
+
+        function stopKidScreenTimeGuardian() {
+            if (kidHeartbeatTimer) {
+                clearInterval(kidHeartbeatTimer);
+                kidHeartbeatTimer = null;
+            }
+            const overlay = document.getElementById('kidScreenTimeLockOverlay');
+            if (overlay) overlay.style.display = 'none';
+            document.body.style.overflow = '';
+            const pill = document.getElementById('kidScreenTimeFloatingPill');
+            if (pill) pill.style.display = 'none';
+        }
+
+        window.checkKidScreenTimeLock = async function(isManual = false) {
+            const token = localStorage.getItem('authToken');
+            if (!token) return;
+
+            try {
+                const res = await fetch('/api/screentime/my-status', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) return;
+
+                const data = await res.json();
+                applyKidLockState(data.status, data.settings);
+                if (isManual && !data.status?.isLocked) {
+                    alert('Máy của bạn hiện không bị khóa!');
+                }
+            } catch (e) {
+                console.warn('ScreenTime check error:', e);
+            }
+        };
+
+        async function sendKidHeartbeat() {
+            const token = localStorage.getItem('authToken');
+            if (!token) return;
+
+            try {
+                const res = await fetch('/api/screentime/my-heartbeat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        deviceName: navigator.userAgent.includes('Mobile') ? 'Điện thoại bé (Web)' : 'Máy tính bé (Web)',
+                        incrementMinutes: 1
+                    })
+                });
+                if (!res.ok) return;
+
+                const data = await res.json();
+                applyKidLockState({
+                    isLocked: data.isLocked,
+                    lockReason: data.reason,
+                    lockMessage: data.lockMessage,
+                    usedMinutesToday: data.usedMinutesToday,
+                    effectiveLimitToday: data.effectiveLimitToday,
+                    remainingMinutesToday: data.remainingMinutes,
+                    currentTimeVn: data.serverTime
+                }, null);
+            } catch (e) {
+                console.warn('Heartbeat error:', e);
+            }
+        }
+
+        function applyKidLockState(status, settings) {
+            if (!status) return;
+
+            const overlay = document.getElementById('kidScreenTimeLockOverlay');
+            const pill = document.getElementById('kidScreenTimeFloatingPill');
+            if (!overlay || !pill) return;
+
+            if (status.isLocked) {
+                // Khóa máy: Hiển thị Fullscreen Lock Overlay, chặn cuộn trang
+                overlay.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+                pill.style.display = 'none';
+
+                const reasonEl = document.getElementById('kidLockReasonText');
+                if (reasonEl) reasonEl.textContent = status.lockReason || 'Đã hết giờ sử dụng hoặc đang trong giờ giới nghiêm.';
+
+                const msgBox = document.getElementById('boxKidLockParentMsg');
+                const msgEl = document.getElementById('kidLockParentMessage');
+                const parentMsg = status.lockMessage || (settings && settings.lockMessage);
+                if (parentMsg && parentMsg.trim()) {
+                    if (msgBox) msgBox.style.display = 'block';
+                    if (msgEl) msgEl.textContent = `"${parentMsg.trim()}"`;
+                } else if (msgBox) {
+                    msgBox.style.display = 'none';
+                }
+
+                const usedEl = document.getElementById('kidLockUsedTime');
+                if (usedEl) usedEl.textContent = (status.usedMinutesToday ?? '--') + ' phút';
+
+                const timeEl = document.getElementById('kidLockCurrentTime');
+                if (timeEl) timeEl.textContent = status.currentTimeVn || new Date().toLocaleTimeString('vi-VN');
+
+            } else {
+                // Mở máy: Ẩn Lock Overlay, hiển thị Floating Pill
+                overlay.style.display = 'none';
+                document.body.style.overflow = '';
+
+                const remaining = status.remainingMinutesToday ?? status.remainingMinutes ?? 0;
+                pill.style.display = 'block';
+                const pillMins = document.getElementById('floatingRemainingMins');
+                if (pillMins) pillMins.textContent = remaining + ' phút';
+
+                // Màu sắc cảnh báo thời gian
+                if (remaining <= 10) {
+                    pill.style.borderColor = 'var(--pixel-ruby)';
+                    if (pillMins) pillMins.className = 'text-danger fw-bold i8-pulse';
+                } else if (remaining <= 30) {
+                    pill.style.borderColor = 'var(--pixel-gold)';
+                    if (pillMins) pillMins.className = 'text-warning fw-bold';
+                } else {
+                    pill.style.borderColor = 'var(--pixel-green)';
+                    if (pillMins) pillMins.className = 'text-success fw-bold';
+                }
+            }
+        }
+
+        window.logoutFromLockScreen = function() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('authUser');
+            stopKidScreenTimeGuardian();
+            window.location.href = '/';
+        };
+
         const updateAuthUI = () => {
             const userStr = localStorage.getItem('authUser');
             const guestBox = document.getElementById('authNavGuest');
@@ -354,12 +565,20 @@
                 try {
                     const u = JSON.parse(userStr);
                     const roles = u.roles || [];
-                    const roleLabel = roles.includes('Admin') ? 'Admin' : (roles.includes('Kid') ? 'Kid' : 'Parents');
+                    const isKid = roles.includes('Kid') || roles.includes('kid');
+                    const roleLabel = roles.includes('Admin') ? 'Admin' : (isKid ? 'Kid' : 'Parents');
                     document.getElementById('navUserName').innerHTML = `${u.fullName || u.username} <span class="badge apple-badge-blue ms-1">${roleLabel}</span>`;
                     document.getElementById('navUserAvatar').src = u.avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(u.username)}`;
                     guestBox.classList.add('d-none');
                     userBox.classList.remove('d-none');
                     userBox.classList.add('d-flex');
+
+                    // Kích hoạt người bảo vệ Screen Time nếu là tài khoản bé
+                    if (isKid) {
+                        startKidScreenTimeGuardian();
+                    } else {
+                        stopKidScreenTimeGuardian();
+                    }
                     return;
                 } catch (e) {
                     localStorage.removeItem('authUser');
@@ -368,13 +587,15 @@
             guestBox.classList.remove('d-none');
             userBox.classList.add('d-none');
             userBox.classList.remove('d-flex');
+            stopKidScreenTimeGuardian();
         };
 
         document.getElementById('btnNavLogout')?.addEventListener('click', () => {
             localStorage.removeItem('authToken');
             localStorage.removeItem('authUser');
+            stopKidScreenTimeGuardian();
             updateAuthUI();
-            if (window.location.pathname.toLowerCase().includes('kids')) {
+            if (window.location.pathname.toLowerCase().includes('kids') || window.location.pathname.toLowerCase().includes('screentime')) {
                 window.location.reload();
             } else {
                 alert('Đã đăng xuất thành công.');

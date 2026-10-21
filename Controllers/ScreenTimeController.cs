@@ -2,6 +2,7 @@ using Giahuy0790.Data;
 using Giahuy0790.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace Giahuy0790.Controllers;
 
@@ -16,6 +17,60 @@ public class ScreenTimeController(AppDbContext context, ILogger<ScreenTimeContro
     private static DateTime GetVietnamTime() => DateTime.UtcNow.AddHours(7);
 
     /// <summary>
+    /// Lấy trạng thái thời gian thực sử dụng thiết bị cho tài khoản con (Kid) đang đăng nhập hiện tại
+    /// </summary>
+    [HttpGet("my-status")]
+    public async Task<IActionResult> GetMyStatus()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(new { message = "Vui lòng đăng nhập để kiểm tra trạng thái." });
+        }
+
+        var kid = await _context.Kids.FirstOrDefaultAsync(k => k.KidUserId == userId);
+        if (kid == null)
+        {
+            return NotFound(new { message = "Tài khoản của bạn chưa được liên kết với hồ sơ trẻ nào." });
+        }
+
+        var screenTime = await GetOrInitScreenTimeAsync(kid.Id);
+        var status = CalculateRealtimeStatus(screenTime);
+
+        return Ok(new
+        {
+            kidId = kid.Id,
+            fullName = kid.FullName,
+            nickname = kid.Nickname,
+            avatarUrl = kid.AvatarUrl,
+            status,
+            settings = screenTime
+        });
+    }
+
+    /// <summary>
+    /// Gửi tín hiệu Heartbeat từ phiên trình duyệt / thiết bị của tài khoản con đang đăng nhập
+    /// Tự động cập nhật thời gian dùng và kiểm tra xem có bị khóa máy hay không
+    /// </summary>
+    [HttpPost("my-heartbeat")]
+    public async Task<IActionResult> MyHeartbeat([FromBody] HeartbeatRequest? request)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(new { message = "Vui lòng đăng nhập để gửi tín hiệu máy bé." });
+        }
+
+        var kid = await _context.Kids.FirstOrDefaultAsync(k => k.KidUserId == userId);
+        if (kid == null)
+        {
+            return NotFound(new { message = "Tài khoản của bạn chưa được liên kết với hồ sơ trẻ nào." });
+        }
+
+        return await Heartbeat(kid.Id, request);
+    }
+
+    /// <summary>
     /// Lấy cấu hình và trạng thái thời gian thực sử dụng thiết bị của bé
     /// </summary>
     [HttpGet("{kidId:int}")]
@@ -25,6 +80,27 @@ public class ScreenTimeController(AppDbContext context, ILogger<ScreenTimeContro
         if (kid == null)
         {
             return NotFound(new { message = $"Không tìm thấy bé có ID = {kidId}" });
+        }
+
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var isParent = User.IsInRole("Parents") || User.IsInRole("parents");
+        var isAdmin = User.IsInRole("Admin") || User.IsInRole("admin");
+        if (!string.IsNullOrEmpty(currentUserId) && !isAdmin)
+        {
+            var isKid = User.IsInRole("Kid") || User.IsInRole("kid");
+            if (isKid && kid.KidUserId != currentUserId)
+            {
+                return Forbid();
+            }
+
+            if (isParent && kid.ParentId != null && kid.ParentId != currentUserId)
+            {
+                var inSameFamily = kid.FamilyGroupId != null && await _context.FamilyMembers.AnyAsync(fm => fm.UserId == currentUserId && fm.FamilyGroupId == kid.FamilyGroupId);
+                if (!inSameFamily)
+                {
+                    return Forbid();
+                }
+            }
         }
 
         var screenTime = await GetOrInitScreenTimeAsync(kidId);
@@ -54,6 +130,20 @@ public class ScreenTimeController(AppDbContext context, ILogger<ScreenTimeContro
         if (kid == null)
         {
             return NotFound(new { message = $"Không tìm thấy bé có ID = {kidId}" });
+        }
+
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var isAdmin = User.IsInRole("Admin") || User.IsInRole("admin");
+        if (!string.IsNullOrEmpty(currentUserId) && !isAdmin)
+        {
+            if (kid.ParentId != null && kid.ParentId != currentUserId)
+            {
+                var inSameFamily = kid.FamilyGroupId != null && await _context.FamilyMembers.AnyAsync(fm => fm.UserId == currentUserId && fm.FamilyGroupId == kid.FamilyGroupId);
+                if (!inSameFamily)
+                {
+                    return Forbid();
+                }
+            }
         }
 
         var screenTime = await GetOrInitScreenTimeAsync(kidId);
@@ -92,6 +182,26 @@ public class ScreenTimeController(AppDbContext context, ILogger<ScreenTimeContro
     [HttpPost("{kidId:int}/quick-lock")]
     public async Task<IActionResult> QuickLock(int kidId, [FromBody] QuickLockRequest request)
     {
+        var kid = await _context.Kids.FindAsync(kidId);
+        if (kid == null)
+        {
+            return NotFound(new { message = $"Không tìm thấy bé có ID = {kidId}" });
+        }
+
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var isAdmin = User.IsInRole("Admin") || User.IsInRole("admin");
+        if (!string.IsNullOrEmpty(currentUserId) && !isAdmin)
+        {
+            if (kid.ParentId != null && kid.ParentId != currentUserId)
+            {
+                var inSameFamily = kid.FamilyGroupId != null && await _context.FamilyMembers.AnyAsync(fm => fm.UserId == currentUserId && fm.FamilyGroupId == kid.FamilyGroupId);
+                if (!inSameFamily)
+                {
+                    return Forbid();
+                }
+            }
+        }
+
         var screenTime = await GetOrInitScreenTimeAsync(kidId);
 
         screenTime.IsLockedNow = request.IsLocked;
