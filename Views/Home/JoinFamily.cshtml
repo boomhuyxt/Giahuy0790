@@ -1,0 +1,268 @@
+@{
+    ViewData["Title"] = "Quét QR Tham Gia Nhóm Gia Đình";
+}
+
+<div class="container py-5" style="max-width: 600px;">
+    <!-- Card chính xác nhận tham gia gia đình -->
+    <div class="apple-card p-4 border-2 shadow-lg text-center">
+        <div class="mb-3">
+            <span class="badge apple-badge-blue px-3 py-2 rounded-2 d-inline-flex align-items-center gap-1 pixel-font">
+                <i class="pixelart-icons-font-users i8-sm"></i>
+                <span>KIDCARE FAMILY</span>
+            </span>
+        </div>
+
+        <h3 class="fw-bold text-primary pixel-font mb-2">THAM GIA NHÓM GIA ĐÌNH</h3>
+        <p class="text-muted small mb-4" id="txtSubTitle">
+            Đang xác thực mã mời tham gia gia đình của bé...
+        </p>
+
+        <!-- Loading spinner -->
+        <div id="loadingBox" class="py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Đang tải...</span>
+            </div>
+            <div class="small text-muted mt-2">Đang kiểm tra hiệu lực mã QR...</div>
+        </div>
+
+        <!-- Khối ĐÃ HẾT HẠN (Sau 1 phút) -->
+        <div id="boxExpired" class="p-4 rounded-3 border border-danger bg-danger-subtle text-danger my-3" style="display: none;">
+            <i class="pixelart-icons-font-close i8-xl text-danger mb-2"></i>
+            <h5 class="fw-bold pixel-font mb-2">MÃ QR ĐÃ HẾT HẠN</h5>
+            <p class="small mb-3">
+                Mã QR này chỉ có hiệu lực trong vòng <strong>1 phút (60 giây)</strong> và hiện tại đã hết hạn.
+            </p>
+            <div class="p-3 bg-white bg-opacity-75 rounded-2 border text-dark small mb-3">
+                👉 Bé hãy nhờ ba mẹ bấm nút <strong>"Tạo Mã QR Mới"</strong> trên ứng dụng của ba mẹ để quét lại nhé!
+            </div>
+            <a href="/" class="btn btn-outline-danger px-4">
+                <i class="pixelart-icons-font-home i8-xs me-1"></i> Về Trang Chủ
+            </a>
+        </div>
+
+        <!-- Khối MÃ ĐÃ SỬ DỤNG -->
+        <div id="boxUsed" class="p-4 rounded-3 border border-warning bg-warning-subtle text-warning-emphasis my-3" style="display: none;">
+            <i class="pixelart-icons-font-check i8-xl text-warning mb-2"></i>
+            <h5 class="fw-bold pixel-font mb-2">MÃ QR ĐÃ ĐƯỢC SỬ DỤNG</h5>
+            <p class="small mb-3">
+                Mã QR này đã được một bé sử dụng để tham gia gia đình rồi. Mỗi mã chỉ dùng được 1 lần.
+            </p>
+            <a href="/" class="btn btn-secondary px-4">Về Trang Chủ</a>
+        </div>
+
+        <!-- Khối MÃ HỢP LỆ (Còn trong 1 phút) -->
+        <div id="boxValid" style="display: none;">
+            <!-- Đồng hồ đếm ngược thời gian còn lại -->
+            <div class="p-3 rounded-3 border bg-body-tertiary mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="small text-muted fw-bold pixel-font" style="font-size: 11px;">
+                        <i class="pixelart-icons-font-clock i8-xs text-warning me-1"></i> THỜI GIAN HIỆU LỰC
+                    </span>
+                    <span class="badge bg-danger text-white pixel-font" id="badgeCountdown">60s</span>
+                </div>
+                <div class="progress" style="height: 10px; border-radius: 4px;">
+                    <div id="barCountdown" class="progress-bar progress-bar-striped progress-bar-animated bg-danger" style="width: 100%;"></div>
+                </div>
+                <div class="small text-muted text-end mt-1" style="font-size: 11px;">
+                    Mã sẽ tự hủy sau <span id="txtRemainingSeconds" class="fw-bold text-danger">60</span> giây
+                </div>
+            </div>
+
+            <!-- Thông tin nhóm gia đình -->
+            <div class="p-3 rounded-3 border border-primary bg-primary-subtle text-primary-emphasis mb-4 text-start">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="p-3 rounded-2 bg-primary text-white">
+                        <i class="pixelart-icons-font-home i8-lg"></i>
+                    </div>
+                    <div>
+                        <div class="small text-muted text-uppercase fw-bold" style="font-size: 10px;">Lời mời gia nhập:</div>
+                        <h5 class="fw-bold mb-0 text-primary pixel-font" id="lblFamilyName">Gia Đình Yêu Thương</h5>
+                        <div class="small text-muted" id="lblOwnerName">Chủ gia đình: Ba Mẹ</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form tham gia cho bé -->
+            <form id="formJoinFamily" class="text-start">
+                <div id="joinAlert"></div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold text-muted mb-1 d-flex align-items-center gap-1">
+                        <i class="pixelart-icons-font-user i8-xs text-primary"></i> Tên của Bé hoặc Tên đăng nhập:
+                    </label>
+                    <input type="text" id="inputKidName" class="form-control" placeholder="Ví dụ: Bé Tin Tin, giahuy..." required />
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label small fw-semibold text-muted mb-1 d-flex align-items-center gap-1">
+                        <i class="pixelart-icons-font-lock i8-xs text-primary"></i> Mật khẩu đăng nhập của bé (tùy chọn):
+                    </label>
+                    <input type="password" id="inputKidPassword" class="form-control" placeholder="Mặc định: Kid@123" />
+                    <div class="form-text small" style="font-size: 11px;">Nếu bé đã đăng nhập sẵn thì hệ thống sẽ tự động dùng tài khoản hiện tại.</div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-3 fw-bold pixel-font shadow" id="btnSubmitJoin">
+                    <i class="pixelart-icons-font-check i8-sm me-1"></i> XÁC NHẬN GIA NHẬP GIA ĐÌNH NGAY
+                </button>
+            </form>
+        </div>
+
+        <!-- Khối THÀNH CÔNG -->
+        <div id="boxSuccess" class="p-4 rounded-3 border border-success bg-success-subtle text-success my-3" style="display: none;">
+            <i class="pixelart-icons-font-heart i8-xl text-success i8-pulse mb-2"></i>
+            <h4 class="fw-bold pixel-font mb-2">🎉 CHÚC MỪNG BÉ!</h4>
+            <p class="mb-3" id="txtSuccessMessage">
+                Bé đã gia nhập Nhóm Gia Đình thành công!
+            </p>
+            <a href="/kids" class="btn btn-success px-4 fw-semibold">
+                <i class="pixelart-icons-font-users i8-xs me-1"></i> Xem Hồ Sơ Gia Đình
+            </a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token') || urlParams.get('code');
+    let timerInterval = null;
+    let remainingSeconds = 60;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        if (!token) {
+            document.getElementById('loadingBox').style.display = 'none';
+            document.getElementById('boxExpired').style.display = 'block';
+            document.getElementById('boxExpired').querySelector('h5').textContent = 'KHÔNG TÌM THẤY MÃ QR';
+            document.getElementById('boxExpired').querySelector('p').textContent = 'Đường link không chứa mã token hoặc mã QR không hợp lệ.';
+            return;
+        }
+
+        // Tự động điền nếu đã có user đăng nhập
+        const authUser = localStorage.getItem('authUser');
+        if (authUser) {
+            try {
+                const u = JSON.parse(authUser);
+                if (u.fullName || u.username) {
+                    document.getElementById('inputKidName').value = u.fullName || u.username;
+                }
+            } catch (_) {}
+        }
+
+        await checkQrStatus();
+    });
+
+    async function checkQrStatus() {
+        try {
+            const res = await fetch(`/api/family/qr-status/${encodeURIComponent(token)}`);
+            document.getElementById('loadingBox').style.display = 'none';
+
+            if (!res.ok) {
+                document.getElementById('boxExpired').style.display = 'block';
+                return;
+            }
+
+            const data = await res.json();
+
+            if (data.isUsed) {
+                document.getElementById('boxUsed').style.display = 'block';
+                return;
+            }
+
+            if (data.isExpired || data.remainingSeconds <= 0) {
+                document.getElementById('boxExpired').style.display = 'block';
+                return;
+            }
+
+            // Mã hợp lệ!
+            remainingSeconds = data.remainingSeconds;
+            document.getElementById('lblFamilyName').textContent = data.familyGroupName || 'Gia Đình Yêu Thương';
+            document.getElementById('boxValid').style.display = 'block';
+
+            startCountdown();
+
+        } catch (err) {
+            console.error(err);
+            document.getElementById('loadingBox').style.display = 'none';
+            document.getElementById('boxExpired').style.display = 'block';
+        }
+    }
+
+    function startCountdown() {
+        const badge = document.getElementById('badgeCountdown');
+        const bar = document.getElementById('barCountdown');
+        const txt = document.getElementById('txtRemainingSeconds');
+
+        if (timerInterval) clearInterval(timerInterval);
+
+        timerInterval = setInterval(() => {
+            remainingSeconds--;
+
+            if (remainingSeconds <= 0) {
+                clearInterval(timerInterval);
+                document.getElementById('boxValid').style.display = 'none';
+                document.getElementById('boxExpired').style.display = 'block';
+                return;
+            }
+
+            badge.textContent = remainingSeconds + 's';
+            txt.textContent = remainingSeconds;
+            const percent = (remainingSeconds / 60) * 100;
+            bar.style.width = percent + '%';
+
+            if (remainingSeconds <= 15) {
+                bar.className = 'progress-bar progress-bar-striped progress-bar-animated bg-danger';
+            } else if (remainingSeconds <= 30) {
+                bar.className = 'progress-bar progress-bar-striped progress-bar-animated bg-warning';
+            } else {
+                bar.className = 'progress-bar progress-bar-striped progress-bar-animated bg-success';
+            }
+        }, 1000);
+    }
+
+    // Submit form gia nhập
+    document.getElementById('formJoinFamily')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('btnSubmitJoin');
+        const alertBox = document.getElementById('joinAlert');
+        const kidName = document.getElementById('inputKidName').value.trim();
+        const kidPassword = document.getElementById('inputKidPassword').value;
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang gia nhập...';
+        alertBox.innerHTML = '';
+
+        const authUser = localStorage.getItem('authUser');
+        let currentUserId = null;
+        if (authUser) {
+            try { currentUserId = JSON.parse(authUser).id; } catch (_) {}
+        }
+
+        try {
+            const res = await fetch('/api/family/join-by-qr', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    token: token,
+                    userId: currentUserId,
+                    username: kidName,
+                    kidFullName: kidName,
+                    password: kidPassword || 'Kid@123'
+                })
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Không thể tham gia gia đình');
+
+            if (timerInterval) clearInterval(timerInterval);
+            document.getElementById('boxValid').style.display = 'none';
+            document.getElementById('boxSuccess').style.display = 'block';
+            document.getElementById('txtSuccessMessage').textContent = data.message;
+
+        } catch (err) {
+            alertBox.innerHTML = `<div class="alert alert-danger py-2 small rounded-2 mb-3">${err.message}</div>`;
+            btn.disabled = false;
+            btn.innerHTML = '<i class="pixelart-icons-font-check i8-sm me-1"></i> XÁC NHẬN GIA NHẬP GIA ĐÌNH NGAY';
+        }
+    });
+</script>
+}

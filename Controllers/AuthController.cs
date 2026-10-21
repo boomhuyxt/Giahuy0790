@@ -1,11 +1,14 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Giahuy0790.Data;
 using Giahuy0790.Models;
+using Giahuy0790.Repositories;
 using Giahuy0790.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Giahuy0790.Controllers;
@@ -19,7 +22,8 @@ public class AuthController(
     UserManager<ApplicationUser> userManager,
     RoleManager<IdentityRole> roleManager,
     IConfiguration config,
-    IEmailService emailService) : ControllerBase
+    IEmailService emailService,
+    IKidRepository kidRepo) : ControllerBase
 {
     /// <summary>
     /// Đăng ký tài khoản người dùng mới (có gán quyền Role)
@@ -77,13 +81,66 @@ public class AuthController(
         }
         await userManager.AddToRoleAsync(user, roleToAssign);
 
+        // Tự động kết nối và gửi Gmail cho Phụ huynh nếu có cung cấp ParentEmail
+        var parentEmail = request.ParentEmail?.Trim();
+        var autoLinked = false;
+        string? linkedParentName = null;
+
+        if (!string.IsNullOrWhiteSpace(parentEmail))
+        {
+            var parentUser = await userManager.FindByEmailAsync(parentEmail)
+                             ?? await userManager.FindByNameAsync(parentEmail);
+            if (parentUser != null)
+            {
+                linkedParentName = parentUser.FullName ?? parentUser.UserName;
+                var kid = new Kid
+                {
+                    FullName = user.FullName ?? user.UserName ?? "Bé yêu",
+                    AvatarUrl = user.AvatarUrl,
+                    ParentId = parentUser.Id,
+                    KidUserId = user.Id,
+                    TotalPoints = 0,
+                    CreatedAt = DateTime.UtcNow
+                };
+                await kidRepo.AddAsync(kid);
+                autoLinked = true;
+            }
+
+            // Gửi Gmail thông báo qua SMTP cho Phụ huynh
+            var targetParentEmail = parentUser?.Email ?? parentEmail;
+            var targetParentName = linkedParentName ?? "Quý Phụ Huynh";
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await emailService.SendChildRegisteredNotificationAsync(
+                        targetParentEmail,
+                        targetParentName,
+                        user.UserName ?? string.Empty,
+                        user.Email ?? string.Empty,
+                        user.FullName ?? user.UserName ?? string.Empty,
+                        autoLinked
+                    );
+                }
+                catch
+                {
+                    // Tránh uncaught background exception
+                }
+            });
+        }
+
         return Ok(new
         {
-            message = "🎉 Đăng ký tài khoản thành công!",
+            message = autoLinked
+                ? $"🎉 Đăng ký thành công! Tài khoản đã được tự động đưa vào danh sách con của phụ huynh {linkedParentName} và gửi email thông báo."
+                : (!string.IsNullOrWhiteSpace(parentEmail)
+                    ? $"🎉 Đăng ký thành công! Hệ thống đã gửi email thông báo tới Gmail phụ huynh: {parentEmail} để đưa vào danh sách con."
+                    : "🎉 Đăng ký tài khoản thành công!"),
             userId = user.Id,
             username = user.UserName,
             email = user.Email,
-            role = roleToAssign
+            role = roleToAssign,
+            autoLinked
         });
 
         static string encode(string text) => Uri.EscapeDataString(text);
@@ -349,17 +406,40 @@ public class AuthController(
             message = "🎉 Đặt lại mật khẩu thành công! Bạn có thể sử dụng mật khẩu mới để đăng nhập."
         });
     }
+
+    /// <summary>
+    /// Xóa tài khoản người dùng (chỉ Quản trị viên mới có quyền)
+    /// </summary>
+    [Authorize(Roles = "Admin,admin")]
+    [HttpDelete("users/{username}")]
+    public async Task<IActionResult> DeleteUser(string username)
+    {
+        var targetUser = await userManager.FindByNameAsync(username);
+        if (targetUser == null)
+        {
+            return NotFound(new { message = $"Không tìm thấy tài khoản '{username}'." });
+        }
+
+        var res = await userManager.DeleteAsync(targetUser);
+        if (!res.Succeeded)
+        {
+            return BadRequest(new { message = "Không thể xóa tài khoản", errors = res.Errors.Select(e => e.Description) });
+        }
+
+        return Ok(new { message = $"Đã xóa tài khoản '{username}' thành công." });
+    }
 }
 
 /// <summary>
-/// DTO Đăng ký tài khoản (hỗ trợ chỉ định quyền Role: Admin, Parents, Kid)
+/// DTO Đăng ký tài khoản (hỗ trợ chỉ định quyền Role: Admin, Parents, Kid & Gmail Phụ huynh)
 /// </summary>
 public record RegisterRequest(
     string Username,
     string Email,
     string Password,
     string? FullName = null,
-    string? Role = "Parents"
+    string? Role = "Parents",
+    string? ParentEmail = null
 );
 
 /// <summary>

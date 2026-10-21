@@ -3,40 +3,132 @@
 }
 
 <div class="container py-4">
-    <!-- Header banner -->
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3 bg-white p-4 rounded-4 shadow-sm border border-light">
+    <!-- Header banner (8-Bit Retro Header) -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3 apple-card-static p-4 border-2">
         <div>
-            <h2 class="fw-bold mb-1 text-primary d-flex align-items-center gap-2">
-                <span>🧒</span> Quản Lý Hồ Sơ Trẻ & Tài Khoản Con
-            </h2>
-            <p class="text-muted mb-0">Theo dõi thông tin sức khỏe, liên kết hoặc cấp tài khoản con để bé tự đăng nhập xem nhiệm vụ & tích điểm sao</p>
+            <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                <i class="pixelart-icons-font-heart i8-xl text-primary i8-bounce"></i>
+                <h2 class="fw-bold mb-0 text-primary pixel-font" style="letter-spacing: 0.04em;">
+                    QUẢN LÝ HỒ SƠ TRẺ & TÀI KHOẢN CON
+                </h2>
+                <span class="badge bg-primary text-white">8-BIT KIDCARE</span>
+            </div>
+            <p class="text-muted mb-0 small">
+                Theo dõi thông tin sức khỏe, liên kết hoặc cấp tài khoản con để bé tự đăng nhập xem nhiệm vụ & tích điểm sao.
+            </p>
         </div>
-        <div class="d-flex gap-2 flex-wrap">
-            <input type="text" id="searchInput" class="form-control rounded-pill px-3" placeholder="🔍 Tìm theo tên bé hoặc username con..." style="max-width: 280px;" />
-            <button class="btn btn-primary rounded-pill px-4 shadow-sm fw-semibold" id="btnOpenAddModal">
-                <i class="bi bi-plus-lg"></i> + Thêm Bé Mới
+        <div class="d-flex gap-2 flex-wrap align-items-center">
+            <div class="input-group" style="max-width: 280px;">
+                <span class="input-group-text bg-light text-muted">
+                    <i class="pixelart-icons-font-search i8-xs"></i>
+                </span>
+                <input type="text" id="searchInput" class="form-control" placeholder="Tìm tên bé hoặc username..." />
+            </div>
+            <button type="button" class="btn btn-warning fw-bold text-dark pixel-font px-3 shadow-sm" onclick="openFamilyQrModal()">
+                <i class="pixelart-icons-font-zap i8-xs me-1"></i> Xin Mã QR (1 Phút)
+            </button>
+            <button class="btn btn-primary px-4 fw-semibold" id="btnOpenAddModal">
+                <i class="pixelart-icons-font-plus i8-xs me-1"></i> Thêm Bé Mới
             </button>
         </div>
     </div>
 
-    <!-- Banner chào mừng riêng khi tài khoản con (Kid) đăng nhập -->
-    <div id="kidGreetingBanner" class="p-4 rounded-4 text-white shadow-sm mb-4 d-none" style="background: linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%);">
+    <!-- Thông báo khi chưa đăng nhập tài khoản Phụ huynh -->
+    <div id="authRequiredNotice" class="alert alert-warning py-3 px-4 rounded-3 d-flex flex-wrap align-items-center justify-content-between mb-4 shadow-sm" style="display: none;">
+        <div class="d-flex align-items-center gap-2 mb-2 mb-sm-0">
+            <i class="pixelart-icons-font-alert i8-sm text-warning"></i>
+            <span>Bạn chưa đăng nhập. Vui lòng đăng nhập tài khoản <strong>Phụ huynh</strong> để xem và quản lý danh sách con của bạn.</span>
+        </div>
+        <button class="btn btn-warning btn-sm fw-bold pixel-font" data-bs-toggle="modal" data-bs-target="#modalLogin">
+            <i class="pixelart-icons-font-user i8-xs me-1"></i> Đăng Nhập Ngay
+        </button>
+    </div>
+
+    <!-- Banner chào mừng riêng khi tài khoản con (Kid) đăng nhập (8-Bit Player Banner) -->
+    <div id="kidGreetingBanner" class="p-4 rounded-3 text-white mb-4 d-none apple-card-static border-2" style="background: linear-gradient(135deg, #1e3a8a 0%, #06b6d4 100%);">
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
             <div class="d-flex align-items-center gap-3">
-                <div style="font-size: 50px;">🎈</div>
+                <div class="p-3 bg-white bg-opacity-25 rounded-2">
+                    <i class="pixelart-icons-font-gamepad i8-xl text-warning i8-pulse"></i>
+                </div>
                 <div>
-                    <h3 class="fw-bold mb-1">Xin chào bé <span id="kidGreetingName"></span>!</h3>
-                    <p class="mb-0 text-white-50">Đây là hồ sơ cá nhân và bảng thành tích của bé. Hãy chăm chỉ rèn luyện và tích thật nhiều sao nhé!</p>
+                    <h3 class="fw-bold mb-1 pixel-font">Xin chào bé <span id="kidGreetingName"></span>!</h3>
+                    <p class="mb-0 text-white-50 small">Đây là hồ sơ cá nhân và bảng thành tích của bé. Hãy chăm chỉ rèn luyện và tích thật nhiều sao nhé!</p>
                 </div>
             </div>
             <div class="d-flex align-items-center gap-3">
-                <div class="text-end bg-white bg-opacity-25 p-2 px-3 rounded-4">
-                    <span class="fs-4 fw-bold text-warning" id="kidGreetingPoints">⭐ 0 sao</span>
+                <div class="text-end bg-dark bg-opacity-25 p-2 px-3 rounded-2 border border-white border-opacity-25">
+                    <div class="d-flex align-items-center gap-1 justify-content-end">
+                        <i class="pixelart-icons-font-star i8-md text-warning"></i>
+                        <span class="fs-4 fw-bold text-warning pixel-font" id="kidGreetingPoints">0 sao</span>
+                    </div>
                     <div class="small text-white-50">Thành tích tích lũy</div>
                 </div>
-                <a href="/activities" class="btn btn-warning rounded-pill px-4 fw-bold text-dark shadow-sm">
-                    📋 Xem Nhiệm Vụ Hôm Nay
+                <a href="/activities" class="btn btn-warning px-4 fw-bold text-dark">
+                    <i class="pixelart-icons-font-calendar i8-xs me-1"></i> Xem Nhiệm Vụ Hôm Nay
                 </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= KHỐI NHÓM GIA ĐÌNH & THÊM THÀNH VIÊN BẰNG EMAIL ================= -->
+    <div id="familyGroupSection" class="apple-card-static p-4 mb-4 border-2" style="display: none;">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 pb-3 border-bottom mb-3">
+            <div>
+                <div class="d-flex align-items-center gap-2">
+                    <i class="pixelart-icons-font-users i8-md text-primary"></i>
+                    <h4 class="fw-bold mb-0 text-primary pixel-font" id="familyGroupName">Nhóm Gia Đình</h4>
+                    <button class="btn btn-sm btn-outline-secondary px-2 py-0 ms-1" id="btnOpenRenameFamily" title="Đổi tên nhóm gia đình" style="font-size: 11px;">
+                        <i class="pixelart-icons-font-magic-edit i8-xs me-1"></i> Đổi tên
+                    </button>
+                </div>
+                <p class="text-muted small mb-0 mt-1">
+                    Chỉ cần nhập email của tài khoản đã đăng ký để thêm vào nhóm gia đình. Cùng nhau theo dõi và quản lý hồ sơ các bé.
+                </p>
+            </div>
+            <div>
+                <span class="badge bg-primary-subtle text-primary border border-primary px-3 py-2" id="familyMemberCount">1 thành viên</span>
+            </div>
+        </div>
+
+        <!-- Ô nhập Email nhanh & Nút Xin Mã QR 1 phút -->
+        <div class="row g-2 align-items-center mb-3">
+            <div class="col-lg-6">
+                <form id="formQuickAddFamily" class="row g-2 align-items-center m-0 p-0">
+                    <div class="col-sm-8">
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-muted">
+                                <i class="pixelart-icons-font-mail i8-sm"></i>
+                            </span>
+                            <input type="email" id="quickFamilyEmail" class="form-control" placeholder="Nhập email tài khoản con/thành viên..." required />
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <button type="submit" class="btn btn-primary w-100 fw-semibold px-2" id="btnSubmitQuickAdd">
+                            <i class="pixelart-icons-font-plus i8-xs me-1"></i> Thêm Email
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="col-lg-6 d-flex gap-2 justify-content-lg-end flex-wrap">
+                <button type="button" class="btn btn-warning fw-bold text-dark pixel-font px-3 shadow-sm" id="btnOpenQrModal" onclick="openFamilyQrModal()">
+                    <i class="pixelart-icons-font-zap i8-xs me-1"></i> Xin Mã QR (1 Phút)
+                </button>
+                <button type="button" class="btn btn-outline-primary fw-semibold px-3" id="btnOpenScanQrModal" onclick="openScanModal()">
+                    <i class="pixelart-icons-font-camera i8-xs me-1"></i> Quét / Nhập QR
+                </button>
+            </div>
+        </div>
+        <div id="quickAddAlert"></div>
+
+        <!-- Danh sách thành viên gia đình (Member pills) -->
+        <div class="mt-2">
+            <div class="small fw-semibold text-muted mb-2 d-flex align-items-center gap-1">
+                <i class="pixelart-icons-font-users i8-xs text-primary"></i>
+                <span>Thành viên trong nhóm gia đình:</span>
+            </div>
+            <div id="familyMembersPills" class="d-flex flex-wrap gap-2 align-items-center">
+                <!-- Render bằng JS -->
             </div>
         </div>
     </div>
@@ -44,28 +136,34 @@
     <!-- Quick Stats Bar (Dành cho Phụ huynh / Admin) -->
     <div id="parentStatsBar" class="row g-3 mb-4">
         <div class="col-sm-4">
-            <div class="bg-white p-3 rounded-4 shadow-sm border border-light d-flex align-items-center gap-3">
-                <div class="fs-1 text-primary">👨‍👩‍👧</div>
+            <div class="apple-card-static p-3 d-flex align-items-center gap-3">
+                <div class="p-3 rounded-2 bg-primary-subtle text-primary border border-primary">
+                    <i class="pixelart-icons-font-users i8-lg"></i>
+                </div>
                 <div>
-                    <div class="fs-4 fw-bold text-dark" id="statTotalKids">0</div>
+                    <div class="fs-4 fw-bold text-dark pixel-font" id="statTotalKids">0</div>
                     <div class="small text-muted">Tổng số bé quản lý</div>
                 </div>
             </div>
         </div>
         <div class="col-sm-4">
-            <div class="bg-white p-3 rounded-4 shadow-sm border border-light d-flex align-items-center gap-3">
-                <div class="fs-1 text-success">👤</div>
+            <div class="apple-card-static p-3 d-flex align-items-center gap-3">
+                <div class="p-3 rounded-2 bg-success-subtle text-success border border-success">
+                    <i class="pixelart-icons-font-lock i8-lg"></i>
+                </div>
                 <div>
-                    <div class="fs-4 fw-bold text-success" id="statLinkedKids">0</div>
+                    <div class="fs-4 fw-bold text-success pixel-font" id="statLinkedKids">0</div>
                     <div class="small text-muted">Đã có tài khoản con riêng</div>
                 </div>
             </div>
         </div>
         <div class="col-sm-4">
-            <div class="bg-white p-3 rounded-4 shadow-sm border border-light d-flex align-items-center gap-3">
-                <div class="fs-1 text-warning">⚠️</div>
+            <div class="apple-card-static p-3 d-flex align-items-center gap-3">
+                <div class="p-3 rounded-2 bg-warning-subtle text-warning border border-warning">
+                    <i class="pixelart-icons-font-circle-info i8-lg text-dark"></i>
+                </div>
                 <div>
-                    <div class="fs-4 fw-bold text-warning" id="statUnlinkedKids">0</div>
+                    <div class="fs-4 fw-bold text-warning-emphasis pixel-font" id="statUnlinkedKids">0</div>
                     <div class="small text-muted">Chưa liên kết tài khoản con</div>
                 </div>
             </div>
@@ -94,12 +192,15 @@
     </div>
 </div>
 
-<!-- ================= MODAL THÊM / CHỈNH SỬA BÉ ================= -->
+<!-- ================= MODAL THÊM / CHỈNH SỬA BÉ (8-BIT RETRO) ================= -->
 <div class="modal fade" id="modalKid" tabindex="-1" aria-labelledby="modalKidLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" style="max-width: 550px;">
-        <div class="modal-content shadow-lg rounded-4">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold" id="modalKidLabel">🧒 Thêm Hồ Sơ Trẻ Mới</h5>
+        <div class="modal-content shadow-lg">
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title fw-bold d-flex align-items-center gap-2" id="modalKidLabel">
+                    <i class="pixelart-icons-font-heart i8-md text-primary"></i>
+                    <span>Thêm Hồ Sơ Trẻ Mới</span>
+                </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="formKid">
@@ -188,28 +289,31 @@
     </div>
 </div>
 
-<!-- ================= MODAL QUẢN LÝ / LIÊN KẾT TÀI KHOẢN CON ================= -->
+<!-- ================= MODAL QUẢN LÝ / LIÊN KẾT TÀI KHOẢN CON (8-BIT RETRO) ================= -->
 <div class="modal fade" id="modalSubAccount" tabindex="-1" aria-labelledby="modalSubAccountLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" style="max-width: 520px;">
-        <div class="modal-content shadow-lg rounded-4 overflow-hidden">
-            <div class="modal-header border-0 pb-2">
-                <h5 class="modal-title fw-bold text-primary" id="modalSubAccountLabel">
-                    🔗 Quản Lý Tài Khoản Con
+        <div class="modal-content shadow-lg overflow-hidden">
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title fw-bold text-primary d-flex align-items-center gap-2" id="modalSubAccountLabel">
+                    <i class="pixelart-icons-font-lock i8-md text-primary"></i>
+                    <span>Quản Lý Tài Khoản Con</span>
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             
-            <div class="px-3 pt-2">
+            <div class="px-3 pt-3">
                 <!-- Nav tabs -->
-                <ul class="nav nav-pills nav-fill bg-light p-1 rounded-pill" id="subAccountTabs" role="tablist">
+                <ul class="nav nav-pills nav-fill bg-light p-1 rounded-2" id="subAccountTabs" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active rounded-pill fw-semibold small py-2" id="tab-link-existing" data-bs-toggle="pill" data-bs-target="#panel-link-existing" type="button" role="tab">
-                            🔗 Liên kết tài khoản có sẵn
+                        <button class="nav-link active fw-semibold small py-2 d-inline-flex align-items-center justify-content-center gap-1" id="tab-link-existing" data-bs-toggle="pill" data-bs-target="#panel-link-existing" type="button" role="tab">
+                            <i class="pixelart-icons-font-user i8-xs"></i>
+                            <span>Liên kết tài khoản có sẵn</span>
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link rounded-pill fw-semibold small py-2" id="tab-create-new" data-bs-toggle="pill" data-bs-target="#panel-create-new" type="button" role="tab">
-                            ✨ Tạo tài khoản con mới
+                        <button class="nav-link fw-semibold small py-2 d-inline-flex align-items-center justify-content-center gap-1" id="tab-create-new" data-bs-toggle="pill" data-bs-target="#panel-create-new" type="button" role="tab">
+                            <i class="pixelart-icons-font-plus i8-xs"></i>
+                            <span>Tạo tài khoản con mới</span>
                         </button>
                     </li>
                 </ul>
@@ -281,12 +385,15 @@
     </div>
 </div>
 
-<!-- ================= MODAL ĐỔI MẬT KHẨU TÀI KHOẢN CON ================= -->
+<!-- ================= MODAL ĐỔI MẬT KHẨU TÀI KHOẢN CON (8-BIT RETRO) ================= -->
 <div class="modal fade" id="modalResetPassword" tabindex="-1" aria-labelledby="modalResetPasswordLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
-        <div class="modal-content shadow-lg rounded-4">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold text-dark" id="modalResetPasswordLabel">🔑 Đổi Mật Khẩu Cho Bé</h5>
+        <div class="modal-content shadow-lg">
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2" id="modalResetPasswordLabel">
+                    <i class="pixelart-icons-font-lock i8-md text-warning"></i>
+                    <span>Đổi Mật Khẩu Cho Bé</span>
+                </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="formResetChildPassword">
@@ -297,13 +404,395 @@
                         Bạn đang đặt lại mật khẩu cho tài khoản con: <strong class="text-primary" id="resetPasswordUsername"></strong>
                     </p>
                     <div class="mb-3">
-                        <label class="form-label fw-semibold small">Mật khẩu mới (Tối thiểu 6 ký tự) <span class="text-danger">*</span></label>
+                        <label class="form-label fw-semibold small d-flex align-items-center gap-1">
+                            <i class="pixelart-icons-font-lock i8-xs text-primary"></i> Mật khẩu mới (Tối thiểu 6 ký tự) <span class="text-danger">*</span>
+                        </label>
                         <input type="password" id="resetNewPassword" class="form-control" placeholder="••••••••" minlength="6" required />
                     </div>
                 </div>
-                <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Hủy</button>
-                    <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm" id="btnSaveNewPassword">Cập Nhật Mật Khẩu</button>
+                <div class="modal-footer border-top">
+                    <button type="button" class="btn btn-secondary px-3" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary px-4 shadow-sm" id="btnSaveNewPassword">
+                        <i class="pixelart-icons-font-check i8-xs me-1"></i> Cập Nhật Mật Khẩu
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ================= MODAL XÁC NHẬN THÊM VÀO NHÓM GIA ĐÌNH ================= -->
+<div class="modal fade" id="modalConfirmAddFamily" tabindex="-1" aria-labelledby="modalConfirmAddFamilyLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 480px;">
+        <div class="modal-content shadow-lg">
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title fw-bold d-flex align-items-center gap-2" id="modalConfirmAddFamilyLabel">
+                    <i class="pixelart-icons-font-users i8-md text-primary"></i>
+                    <span>Thêm Vào Nhóm Gia Đình</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="confirmAddAlert"></div>
+
+                <!-- Thông tin user tìm thấy -->
+                <div class="p-3 rounded-2 border bg-light mb-3 text-center">
+                    <img id="foundUserAvatar" src="" class="rounded-2 border mb-2" style="width: 64px; height: 64px; object-fit: cover;" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=User'" />
+                    <h6 class="fw-bold mb-1" id="foundUserFullName">Tên Người Dùng</h6>
+                    <div class="small text-muted mb-1" id="foundUserEmail">email@example.com</div>
+                    <div class="small text-muted" id="foundUserUsername"></div>
+                    <div class="mt-2" id="foundUserRolesBadge"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold small">Chọn vai trò trong nhóm gia đình <span class="text-danger">*</span></label>
+                    <div class="d-flex flex-column gap-2">
+                        <label class="p-2 px-3 border rounded-2 d-flex align-items-center gap-3 cursor-pointer mb-0 bg-white">
+                            <input type="radio" name="familyRoleOption" value="Child" class="form-check-input mt-0" id="roleOptionChild" checked />
+                            <div>
+                                <div class="fw-bold small text-primary d-flex align-items-center gap-1">
+                                    <i class="pixelart-icons-font-heart i8-xs text-danger"></i> Tài khoản Con (Bé)
+                                </div>
+                                <div class="text-muted" style="font-size: 11px;">Tạo hoặc liên kết hồ sơ trẻ để cùng theo dõi sức khỏe, lịch sinh hoạt & sao thưởng</div>
+                            </div>
+                        </label>
+                        <label class="p-2 px-3 border rounded-2 d-flex align-items-center gap-3 cursor-pointer mb-0 bg-white">
+                            <input type="radio" name="familyRoleOption" value="Parent" class="form-check-input mt-0" id="roleOptionParent" />
+                            <div>
+                                <div class="fw-bold small text-dark d-flex align-items-center gap-1">
+                                    <i class="pixelart-icons-font-users i8-xs text-primary"></i> Đồng quản lý (Phụ huynh / Người giám hộ)
+                                </div>
+                                <div class="text-muted" style="font-size: 11px;">Cùng quản lý và xem tất cả hồ sơ các bé trong nhóm gia đình</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="alert alert-info py-2 small mb-0 d-flex align-items-center gap-2">
+                    <i class="pixelart-icons-font-circle-info i8-sm"></i>
+                    <span>Hệ thống sẽ tự động gửi email qua Gmail thông báo cho tài khoản này.</span>
+                </div>
+            </div>
+            <div class="modal-footer border-top">
+                <button type="button" class="btn btn-secondary px-3" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary px-4 shadow-sm" id="btnConfirmAddMember">
+                    <i class="pixelart-icons-font-check i8-xs me-1"></i> Xác Nhận Thêm
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ================= MODAL ĐỔI TÊN NHÓM GIA ĐÌNH ================= -->
+<div class="modal fade" id="modalRenameFamily" tabindex="-1" aria-labelledby="modalRenameFamilyLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+        <div class="modal-content shadow-lg">
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title fw-bold d-flex align-items-center gap-2" id="modalRenameFamilyLabel">
+                    <i class="pixelart-icons-font-magic-edit i8-md text-primary"></i>
+                    <span>Đổi Tên Nhóm Gia Đình</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="formRenameFamily">
+                <div class="modal-body">
+                    <div id="renameFamilyAlert"></div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Tên nhóm gia đình <span class="text-danger">*</span></label>
+                        <input type="text" id="inputNewFamilyName" class="form-control" placeholder="Ví dụ: Gia Đình Của Huy" maxlength="100" required />
+                    </div>
+                </div>
+                <div class="modal-footer border-top">
+                    <button type="button" class="btn btn-secondary px-3" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary px-4 shadow-sm" id="btnSaveFamilyName">
+                        <i class="pixelart-icons-font-check i8-xs me-1"></i> Lưu Thay Đổi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ================= MODAL QUẢN LÝ CHẶN WEB & APP ================= -->
+<div class="modal fade" id="modalBlockedItems" tabindex="-1" aria-labelledby="modalBlockedItemsLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" style="max-width: 760px;">
+        <div class="modal-content shadow-lg">
+            <div class="modal-header border-bottom">
+                <div>
+                    <h5 class="modal-title fw-bold d-flex align-items-center gap-2" id="modalBlockedItemsLabel">
+                        <i class="pixelart-icons-font-shield i8-lg text-danger"></i>
+                        <span>Quản Lý Chặn Web & Ứng Dụng: <span class="text-danger" id="blockedKidName">Bé</span></span>
+                    </h5>
+                    <p class="text-muted small mb-0 mt-1">
+                        Ngăn chặn trẻ truy cập các trang web độc hại, cờ bạc, 18+ và giới hạn các ứng dụng / game dễ gây nghiện.
+                    </p>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body pt-3">
+                <input type="hidden" id="blockedKidId" value="" />
+                <div id="blockedItemAlert"></div>
+
+                <!-- KHỐI NHẬP LINK CHẶN THÔNG MINH (QUICK LINK BLOCKER) -->
+                <div class="p-3 rounded-2 bg-danger-subtle border border-danger-subtle mb-3" id="boxQuickLinkBlock">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <label for="quickLinkInput" class="fw-bold small text-danger mb-0 d-flex align-items-center gap-2">
+                            <i class="pixelart-icons-font-shield i8-xs"></i>
+                            <span>Tự Thêm Link Chặn Web & App:</span>
+                        </label>
+                        <span class="badge bg-danger text-white small" style="font-size: 10px;">Tự động nhận diện</span>
+                    </div>
+                    <form id="formQuickLinkBlock" class="d-flex flex-wrap gap-2">
+                        <div class="input-group flex-grow-1">
+                            <span class="input-group-text bg-white text-muted">
+                                <i class="pixelart-icons-font-search i8-xs"></i>
+                            </span>
+                            <input type="text" id="quickLinkInput" class="form-control" 
+                                   placeholder="Dán link web (vd: https://youtube.com, tiktok.com) hoặc link tải app (CH Play, App Store)..." required />
+                        </div>
+                        <button type="submit" class="btn btn-danger px-4 fw-semibold text-nowrap shadow-sm" id="btnSubmitQuickLink">
+                            <i class="pixelart-icons-font-plus i8-xs me-1"></i> Chặn Link Này
+                        </button>
+                    </form>
+                    <div class="text-muted mt-2 d-flex flex-wrap align-items-center gap-2" style="font-size: 11px;">
+                        <span><i class="pixelart-icons-font-zap i8-xs text-warning"></i> Hỗ trợ dán:</span>
+                        <span class="badge bg-white text-secondary border">Link web bất kỳ (https://...)</span>
+                        <span class="badge bg-white text-secondary border">Link Google Play Store</span>
+                        <span class="badge bg-white text-secondary border">Link Apple App Store</span>
+                        <span class="badge bg-white text-secondary border">Tên miền hoặc Tên App</span>
+                    </div>
+                </div>
+
+                <!-- GỢI Ý CHẶN NHANH PHỔ BIẾN (PRESETS) -->
+                <div class="p-3 rounded-2 bg-light border mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="small fw-bold text-dark d-flex align-items-center gap-1">
+                            <i class="pixelart-icons-font-zap i8-xs text-warning"></i> Gợi ý chặn nhanh phổ biến (1 chạm):
+                        </span>
+                        <span class="text-muted" style="font-size: 11px;">Nhấp vào để thêm ngay</span>
+                    </div>
+                    <div id="boxPresetsPills" class="d-flex flex-wrap gap-2">
+                        <!-- Render presets qua JavaScript -->
+                    </div>
+                </div>
+
+                <!-- TÙY CHỌN NÂNG CAO / THỦ CÔNG (COLLAPSIBLE) -->
+                <div class="mb-3">
+                    <div class="text-end mb-2">
+                        <button class="btn btn-sm btn-link text-decoration-none text-muted p-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapseManualAdd" aria-expanded="false">
+                            <i class="pixelart-icons-font-sliders i8-xs me-1"></i> Tùy chỉnh chi tiết (Tên hiển thị, Thể loại, Lý do chặn) ▼
+                        </button>
+                    </div>
+
+                    <div class="collapse" id="collapseManualAdd">
+                        <div class="bg-white p-3 rounded-2 border shadow-sm mb-3" id="boxFormAddBlockedItem">
+                            <div class="fw-bold small text-dark mb-2 d-flex align-items-center gap-2">
+                                <i class="pixelart-icons-font-plus i8-xs text-danger"></i>
+                                <span>Thêm mục chặn chi tiết:</span>
+                            </div>
+                            <form id="formAddBlockedItem" class="row g-2">
+                                <div class="col-md-3">
+                                    <label class="form-label small text-muted mb-1">Loại</label>
+                                    <select id="inputItemType" class="form-select form-select-sm">
+                                        <option value="Website">Trang Web</option>
+                                        <option value="App">Ứng Dụng</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-5">
+                                    <label class="form-label small text-muted mb-1" id="labelTargetInput">Link web / Tên miền / App <span class="text-danger">*</span></label>
+                                    <input type="text" id="inputTarget" class="form-control form-control-sm" placeholder="vd: tiktok.com, b52.club" required />
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small text-muted mb-1">Tên gợi nhớ (tùy chọn)</label>
+                                    <input type="text" id="inputTitle" class="form-control form-control-sm" placeholder="Để trống hệ thống sẽ tự điền" />
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small text-muted mb-1">Thể loại</label>
+                                    <select id="inputCategory" class="form-select form-select-sm">
+                                        <option value="Khác" selected>Tự động nhận diện</option>
+                                        <option value="Mạng xã hội">Mạng xã hội</option>
+                                        <option value="Trò chơi / Game">Trò chơi / Game</option>
+                                        <option value="Cờ bạc & Cá cược">Cờ bạc & Cá cược</option>
+                                        <option value="Nội dung độc hại / 18+">Nội dung độc hại / 18+</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-5">
+                                    <label class="form-label small text-muted mb-1">Lý do chặn (tùy chọn)</label>
+                                    <input type="text" id="inputReason" class="form-control form-control-sm" placeholder="vd: Gây xao nhãng học tập, bạo lực..." />
+                                </div>
+                                <div class="col-md-3 d-flex align-items-end">
+                                    <button type="submit" class="btn btn-sm btn-danger w-100 fw-semibold py-1 shadow-sm" id="btnAddBlockedItem">
+                                        <i class="pixelart-icons-font-plus i8-xs me-1"></i> Lưu Chặn
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- DANH SÁCH CÁC MỤC ĐANG BỊ CHẶN -->
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="d-flex gap-2" id="filterBlockedTabs">
+                        <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 py-1" data-filter="all" id="btnFilterAll">
+                            Tất cả (<span id="countFilterAll">0</span>)
+                        </button>
+                        <button type="button" class="btn btn-sm btn-light rounded-pill px-3 py-1 border" data-filter="Website" id="btnFilterWeb">
+                            🌐 Web (<span id="countFilterWeb">0</span>)
+                        </button>
+                        <button type="button" class="btn btn-sm btn-light rounded-pill px-3 py-1 border" data-filter="App" id="btnFilterApp">
+                            📱 App (<span id="countFilterApp">0</span>)
+                        </button>
+                    </div>
+                    <span class="small text-muted" id="activeBlockedSummary">0 mục đang chặn</span>
+                </div>
+
+                <!-- Container danh sách items -->
+                <div id="blockedItemsContainer" style="max-height: 280px; overflow-y: auto;" class="d-flex flex-column gap-2 pe-1">
+                    <!-- Sẽ render bằng JS -->
+                </div>
+
+                <div id="emptyBlockedBox" class="text-center py-4 text-muted small bg-light rounded-3 border" style="display: none;">
+                    <div>🛡️ Bé chưa bị chặn trang web hay ứng dụng nào.</div>
+                    <div class="mt-1">Nhấp vào một trong các gợi ý nhanh bên trên để bảo vệ bé ngay!</div>
+                </div>
+            </div>
+
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ================= MODAL MÃ QR GIA ĐÌNH (HIỆU LỰC ĐÚNG 1 PHÚT) ================= -->
+<div class="modal fade" id="modalFamilyQr" tabindex="-1" aria-labelledby="modalFamilyQrLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 460px;">
+        <div class="modal-content shadow-lg border-2">
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title fw-bold d-flex align-items-center gap-2 pixel-font" id="modalFamilyQrLabel">
+                    <i class="pixelart-icons-font-zap i8-md text-warning"></i>
+                    <span>MÃ QR THAM GIA GIA ĐÌNH</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="closeQrModal()"></button>
+            </div>
+            <div class="modal-body text-center p-4">
+                <p class="text-muted small mb-3">
+                    Cho bé dùng camera quét mã QR bên dưới để tham gia nhóm gia đình. Mã tự động hủy sau <strong>1 phút (60s)</strong> để bảo mật.
+                </p>
+
+                <!-- Loading State -->
+                <div id="qrLoadingBox" class="py-5" style="display: none;">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <div class="small text-muted mt-2 fw-semibold">Đang tạo mã QR bảo mật 60s...</div>
+                </div>
+
+                <!-- QR Display Container -->
+                <div id="qrDisplayBox">
+                    <!-- Progress Bar 60s -->
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="small text-muted fw-bold pixel-font" style="font-size: 11px;">
+                                <i class="pixelart-icons-font-clock i8-xs text-warning me-1"></i> THỜI GIAN CÒN LẠI:
+                            </span>
+                            <span class="badge bg-danger text-white pixel-font" id="qrModalTimerBadge">60s</span>
+                        </div>
+                        <div class="progress" style="height: 10px; border-radius: 4px;">
+                            <div id="qrModalProgressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width: 100%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Khung hình ảnh QR Code 8-bit (Luôn nền trắng tinh khiết, tương phản cao trên cả Light & Dark mode) -->
+                    <div class="position-relative d-inline-block p-3 rounded-3 border border-3 border-dark qr-box-white shadow mb-3" data-qr-box="true" style="min-width: 260px; min-height: 260px; background-color: #ffffff !important;">
+                        <!-- Container ảnh PNG hoặc SVG Vector -->
+                        <div id="qrImageWrapper" class="qr-box-white" style="width: 220px; height: 220px; display: flex; align-items: center; justify-content: center; margin: 0 auto; background-color: #ffffff !important;">
+                            <img id="qrImageElement" src="" alt="Mã QR Gia Đình" style="width: 220px; height: 220px; object-fit: contain; image-rendering: pixelated; display: block;" />
+                            <div id="qrSvgContainer" class="qr-box-white" style="width: 220px; height: 220px; display: none;"></div>
+                        </div>
+                        
+                        <!-- Overlay khi hết hạn sau 1 phút -->
+                        <div id="qrExpiredOverlay" class="position-absolute top-0 start-0 w-100 h-100 rounded-3 flex-column justify-content-center align-items-center p-3 text-center d-none" style="background: rgba(15, 23, 42, 0.94); z-index: 10;">
+                            <i class="pixelart-icons-font-close i8-xl text-danger mb-2"></i>
+                            <h6 class="fw-bold text-danger pixel-font mb-1">MÃ QR ĐÃ HẾT HẠN!</h6>
+                            <p class="small text-white-50 mb-3" style="font-size: 11px;">Mã chỉ tồn tại trong 1 phút để bảo vệ trẻ. Hãy bấm nút dưới để tạo mã mới.</p>
+                            <button type="button" class="btn btn-warning btn-sm fw-bold px-3 py-2 pixel-font shadow" onclick="generateNewQrCode()">
+                                <i class="pixelart-icons-font-reload i8-xs me-1"></i> Tạo Mã QR Mới
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Mã PIN 6 số dự phòng -->
+                    <div class="p-2 rounded-2 border bg-body-tertiary mb-3">
+                        <div class="small text-muted" style="font-size: 11px;">Hoặc bé có thể nhập Mã PIN 6 số:</div>
+                        <div class="fs-3 fw-bold text-primary pixel-font" style="letter-spacing: 0.15em;" id="qrShortCodeText">------</div>
+                    </div>
+
+                    <div class="alert alert-info py-2 small mb-0 d-flex align-items-center justify-content-center gap-2" id="qrStatusAlert">
+                        <div class="spinner-grow spinner-grow-sm text-info" role="status"></div>
+                        <span id="qrStatusPollingText">Đang chờ bé quét mã...</span>
+                    </div>
+                </div>
+
+                <!-- Success Box khi bé đã quét thành công -->
+                <div id="qrSuccessBox" class="p-4 rounded-3 border border-success bg-success-subtle text-success my-3" style="display: none;">
+                    <i class="pixelart-icons-font-heart i8-xl text-success i8-pulse mb-2"></i>
+                    <h5 class="fw-bold pixel-font mb-1">🎉 THÀNH CÔNG!</h5>
+                    <div class="small" id="qrSuccessMessage">Bé đã tham gia gia đình thành công!</div>
+                </div>
+            </div>
+            <div class="modal-footer border-top d-flex justify-content-between">
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="generateNewQrCode()">
+                    <i class="pixelart-icons-font-reload i8-xs me-1"></i> Làm mới mã QR
+                </button>
+                <button type="button" class="btn btn-sm btn-secondary px-4" data-bs-dismiss="modal" onclick="closeQrModal()">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ================= MODAL QUÉT QR / NHẬP PIN THAM GIA GIA ĐÌNH ================= -->
+<div class="modal fade" id="modalJoinByQrCode" tabindex="-1" aria-labelledby="modalJoinByQrCodeLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 450px;">
+        <div class="modal-content shadow-lg border-2">
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title fw-bold d-flex align-items-center gap-2 pixel-font" id="modalJoinByQrCodeLabel">
+                    <i class="pixelart-icons-font-camera i8-md text-primary"></i>
+                    <span>THAM GIA BẰNG QR / MÃ PIN</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="formJoinByQrModal">
+                <div class="modal-body p-4">
+                    <div id="joinModalAlert"></div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-muted mb-1 d-flex align-items-center gap-1">
+                            <i class="pixelart-icons-font-zap i8-xs text-warning"></i> Nhập Mã PIN 6 số hoặc Token từ ba mẹ: <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" id="inputScanPinCode" class="form-control form-control-lg text-center fw-bold pixel-font text-primary" placeholder="Ví dụ: 829143" maxlength="64" required style="letter-spacing: 0.1em; font-size: 1.3rem;" />
+                        <div class="form-text small" style="font-size: 11px;">Mã PIN do phụ huynh tạo và chỉ có hiệu lực trong 1 phút (60s).</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-muted mb-1 d-flex align-items-center gap-1">
+                            <i class="pixelart-icons-font-user i8-xs text-primary"></i> Tên của Bé: <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" id="inputScanKidName" class="form-control" placeholder="Ví dụ: Bé Tin Tin" required />
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label small fw-semibold text-muted mb-1 d-flex align-items-center gap-1">
+                            <i class="pixelart-icons-font-lock i8-xs text-primary"></i> Mật khẩu đăng nhập cho bé (tùy chọn):
+                        </label>
+                        <input type="password" id="inputScanPassword" class="form-control" placeholder="Mặc định: Kid@123" />
+                    </div>
+                </div>
+                <div class="modal-footer border-top">
+                    <button type="button" class="btn btn-light btn-sm px-3" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary px-4 fw-bold pixel-font" id="btnSubmitJoinModal">
+                        <i class="pixelart-icons-font-check i8-xs me-1"></i> Tham Gia Ngay
+                    </button>
                 </div>
             </form>
         </div>
@@ -315,16 +804,31 @@
     let kidsList = [];
     let currentUser = null;
     let isKidRole = false;
+    let currentFamilyGroup = null;
+    let candidateUserToAdd = null;
+    let currentBlockedItems = [];
+    let currentKidForBlocked = null;
+    let cachedPresets = [];
+    let currentBlockedFilter = 'all';
 
     const container = document.getElementById('kidsContainer');
     const loadingBox = document.getElementById('loadingBox');
     const emptyBox = document.getElementById('emptyBox');
     const parentStatsBar = document.getElementById('parentStatsBar');
     const kidGreetingBanner = document.getElementById('kidGreetingBanner');
+    const familyGroupSection = document.getElementById('familyGroupSection');
 
     const modalKid = new bootstrap.Modal(document.getElementById('modalKid'));
     const modalSubAccount = new bootstrap.Modal(document.getElementById('modalSubAccount'));
     const modalResetPassword = new bootstrap.Modal(document.getElementById('modalResetPassword'));
+    const modalConfirmAddFamily = new bootstrap.Modal(document.getElementById('modalConfirmAddFamily'));
+    const modalRenameFamily = new bootstrap.Modal(document.getElementById('modalRenameFamily'));
+    const modalBlockedItems = new bootstrap.Modal(document.getElementById('modalBlockedItems'));
+    const modalFamilyQr = new bootstrap.Modal(document.getElementById('modalFamilyQr'));
+    const modalJoinByQrCode = new bootstrap.Modal(document.getElementById('modalJoinByQrCode'));
+    let qrTimerInterval = null;
+    let qrPollingInterval = null;
+    let currentQrToken = null;
 
     // Lấy token và header xác thực
     function getAuthHeaders() {
@@ -352,6 +856,20 @@
     // Load danh sách trẻ
     async function loadKids() {
         checkCurrentAuth();
+        const authRequiredNotice = document.getElementById('authRequiredNotice');
+
+        if (!currentUser) {
+            if (authRequiredNotice) authRequiredNotice.style.display = 'flex';
+            if (loadingBox) loadingBox.style.display = 'none';
+            if (parentStatsBar) parentStatsBar.style.display = 'none';
+            if (familyGroupSection) familyGroupSection.style.display = 'none';
+            if (container) container.style.display = 'none';
+            if (emptyBox) emptyBox.style.display = 'none';
+            return;
+        }
+
+        if (authRequiredNotice) authRequiredNotice.style.display = 'none';
+        loadFamilyGroup();
         loadingBox.style.display = 'block';
         container.style.display = 'none';
         emptyBox.style.display = 'none';
@@ -426,39 +944,55 @@
             const subEmail = k.kidUserEmail || (k.kidAccount ? k.kidAccount.email : '');
             const subFullName = k.kidUserFullName || (k.kidAccount ? k.kidAccount.fullName : '');
 
+            // Trạng thái Chặn Web & App
+            const blockedCount = k.blockedItemsCount || 0;
+            const blockedHtml = `
+            <div class="d-flex justify-content-between align-items-center mb-2 px-3 py-2 rounded-2 bg-light border">
+                <div class="small d-flex align-items-center gap-1">
+                    <i class="pixelart-icons-font-shield i8-xs text-danger"></i>
+                    <span class="text-muted">Chặn Web & App:</span>
+                    ${blockedCount > 0 
+                        ? `<span class="badge bg-danger text-white">${blockedCount} mục</span>`
+                        : `<span class="badge bg-secondary-subtle text-secondary">0 mục</span>`}
+                </div>
+                <button type="button" class="btn btn-sm btn-link text-decoration-none p-0 fw-semibold text-danger small" onclick="openBlockedItemsModal(${k.id}, '${k.fullName.replace(/'/g, "\\'")}')">
+                    ${!isKidRole ? 'Cài đặt' : 'Xem'}
+                </button>
+            </div>`;
+
             // Khối hiển thị Sub-Account Box
             let subAccountHtml = '';
             if (hasSub) {
                 subAccountHtml = `
-                <div class="p-3 rounded-3 bg-success-subtle border border-success-subtle mb-3">
+                <div class="p-3 rounded-2 bg-success-subtle border border-success-subtle mb-3">
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="d-flex align-items-center gap-2">
-                            <span class="fs-4">👦</span>
+                            <i class="pixelart-icons-font-user i8-lg text-success"></i>
                             <div>
                                 <div class="fw-bold text-success-emphasis d-flex align-items-center gap-1">
                                     <span>Tài khoản con:</span>
                                     <span class="badge bg-success text-white">${'@@' + (subUsername || 'con')}</span>
                                 </div>
-                                <div class="text-muted" style="font-size: 11px;">
-                                    ${subEmail ? `✉️ ${subEmail}` : 'Đã kết nối tài khoản riêng'}
+                                <div class="text-muted d-flex align-items-center gap-1" style="font-size: 11px;">
+                                    ${subEmail ? `<i class="pixelart-icons-font-mail i8-xs"></i> ${subEmail}` : 'Đã kết nối tài khoản riêng'}
                                 </div>
                             </div>
                         </div>
                         ${!isKidRole ? `
                         <div class="dropdown">
-                            <button class="btn btn-sm btn-light rounded-pill px-2 py-1 border shadow-sm" data-bs-toggle="dropdown" title="Tùy chọn tài khoản con">
-                                ⚙️
+                            <button class="btn btn-sm btn-light px-2 py-1 border shadow-sm" data-bs-toggle="dropdown" title="Tùy chọn tài khoản con">
+                                <i class="pixelart-icons-font-sliders i8-xs"></i>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                                 <li>
                                     <button class="dropdown-item small" onclick="openResetPasswordModal(${k.id}, '${subUsername}')">
-                                        🔑 Đổi mật khẩu cho bé
+                                        <i class="pixelart-icons-font-lock i8-xs me-1"></i> Đổi mật khẩu cho bé
                                     </button>
                                 </li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <button class="dropdown-item small text-danger" onclick="unlinkChildAccount(${k.id}, '${k.fullName}')">
-                                        ❌ Hủy liên kết tài khoản con
+                                        <i class="pixelart-icons-font-close i8-xs me-1"></i> Hủy liên kết tài khoản con
                                     </button>
                                 </li>
                             </ul>
@@ -467,31 +1001,31 @@
                 </div>`;
             } else {
                 subAccountHtml = `
-                <div class="p-3 rounded-3 bg-warning-subtle border border-warning-subtle mb-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <div class="p-3 rounded-2 bg-warning-subtle border border-warning-subtle mb-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
                     <div class="d-flex align-items-center gap-2 text-warning-emphasis small">
-                        <span>⚠️</span>
+                        <i class="pixelart-icons-font-circle-info i8-xs text-warning"></i>
                         <span>Chưa liên kết tài khoản con riêng</span>
                     </div>
                     ${!isKidRole ? `
-                    <button class="btn btn-sm btn-warning rounded-pill px-3 py-1 fw-semibold shadow-sm text-dark" onclick="openSubAccountModal(${k.id}, '${k.fullName}')">
-                        🔗 + Thêm tài khoản con
+                    <button class="btn btn-sm btn-warning px-3 py-1 fw-semibold text-dark" onclick="openSubAccountModal(${k.id}, '${k.fullName}')">
+                        <i class="pixelart-icons-font-plus i8-xs me-1"></i> Thêm tài khoản con
                     </button>` : ''}
                 </div>`;
             }
 
             return `
             <div class="col-md-6 col-lg-4">
-                <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden position-relative hover-shadow transition">
-                    <div class="card-body p-4 d-flex flex-column">
+                <div class="apple-card h-100 position-relative">
+                    <div class="p-4 d-flex flex-column h-100">
                         <!-- Header thẻ bé -->
                         <div class="d-flex align-items-center gap-3 mb-3">
-                            <img src="${avatar}" alt="${k.fullName}" class="rounded-circle border border-2 border-primary-subtle bg-light" style="width: 64px; height: 64px; object-fit: cover;" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Kid'"/>
+                            <img src="${avatar}" alt="${k.fullName}" class="rounded-2 border border-2 border-primary-subtle bg-light" style="width: 60px; height: 60px; object-fit: cover;" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Kid'"/>
                             <div class="flex-grow-1">
                                 <h5 class="fw-bold mb-0 text-dark">${k.fullName}</h5>
-                                <div class="small text-muted mt-1">
-                                    ${k.nickname ? `<span class="badge bg-warning-subtle text-warning-emphasis me-1">🧸 ${k.nickname}</span>` : ''}
+                                <div class="small text-muted mt-1 d-flex flex-wrap gap-1 align-items-center">
+                                    ${k.nickname ? `<span class="badge bg-warning text-dark"><i class="pixelart-icons-font-star i8-xs"></i> ${k.nickname}</span>` : ''}
                                     <span class="badge ${genderBadge}">${k.gender || 'Bé'}</span>
-                                    <span class="badge bg-secondary-subtle text-secondary ms-1">${age}</span>
+                                    <span class="badge bg-secondary text-white">${age}</span>
                                 </div>
                             </div>
                         </div>
@@ -502,50 +1036,62 @@
                         <!-- Thông tin chi tiết trường học / sức khỏe -->
                         <div class="mb-3 small flex-grow-1">
                             <div class="d-flex align-items-center gap-2 text-secondary mb-1">
-                                <span>🏫</span>
+                                <i class="pixelart-icons-font-home i8-xs text-muted"></i>
                                 <span>${k.schoolName || 'Chưa cập nhật trường học'}</span>
                             </div>
                             ${k.healthNotes ? `
                             <div class="d-flex align-items-start gap-2 text-danger-emphasis mb-1">
-                                <span>❤️</span>
+                                <i class="pixelart-icons-font-heart i8-xs text-danger"></i>
                                 <span>${k.healthNotes}</span>
                             </div>` : ''}
                             ${k.interests ? `
                             <div class="d-flex align-items-center gap-2 text-info-emphasis">
-                                <span>🎨</span>
+                                <i class="pixelart-icons-font-magic-edit i8-xs text-info"></i>
                                 <span>${k.interests}</span>
                             </div>` : ''}
                             ${k.parentName ? `
                             <div class="d-flex align-items-center gap-2 text-muted mt-2 pt-2 border-top">
-                                <span>👨‍👩‍👧</span>
+                                <i class="pixelart-icons-font-users i8-xs text-primary"></i>
                                 <span style="font-size: 11px;">Phụ huynh: <strong>${k.parentName}</strong></span>
                             </div>` : ''}
                         </div>
 
+                        <!-- Trạng thái Chặn Web & App -->
+                        ${blockedHtml}
+
                         <!-- Điểm sao thưởng tích lũy -->
                         <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
-                            <div class="d-flex align-items-center gap-1 text-warning fw-bold fs-5">
-                                <span>⭐</span>
-                                <span class="text-dark">${k.totalPoints || 0}</span>
+                            <div class="d-flex align-items-center gap-2 text-warning fw-bold fs-5">
+                                <i class="pixelart-icons-font-star i8-sm text-warning i8-pulse"></i>
+                                <span class="text-dark pixel-font">${k.totalPoints || 0}</span>
                                 <span class="small text-muted fw-normal fs-6">sao tích lũy</span>
                             </div>
                             ${!isKidRole ? `
-                            <button class="btn btn-sm btn-outline-warning rounded-pill px-3 py-1 fw-bold" onclick="addQuickPoints(${k.id}, 5)" title="Thưởng nóng 5 sao cho bé">
-                                +5 ⭐
+                            <button class="btn btn-sm btn-outline-warning px-3 py-1 fw-bold" onclick="addQuickPoints(${k.id}, 5)" title="Thưởng nóng 5 sao cho bé">
+                                +5 <i class="pixelart-icons-font-star i8-xs"></i>
                             </button>` : ''}
                         </div>
 
                         <!-- Các nút hành động -->
-                        <div class="d-flex gap-2 mt-3">
-                            <a href="/activities?kidId=${k.id}" class="btn btn-sm btn-light rounded-pill flex-grow-1 text-primary fw-semibold border">
-                                📋 Lịch & Nhiệm Vụ
+                        <div class="d-flex flex-wrap gap-2 mt-3">
+                            <a href="/activities?kidId=${k.id}" class="btn btn-sm btn-secondary flex-grow-1 text-primary fw-semibold border text-center">
+                                <i class="pixelart-icons-font-calendar i8-xs me-1"></i> Nhiệm Vụ
                             </a>
-                            ${!isKidRole ? `
-                            <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="openEditModal(${k.id})">
-                                Sửa
+                            <a href="/tracking?kidId=${k.id}" class="btn btn-sm btn-outline-primary px-2 fw-semibold" title="Định vị GPS thời gian thực & Vùng an toàn">
+                                <i class="pixelart-icons-font-map-pin i8-xs me-1"></i> Định Vị
+                            </a>
+                            <a href="/screentime?kidId=${k.id}" class="btn btn-sm btn-outline-primary px-2 fw-semibold" title="Đặt lịch và giới hạn giờ dùng máy">
+                                <i class="pixelart-icons-font-clock i8-xs me-1"></i> Giờ Máy
+                            </a>
+                            <button type="button" class="btn btn-sm btn-danger px-2 fw-semibold" onclick="openBlockedItemsModal(${k.id}, '${k.fullName.replace(/'/g, "\\'")}')" title="Quản lý chặn web và app">
+                                <i class="pixelart-icons-font-shield i8-xs me-1"></i> Chặn
                             </button>
-                            <button class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="deleteKid(${k.id}, '${k.fullName}')">
-                                Xóa
+                            ${!isKidRole ? `
+                            <button class="btn btn-sm btn-outline-secondary px-2" onclick="openEditModal(${k.id})" title="Chỉnh sửa hồ sơ">
+                                <i class="pixelart-icons-font-magic-edit i8-xs"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger px-2" onclick="deleteKid(${k.id}, '${k.fullName}')" title="Xóa hồ sơ">
+                                <i class="pixelart-icons-font-trash i8-xs"></i>
                             </button>` : ''}
                         </div>
                     </div>
@@ -913,6 +1459,838 @@
         );
         renderKids(filtered);
     });
+
+    // ==========================================
+    // QUẢN LÝ NHÓM GIA ĐÌNH
+    // ==========================================
+    async function loadFamilyGroup() {
+        if (!currentUser || isKidRole) {
+            if (familyGroupSection) familyGroupSection.style.display = 'none';
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/family/my-family', { headers: getAuthHeaders() });
+            if (!res.ok) {
+                if (familyGroupSection) familyGroupSection.style.display = 'none';
+                return;
+            }
+            currentFamilyGroup = await res.json();
+            renderFamilyGroup(currentFamilyGroup);
+        } catch (e) {
+            console.warn('Không thể tải nhóm gia đình:', e);
+        }
+    }
+
+    function renderFamilyGroup(data) {
+        if (!data || !data.group) {
+            if (familyGroupSection) familyGroupSection.style.display = 'none';
+            return;
+        }
+        if (familyGroupSection) familyGroupSection.style.display = 'block';
+
+        const nameEl = document.getElementById('familyGroupName');
+        if (nameEl) nameEl.textContent = data.group.name || 'Nhóm Gia Đình';
+
+        const members = data.members || [];
+        const countEl = document.getElementById('familyMemberCount');
+        if (countEl) countEl.textContent = `${members.length} thành viên`;
+
+        const pillsBox = document.getElementById('familyMembersPills');
+        if (!pillsBox) return;
+
+        const isCurrentOwner = currentUser && (currentUser.id === data.group.ownerId);
+
+        pillsBox.innerHTML = members.map(m => {
+            const isOwner = m.roleInFamily === 'Owner' || m.userId === data.group.ownerId;
+            const isChild = m.roleInFamily === 'Child';
+            const badgeClass = isOwner ? 'badge bg-warning text-dark' : (isChild ? 'badge bg-success-subtle text-success border border-success' : 'badge bg-primary-subtle text-primary border border-primary');
+            const roleLabel = isOwner ? '👑 Chủ gia đình' : (isChild ? '👶 Bé (Con)' : '👥 Quản lý');
+            const displayName = m.fullName || m.username || 'Thành viên';
+            const avatar = m.avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(displayName)}`;
+
+            const canDelete = isCurrentOwner && !isOwner;
+            const safeName = displayName.replace(/'/g, "\\'");
+
+            return `
+            <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill bg-white border shadow-sm">
+                <img src="${avatar}" class="rounded-circle" style="width: 24px; height: 24px; object-fit: cover;" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=User'" />
+                <div class="d-flex align-items-center gap-1">
+                    <span class="fw-semibold small">${displayName}</span>
+                    <span class="${badgeClass}" style="font-size: 10px;">${roleLabel}</span>
+                </div>
+                ${canDelete ? `
+                <button type="button" class="btn btn-sm btn-link text-danger p-0 ms-1 text-decoration-none fw-bold" style="font-size: 14px; line-height: 1;" onclick="removeFamilyMember(${m.id}, '${safeName}')" title="Xóa khỏi gia đình">
+                    &times;
+                </button>` : ''}
+            </div>`;
+        }).join('');
+    }
+
+    // Xử lý gửi Form nhập Email nhanh
+    document.getElementById('formQuickAddFamily')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const emailInput = document.getElementById('quickFamilyEmail');
+        const email = emailInput.value.trim();
+        const alertBox = document.getElementById('quickAddAlert');
+        const btn = document.getElementById('btnSubmitQuickAdd');
+
+        if (!email) return;
+
+        btn.disabled = true;
+        btn.innerHTML = 'Đang kiểm tra...';
+        alertBox.innerHTML = '';
+
+        try {
+            const res = await fetch('/api/family/check-email', {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ email })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Lỗi khi kiểm tra email');
+
+            if (!data.exists) {
+                alertBox.innerHTML = `<div class="alert alert-warning py-2 small alert-dismissible fade show">
+                    <strong>Không tìm thấy tài khoản!</strong> ${data.message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>`;
+                return;
+            }
+
+            if (data.isSelf) {
+                alertBox.innerHTML = `<div class="alert alert-info py-2 small alert-dismissible fade show">
+                    Đây là tài khoản hiện tại của bạn.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>`;
+                return;
+            }
+
+            if (data.isAlreadyMember) {
+                alertBox.innerHTML = `<div class="alert alert-info py-2 small alert-dismissible fade show">
+                    Tài khoản này đã là thành viên trong nhóm gia đình (${data.memberRole || 'Thành viên'}).
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>`;
+                return;
+            }
+
+            candidateUserToAdd = data.user;
+
+            // Đổ thông tin vào modal
+            document.getElementById('foundUserAvatar').src = candidateUserToAdd.avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(candidateUserToAdd.fullName || candidateUserToAdd.username)}`;
+            document.getElementById('foundUserFullName').textContent = candidateUserToAdd.fullName || candidateUserToAdd.username;
+            document.getElementById('foundUserEmail').textContent = candidateUserToAdd.email || '';
+            document.getElementById('foundUserUsername').textContent = '@@' + candidateUserToAdd.username;
+
+            const roles = candidateUserToAdd.roles || [];
+            document.getElementById('foundUserRolesBadge').innerHTML = roles.map(r => `<span class="badge bg-secondary-subtle text-secondary me-1">${r}</span>`).join('');
+
+            // Chọn mặc định vai trò dựa theo role hiện tại của user
+            if (roles.includes('Kid') || roles.includes('kid')) {
+                document.getElementById('roleOptionChild').checked = true;
+            } else {
+                document.getElementById('roleOptionParent').checked = true;
+            }
+
+            document.getElementById('confirmAddAlert').innerHTML = '';
+            modalConfirmAddFamily.show();
+        } catch (err) {
+            alertBox.innerHTML = `<div class="alert alert-danger py-2 small">${err.message}</div>`;
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '+ Thêm Vào Gia Đình';
+        }
+    });
+
+    // Xác nhận thêm thành viên và gửi Gmail
+    document.getElementById('btnConfirmAddMember')?.addEventListener('click', async () => {
+        if (!candidateUserToAdd) return;
+        const btn = document.getElementById('btnConfirmAddMember');
+        const alertBox = document.getElementById('confirmAddAlert');
+        const roleInFamily = document.querySelector('input[name="familyRoleOption"]:checked')?.value || 'Child';
+
+        btn.disabled = true;
+        btn.innerHTML = 'Đang thêm & gửi Gmail...';
+        alertBox.innerHTML = '';
+
+        try {
+            const res = await fetch('/api/family/add-by-email', {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({
+                    email: candidateUserToAdd.email || candidateUserToAdd.username,
+                    roleInFamily,
+                    kidFullName: candidateUserToAdd.fullName || candidateUserToAdd.username
+                })
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Không thể thêm thành viên');
+
+            modalConfirmAddFamily.hide();
+            document.getElementById('quickFamilyEmail').value = '';
+            document.getElementById('quickAddAlert').innerHTML = `<div class="alert alert-success py-2 small alert-dismissible fade show">
+                <strong>Thành công!</strong> ${data.message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>`;
+
+            await loadKids();
+            await loadFamilyGroup();
+        } catch (err) {
+            alertBox.innerHTML = `<div class="alert alert-danger py-2 small">${err.message}</div>`;
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = 'Xác Nhận Thêm';
+        }
+    });
+
+    // Xóa thành viên khỏi nhóm gia đình
+    window.removeFamilyMember = async function(memberId, name) {
+        if (!confirm(`Bạn có chắc muốn xóa "${name}" khỏi nhóm gia đình không?`)) return;
+
+        try {
+            const res = await fetch(`/api/family/members/${memberId}`, {
+                method: 'DELETE',
+                headers: getAuthHeaders()
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Lỗi khi xóa thành viên');
+
+            await loadFamilyGroup();
+            await loadKids();
+        } catch (err) {
+            alert(err.message);
+        }
+    };
+
+    // Đổi tên nhóm gia đình
+    document.getElementById('btnOpenRenameFamily')?.addEventListener('click', () => {
+        if (!currentFamilyGroup || !currentFamilyGroup.group) return;
+        document.getElementById('inputNewFamilyName').value = currentFamilyGroup.group.name || '';
+        document.getElementById('renameFamilyAlert').innerHTML = '';
+        modalRenameFamily.show();
+    });
+
+    document.getElementById('formRenameFamily')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const newName = document.getElementById('inputNewFamilyName').value.trim();
+        const btn = document.getElementById('btnSaveFamilyName');
+        const alertBox = document.getElementById('renameFamilyAlert');
+
+        if (!newName) return;
+
+        btn.disabled = true;
+        btn.innerHTML = 'Đang lưu...';
+        alertBox.innerHTML = '';
+
+        try {
+            const res = await fetch('/api/family/rename', {
+                method: 'PUT',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ name: newName })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Lỗi khi đổi tên');
+
+            modalRenameFamily.hide();
+            await loadFamilyGroup();
+        } catch (err) {
+            alertBox.innerHTML = `<div class="alert alert-danger py-2 small">${err.message}</div>`;
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = 'Lưu Thay Đổi';
+        }
+    });
+
+    // ==========================================
+    // QUẢN LÝ MÃ QR GIA ĐÌNH (HIỆU LỰC 1 PHÚT)
+    // ==========================================
+    window.openFamilyQrModal = async function() {
+        modalFamilyQr.show();
+        await generateNewQrCode();
+    };
+
+    window.closeQrModal = function() {
+        if (qrTimerInterval) clearInterval(qrTimerInterval);
+        if (qrPollingInterval) clearInterval(qrPollingInterval);
+        const overlay = document.getElementById('qrExpiredOverlay');
+        if (overlay) {
+            overlay.classList.add('d-none');
+            overlay.classList.remove('d-flex');
+            overlay.style.display = 'none';
+        }
+    };
+
+    window.generateNewQrCode = async function() {
+        if (qrTimerInterval) clearInterval(qrTimerInterval);
+        if (qrPollingInterval) clearInterval(qrPollingInterval);
+
+        const qrLoadingBox = document.getElementById('qrLoadingBox');
+        const qrDisplayBox = document.getElementById('qrDisplayBox');
+        const qrExpiredOverlay = document.getElementById('qrExpiredOverlay');
+        const qrSuccessBox = document.getElementById('qrSuccessBox');
+        const imgEl = document.getElementById('qrImageElement');
+        const svgContainer = document.getElementById('qrSvgContainer');
+
+        // Phục hồi HTML khung loading sạch
+        qrLoadingBox.innerHTML = `
+            <div class="spinner-border text-primary" role="status"></div>
+            <div class="small text-muted mt-2 fw-semibold">Đang tạo mã QR bảo mật 60s...</div>
+        `;
+        qrLoadingBox.style.display = 'block';
+        qrDisplayBox.style.display = 'none';
+        qrSuccessBox.style.display = 'none';
+
+        // Ẩn triệt để overlay hết hạn (kết hợp class d-none và style)
+        if (qrExpiredOverlay) {
+            qrExpiredOverlay.classList.add('d-none');
+            qrExpiredOverlay.classList.remove('d-flex');
+            qrExpiredOverlay.style.display = 'none';
+        }
+
+        try {
+            const authUser = localStorage.getItem('authUser');
+            let uid = null;
+            if (authUser) {
+                try { uid = JSON.parse(authUser).id; } catch(_) {}
+            }
+
+            const res = await fetch('/api/family/generate-qr', {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ userId: uid })
+            });
+
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                throw new Error(errData.message || 'Không thể tạo mã QR gia đình');
+            }
+            const data = await res.json();
+
+            currentQrToken = data.token;
+            document.getElementById('qrShortCodeText').textContent = data.shortCode || '------';
+
+            // Đảm bảo hiển thị QR Code đa tầng bảo mật (SVG -> Base64 PNG -> Online QR Server Fallback)
+            if (data.qrCodeSvg && data.qrCodeSvg.trim() !== '') {
+                svgContainer.innerHTML = data.qrCodeSvg;
+                const svgTag = svgContainer.querySelector('svg');
+                if (svgTag) {
+                    svgTag.setAttribute('width', '220');
+                    svgTag.setAttribute('height', '220');
+                    svgTag.style.width = '220px';
+                    svgTag.style.height = '220px';
+                    svgTag.style.display = 'block';
+                    svgTag.style.margin = '0 auto';
+                }
+                svgContainer.style.display = 'block';
+                imgEl.style.display = 'none';
+            } else if (data.qrCodeDataUrl && data.qrCodeDataUrl.trim() !== '') {
+                imgEl.src = data.qrCodeDataUrl;
+                imgEl.style.display = 'block';
+                svgContainer.style.display = 'none';
+
+                // Tự động kích hoạt Fallback nếu trình duyệt không hiển thị được Base64 PNG
+                imgEl.onerror = () => {
+                    const fallbackUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(data.joinUrl)}`;
+                    imgEl.src = fallbackUrl;
+                };
+            } else {
+                // Fallback nếu server không sinh được ảnh
+                const fallbackUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(data.joinUrl)}`;
+                imgEl.src = fallbackUrl;
+                imgEl.style.display = 'block';
+                svgContainer.style.display = 'none';
+            }
+
+            qrLoadingBox.style.display = 'none';
+            qrDisplayBox.style.display = 'block';
+
+            // Khởi động đếm ngược 60 giây (1 phút)
+            startQrCountdown(60);
+
+            // Bắt đầu polling lắng nghe khi bé quét thành công
+            startQrPolling(data.token);
+
+        } catch (err) {
+            console.error('Lỗi khi tạo mã QR:', err);
+            qrLoadingBox.innerHTML = `
+                <div class="alert alert-danger py-2 small mb-3">
+                    <i class="pixelart-icons-font-alert i8-xs me-1"></i> ${err.message || 'Lỗi khi tạo mã QR'}
+                </div>
+                <button type="button" class="btn btn-warning btn-sm pixel-font fw-bold" onclick="generateNewQrCode()">
+                    <i class="pixelart-icons-font-reload i8-xs me-1"></i> Thử Tạo Lại
+                </button>
+            `;
+        }
+    };
+
+    function startQrCountdown(seconds) {
+        let remaining = seconds;
+        const badge = document.getElementById('qrModalTimerBadge');
+        const bar = document.getElementById('qrModalProgressBar');
+        const overlay = document.getElementById('qrExpiredOverlay');
+
+        // Đảm bảo overlay bị ẩn khi bắt đầu đếm
+        if (overlay) {
+            overlay.classList.add('d-none');
+            overlay.classList.remove('d-flex');
+            overlay.style.display = 'none';
+        }
+
+        badge.textContent = remaining + 's';
+        bar.style.width = '100%';
+        bar.className = 'progress-bar progress-bar-striped progress-bar-animated bg-success';
+
+        qrTimerInterval = setInterval(() => {
+            remaining--;
+            if (remaining <= 0) {
+                clearInterval(qrTimerInterval);
+                if (qrPollingInterval) clearInterval(qrPollingInterval);
+
+                badge.textContent = '0s';
+                bar.style.width = '0%';
+                if (overlay) {
+                    overlay.classList.remove('d-none');
+                    overlay.classList.add('d-flex');
+                    overlay.style.display = 'flex'; // Hiện overlay MÃ ĐÃ HẾT HẠN
+                }
+                return;
+            }
+
+            badge.textContent = remaining + 's';
+            const pct = (remaining / 60) * 100;
+            bar.style.width = pct + '%';
+
+            if (remaining <= 15) {
+                bar.className = 'progress-bar progress-bar-striped progress-bar-animated bg-danger';
+            } else if (remaining <= 30) {
+                bar.className = 'progress-bar progress-bar-striped progress-bar-animated bg-warning';
+            } else {
+                bar.className = 'progress-bar progress-bar-striped progress-bar-animated bg-success';
+            }
+        }, 1000);
+    }
+
+    function startQrPolling(token) {
+        qrPollingInterval = setInterval(async () => {
+            try {
+                const res = await fetch(`/api/family/qr-status/${encodeURIComponent(token)}`);
+                if (!res.ok) return;
+                const status = await res.json();
+
+                if (status.isUsed) {
+                    clearInterval(qrPollingInterval);
+                    if (qrTimerInterval) clearInterval(qrTimerInterval);
+
+                    document.getElementById('qrDisplayBox').style.display = 'none';
+                    const successBox = document.getElementById('qrSuccessBox');
+                    document.getElementById('qrSuccessMessage').innerHTML = `Bé <strong>${status.usedByUserName || 'Thành viên mới'}</strong> đã quét mã QR thành công và gia nhập nhóm gia đình!`;
+                    successBox.style.display = 'block';
+
+                    // Tải lại danh sách
+                    await loadFamilyGroup();
+                    await loadKids();
+                }
+            } catch (_) {}
+        }, 2000);
+    }
+
+    // Modal nhập mã PIN / Quét QR thủ công
+    window.openScanModal = function() {
+        document.getElementById('inputScanPinCode').value = '';
+        document.getElementById('inputScanKidName').value = '';
+        document.getElementById('inputScanPassword').value = '';
+        document.getElementById('joinModalAlert').innerHTML = '';
+        modalJoinByQrCode.show();
+    };
+
+    document.getElementById('formJoinByQrModal')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const code = document.getElementById('inputScanPinCode').value.trim();
+        const kidName = document.getElementById('inputScanKidName').value.trim();
+        const pwd = document.getElementById('inputScanPassword').value;
+        const btn = document.getElementById('btnSubmitJoinModal');
+        const alertBox = document.getElementById('joinModalAlert');
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang xác thực...';
+        alertBox.innerHTML = '';
+
+        try {
+            const res = await fetch('/api/family/join-by-qr', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    code: code,
+                    token: code,
+                    username: kidName,
+                    kidFullName: kidName,
+                    password: pwd || 'Kid@123'
+                })
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Lỗi khi gia nhập gia đình');
+
+            modalJoinByQrCode.hide();
+            alert(data.message);
+            await loadFamilyGroup();
+            await loadKids();
+
+        } catch (err) {
+            alertBox.innerHTML = `<div class="alert alert-danger py-2 small rounded-2 mb-3">${err.message}</div>`;
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="pixelart-icons-font-check i8-xs me-1"></i> Tham Gia Ngay';
+        }
+    });
+
+    // ==========================================
+    // QUẢN LÝ CHẶN WEB & ỨNG DỤNG (PARENTAL CONTROL)
+    // ==========================================
+    window.openBlockedItemsModal = async function(kidId, kidName) {
+        currentKidForBlocked = kidId;
+        document.getElementById('blockedKidId').value = kidId;
+        document.getElementById('blockedKidName').textContent = kidName;
+        document.getElementById('blockedItemAlert').innerHTML = '';
+        if (document.getElementById('quickLinkInput')) document.getElementById('quickLinkInput').value = '';
+        document.getElementById('formAddBlockedItem').reset();
+
+        const boxQuickLink = document.getElementById('boxQuickLinkBlock');
+        if (boxQuickLink) {
+            boxQuickLink.style.display = isKidRole ? 'none' : 'block';
+        }
+
+        const boxAddForm = document.getElementById('boxFormAddBlockedItem');
+        if (boxAddForm) {
+            boxAddForm.style.display = isKidRole ? 'none' : 'block';
+        }
+
+        modalBlockedItems.show();
+
+        await loadPresets();
+        await loadBlockedItems(kidId);
+    };
+
+    async function loadPresets() {
+        if (cachedPresets.length > 0) {
+            renderPresets();
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/blockeditems/presets', { headers: getAuthHeaders() });
+            if (res.ok) {
+                cachedPresets = await res.json();
+                renderPresets();
+            }
+        } catch (e) {
+            console.warn('Lỗi tải presets:', e);
+        }
+    }
+
+    function renderPresets() {
+        const box = document.getElementById('boxPresetsPills');
+        if (!box) return;
+
+        const currentTargets = (currentBlockedItems || []).map(x => (x.target || '').toLowerCase());
+
+        box.innerHTML = cachedPresets.map((p, idx) => {
+            const isAlreadyBlocked = currentTargets.includes(p.target.toLowerCase());
+            const badgeClass = isAlreadyBlocked ? 'btn-secondary text-white' : 'btn-outline-danger';
+            const t = (p.title || '').toLowerCase();
+            let iconHtml = p.itemType === 'App' ? '<i class="pixelart-icons-font-gamepad i8-xs text-warning me-1"></i>' : '<i class="pixelart-icons-font-globe i8-xs text-primary me-1"></i>';
+            if (t.includes('tiktok')) iconHtml = '<i class="pixelart-icons-font-sunglasses i8-xs text-danger me-1"></i>';
+            else if (t.includes('fire') || t.includes('liên quân')) iconHtml = '<i class="pixelart-icons-font-gamepad i8-xs text-warning me-1"></i>';
+            else if (t.includes('roblox')) iconHtml = '<i class="pixelart-icons-font-blocks i8-xs text-danger me-1"></i>';
+            else if (t.includes('b52') || t.includes('cờ bạc') || t.includes('go88')) iconHtml = '<i class="pixelart-icons-font-square-alert i8-xs text-danger me-1"></i>';
+            else if (t.includes('18+') || t.includes('độc hại')) iconHtml = '<i class="pixelart-icons-font-eye-off i8-xs text-danger me-1"></i>';
+
+            return `
+            <button type="button" class="btn btn-sm ${badgeClass} py-1 px-3 d-inline-flex align-items-center gap-1 shadow-sm" style="font-size: 12px;" onclick="quickAddPreset(${idx})" ${isAlreadyBlocked || isKidRole ? 'disabled' : ''}>
+                ${iconHtml}
+                <span>${p.title}</span>
+                ${isAlreadyBlocked ? '<span class="badge bg-dark ms-1" style="font-size: 9px;">Đã chặn</span>' : '<span class="text-danger fw-bold ms-1">+</span>'}
+            </button>`;
+        }).join('');
+    }
+
+    window.quickAddPreset = async function(index) {
+        if (isKidRole) return;
+        const p = cachedPresets[index];
+        if (!p || !currentKidForBlocked) return;
+
+        const alertBox = document.getElementById('blockedItemAlert');
+        alertBox.innerHTML = '<div class="alert alert-info py-1 small">Đang thêm mục chặn...</div>';
+
+        try {
+            const res = await fetch(`/api/kids/${currentKidForBlocked}/blocked-items`, {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({
+                    itemType: p.itemType,
+                    target: p.target,
+                    title: p.title,
+                    category: p.category,
+                    reason: p.defaultReason
+                })
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Lỗi khi thêm mục chặn');
+
+            alertBox.innerHTML = `<div class="alert alert-success py-2 small alert-dismissible fade show">
+                <strong>Thành công!</strong> ${data.message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>`;
+
+            await loadBlockedItems(currentKidForBlocked);
+            await loadKids();
+        } catch (err) {
+            alertBox.innerHTML = `<div class="alert alert-danger py-2 small">${err.message}</div>`;
+        }
+    };
+
+    async function loadBlockedItems(kidId) {
+        const containerEl = document.getElementById('blockedItemsContainer');
+        const emptyEl = document.getElementById('emptyBlockedBox');
+
+        try {
+            const res = await fetch(`/api/kids/${kidId}/blocked-items`, { headers: getAuthHeaders() });
+            if (!res.ok) throw new Error('Không thể tải danh sách chặn');
+            const data = await res.json();
+            currentBlockedItems = data.items || [];
+            renderBlockedItems();
+            renderPresets();
+        } catch (err) {
+            document.getElementById('blockedItemAlert').innerHTML = `<div class="alert alert-danger py-2 small">${err.message}</div>`;
+        }
+    }
+
+    function renderBlockedItems() {
+        const containerEl = document.getElementById('blockedItemsContainer');
+        const emptyEl = document.getElementById('emptyBlockedBox');
+
+        const total = currentBlockedItems.length;
+        const webCount = currentBlockedItems.filter(x => x.itemType === 'Website').length;
+        const appCount = currentBlockedItems.filter(x => x.itemType === 'App').length;
+        const activeBlocked = currentBlockedItems.filter(x => x.isBlocked).length;
+
+        document.getElementById('countFilterAll').textContent = total;
+        document.getElementById('countFilterWeb').textContent = webCount;
+        document.getElementById('countFilterApp').textContent = appCount;
+        document.getElementById('activeBlockedSummary').textContent = `${activeBlocked} mục đang chặn`;
+
+        let filtered = currentBlockedItems;
+        if (currentBlockedFilter !== 'all') {
+            filtered = currentBlockedItems.filter(x => x.itemType === currentBlockedFilter);
+        }
+
+        if (filtered.length === 0) {
+            containerEl.innerHTML = '';
+            emptyEl.style.display = 'block';
+            return;
+        }
+
+        emptyEl.style.display = 'none';
+        containerEl.innerHTML = filtered.map(item => {
+            const isWeb = item.itemType === 'Website';
+            const iconHtml = isWeb 
+                ? '<i class="pixelart-icons-font-globe i8-lg text-primary"></i>' 
+                : '<i class="pixelart-icons-font-gamepad i8-lg text-warning"></i>';
+            const badgeClass = isWeb ? 'badge bg-primary-subtle text-primary border border-primary' : 'badge bg-warning-subtle text-warning-emphasis border border-warning';
+            const statusBadge = item.isBlocked 
+                ? '<span class="badge bg-danger text-white"><i class="pixelart-icons-font-square-alert i8-xs me-1"></i> Đang chặn</span>'
+                : '<span class="badge bg-success-subtle text-success border border-success"><i class="pixelart-icons-font-check i8-xs me-1"></i> Tạm mở</span>';
+
+            const safeTitle = (item.title || '').replace(/'/g, "\\'");
+
+            return `
+            <div class="p-3 rounded-2 bg-white border shadow-sm d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <div class="d-flex align-items-center gap-3">
+                    ${iconHtml}
+                    <div>
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <span class="fw-bold text-dark">${item.title}</span>
+                            <span class="${badgeClass}" style="font-size: 11px;">${item.category || item.itemType}</span>
+                            ${statusBadge}
+                        </div>
+                        <div class="small font-monospace text-muted mt-1" style="font-size: 11px;">
+                            ${item.target}
+                        </div>
+                        ${item.reason ? `<div class="text-secondary small mt-1" style="font-size: 11px;"><em>Ghi chú: ${item.reason}</em></div>` : ''}
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    ${!isKidRole ? `
+                    <div class="form-check form-switch m-0" title="Bật/Tắt chặn">
+                        <input class="form-check-input" type="checkbox" role="switch" ${item.isBlocked ? 'checked' : ''} onchange="toggleBlockedItem(${item.id})">
+                    </div>
+                    <button type="button" class="btn btn-sm btn-danger px-2 py-1" onclick="deleteBlockedItem(${item.id}, '${safeTitle}')" title="Xóa khỏi danh sách chặn">
+                        <i class="pixelart-icons-font-trash i8-xs"></i>
+                    </button>` : ''}
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    // Đổi placeholder khi đổi loại chặn (Website / App)
+    document.getElementById('inputItemType')?.addEventListener('change', (e) => {
+        const isApp = e.target.value === 'App';
+        const labelEl = document.getElementById('labelTargetInput');
+        const inputEl = document.getElementById('inputTarget');
+        const categoryEl = document.getElementById('inputCategory');
+
+        if (isApp) {
+            labelEl.innerHTML = 'Tên Ứng dụng / Mã gói <span class="text-danger">*</span>';
+            inputEl.placeholder = 'vd: Roblox, Free Fire, com.zhiliaoapp.musically';
+            categoryEl.value = 'Trò chơi / Game';
+        } else {
+            labelEl.innerHTML = 'Tên miền web / URL <span class="text-danger">*</span>';
+            inputEl.placeholder = 'vd: tiktok.com, b52.club';
+            categoryEl.value = 'Khác';
+        }
+    });
+
+    // Lọc danh sách chặn
+    document.getElementById('filterBlockedTabs')?.addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-filter]');
+        if (!btn) return;
+
+        document.querySelectorAll('#filterBlockedTabs button').forEach(b => {
+            b.classList.remove('btn-primary');
+            b.classList.add('btn-light');
+        });
+        btn.classList.remove('btn-light');
+        btn.classList.add('btn-primary');
+
+        currentBlockedFilter = btn.getAttribute('data-filter');
+        renderBlockedItems();
+    });
+
+    // Xử lý gửi Form tự nhập link chặn nhanh (Website / App)
+    document.getElementById('formQuickLinkBlock')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!currentKidForBlocked) return;
+
+        const inputEl = document.getElementById('quickLinkInput');
+        const rawLink = inputEl.value.trim();
+        const btn = document.getElementById('btnSubmitQuickLink');
+        const alertBox = document.getElementById('blockedItemAlert');
+
+        if (!rawLink) return;
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang chặn...';
+        alertBox.innerHTML = '';
+
+        try {
+            const res = await fetch(`/api/kids/${currentKidForBlocked}/blocked-items`, {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ target: rawLink })
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Lỗi khi thêm link chặn');
+
+            inputEl.value = '';
+            alertBox.innerHTML = `<div class="alert alert-success py-2 small alert-dismissible fade show">
+                <strong>Thành công!</strong> ${data.message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>`;
+
+            await loadBlockedItems(currentKidForBlocked);
+            await loadKids();
+        } catch (err) {
+            alertBox.innerHTML = `<div class="alert alert-danger py-2 small">${err.message}</div>`;
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '+ Chặn Link Này';
+        }
+    });
+
+    // Form thêm mục chặn chi tiết
+    document.getElementById('formAddBlockedItem')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!currentKidForBlocked) return;
+
+        const btn = document.getElementById('btnAddBlockedItem');
+        const alertBox = document.getElementById('blockedItemAlert');
+
+        const itemType = document.getElementById('inputItemType').value;
+        const target = document.getElementById('inputTarget').value.trim();
+        const title = document.getElementById('inputTitle').value.trim();
+        const category = document.getElementById('inputCategory').value;
+        const reason = document.getElementById('inputReason').value.trim();
+
+        if (!target) return;
+
+        btn.disabled = true;
+        btn.innerHTML = 'Đang thêm...';
+        alertBox.innerHTML = '';
+
+        try {
+            const res = await fetch(`/api/kids/${currentKidForBlocked}/blocked-items`, {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ itemType, target, title: title || null, category, reason: reason || null })
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Lỗi khi thêm mục chặn');
+
+            document.getElementById('formAddBlockedItem').reset();
+            alertBox.innerHTML = `<div class="alert alert-success py-2 small alert-dismissible fade show">
+                <strong>Thành công!</strong> ${data.message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>`;
+
+            await loadBlockedItems(currentKidForBlocked);
+            await loadKids();
+        } catch (err) {
+            alertBox.innerHTML = `<div class="alert alert-danger py-2 small">${err.message}</div>`;
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '+ Lưu Chặn';
+        }
+    });
+
+    // Toggle Bật/Tắt chặn
+    window.toggleBlockedItem = async function(id) {
+        try {
+            const res = await fetch(`/api/blockeditems/${id}/toggle`, {
+                method: 'PUT',
+                headers: getAuthHeaders()
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Không thể đổi trạng thái');
+
+            await loadBlockedItems(currentKidForBlocked);
+            await loadKids();
+        } catch (err) {
+            alert(err.message);
+        }
+    };
+
+    // Xóa mục chặn
+    window.deleteBlockedItem = async function(id, title) {
+        if (!confirm(`Bạn có chắc muốn xóa "${title}" khỏi danh sách chặn của bé?`)) return;
+
+        try {
+            const res = await fetch(`/api/blockeditems/${id}`, {
+                method: 'DELETE',
+                headers: getAuthHeaders()
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Không thể xóa');
+
+            await loadBlockedItems(currentKidForBlocked);
+            await loadKids();
+        } catch (err) {
+            alert(err.message);
+        }
+    };
 
     document.addEventListener('DOMContentLoaded', loadKids);
 </script>

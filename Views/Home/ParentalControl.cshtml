@@ -1,0 +1,783 @@
+@{
+    ViewData["Title"] = "Trung Tâm Chặn Link Web & App Cho Bé";
+}
+
+<div class="container py-4">
+    <!-- Header banner (8-Bit Arcade Style) -->
+    <div class="apple-card-static p-4 mb-4 border-2">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                    <i class="pixelart-icons-font-shield i8-xl text-danger i8-bounce"></i>
+                    <h2 class="fw-bold mb-0 text-danger pixel-font" style="letter-spacing: 0.04em;">
+                        TRUNG TÂM CHẶN LINK WEB & APP
+                    </h2>
+                    <span class="badge bg-danger text-white">8-BIT SHIELD</span>
+                </div>
+                <p class="text-muted mb-0 small">
+                    Khu vực chuyên biệt để thêm, theo dõi và xóa các đường link trang web độc hại, cờ bạc, 18+ hoặc hạn chế tải và dùng ứng dụng, game cho các bé.
+                </p>
+            </div>
+            <div class="d-flex gap-2 flex-wrap align-items-center">
+                <a href="/screentime" class="btn btn-outline-primary px-3 small">
+                    <i class="pixelart-icons-font-clock i8-xs me-1"></i> Giới Hạn Giờ Dùng Máy
+                </a>
+                <a href="/kids" class="btn btn-outline-secondary px-3 small">
+                    <i class="pixelart-icons-font-users i8-xs me-1"></i> Về Quản Lý Trẻ
+                </a>
+                <button class="btn btn-danger px-4 fw-semibold" onclick="document.getElementById('dedicatedLinkInput').focus()">
+                    <i class="pixelart-icons-font-plus i8-xs me-1"></i> Thêm Link Chặn Mới
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert placeholder -->
+    <div id="pageAlert"></div>
+
+    <!-- Quick Stats Bar (8-Bit Arcade Stats) -->
+    <div class="row g-3 mb-4" id="statsBar">
+        <div class="col-sm-6 col-lg-3">
+            <div class="apple-card-static p-3 d-flex align-items-center gap-3">
+                <div class="p-3 rounded-2 bg-danger-subtle text-danger border border-danger">
+                    <i class="pixelart-icons-font-square-alert i8-lg"></i>
+                </div>
+                <div>
+                    <div class="fs-4 fw-bold text-danger pixel-font" id="statTotalBlocked">0</div>
+                    <div class="small text-muted">Tổng link đang chặn</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="apple-card-static p-3 d-flex align-items-center gap-3">
+                <div class="p-3 rounded-2 bg-primary-subtle text-primary border border-primary">
+                    <i class="pixelart-icons-font-globe i8-lg"></i>
+                </div>
+                <div>
+                    <div class="fs-4 fw-bold text-primary pixel-font" id="statWebCount">0</div>
+                    <div class="small text-muted">Trang web (Websites)</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="apple-card-static p-3 d-flex align-items-center gap-3">
+                <div class="p-3 rounded-2 bg-warning-subtle text-warning border border-warning">
+                    <i class="pixelart-icons-font-gamepad i8-lg text-dark"></i>
+                </div>
+                <div>
+                    <div class="fs-4 fw-bold text-warning-emphasis pixel-font" id="statAppCount">0</div>
+                    <div class="small text-muted">Ứng dụng (Apps/Games)</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="apple-card-static p-3 d-flex align-items-center gap-3">
+                <div class="p-3 rounded-2 bg-success-subtle text-success border border-success">
+                    <i class="pixelart-icons-font-heart i8-lg"></i>
+                </div>
+                <div>
+                    <div class="fs-4 fw-bold text-success pixel-font" id="statKidsProtected">0</div>
+                    <div class="small text-muted">Bé đang được bảo vệ</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- KHỐI CHỌN BÉ CẦN QUẢN LÝ -->
+    <div class="apple-card-static p-3 mb-4">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <span class="fw-bold text-secondary small d-flex align-items-center gap-1">
+                    <i class="pixelart-icons-font-sliders i8-xs text-primary"></i> Đang xem cho:
+                </span>
+                <div id="kidSelectorPills" class="d-flex flex-wrap gap-2">
+                    <!-- Render dynamic kid selector pills -->
+                </div>
+            </div>
+            <div class="text-muted small" id="currentSelectedKidLabel" style="font-size: 12px;">
+                Đang hiển thị toàn bộ link chặn
+            </div>
+        </div>
+    </div>
+
+    <!-- KHỐI THÊM LINK CHẶN MỚI (DEDICATED LINK ADDER) -->
+    <div class="apple-card-static p-4 border-2 border-danger mb-4">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+            <h5 class="fw-bold text-danger mb-0 d-flex align-items-center gap-2">
+                <i class="pixelart-icons-font-shield i8-md text-danger"></i>
+                <span>Thêm Link Web Hoặc App Cần Chặn:</span>
+            </h5>
+            <span class="badge bg-danger text-white px-3 py-1">TỰ ĐỘNG BÓC TÁCH LINK</span>
+        </div>
+        <p class="text-muted small mb-3">
+            Dán đường link bất kỳ (link web, link tải CH Play, App Store hoặc tên miền/tên App). Hệ thống sẽ tự động bóc tách và phân loại.
+        </p>
+
+        <!-- Form nhập link chính -->
+        <form id="formAddLinkDedicated" class="row g-2 align-items-center">
+            <div class="col-lg-6">
+                <div class="input-group">
+                    <span class="input-group-text bg-light text-muted">
+                        <i class="pixelart-icons-font-search i8-sm"></i>
+                    </span>
+                    <input type="text" id="dedicatedLinkInput" class="form-control" 
+                           placeholder="Dán link web (vd: https://youtube.com, b52.club) hoặc link CH Play, App Store..." required />
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <select id="selectTargetKid" class="form-select">
+                    <option value="all">👨‍👩‍👧‍👦 Áp dụng cho TẤT CẢ các bé</option>
+                </select>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <button type="submit" class="btn btn-danger w-100 fw-semibold py-2" id="btnAddDedicatedLink">
+                    <i class="pixelart-icons-font-plus i8-xs me-1"></i> Thêm Chặn Link Này
+                </button>
+            </div>
+        </form>
+
+        <!-- Gợi ý link mẫu phổ biến (Presets) -->
+        <div class="mt-3 pt-3 border-top">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="small fw-bold text-dark d-flex align-items-center gap-1">
+                    <i class="pixelart-icons-font-zap i8-xs text-warning"></i> Gợi ý chặn nhanh (1 chạm):
+                </span>
+                <span class="text-muted" style="font-size: 11px;">Nhấp vào nút để thêm ngay vào danh sách</span>
+            </div>
+            <div id="presetsContainer" class="d-flex flex-wrap gap-2">
+                <!-- Render presets -->
+            </div>
+        </div>
+
+        <!-- Tùy chỉnh chi tiết (Collapse) -->
+        <div class="mt-3">
+            <a class="btn btn-sm btn-link text-decoration-none text-muted p-0" data-bs-toggle="collapse" href="#collapseDetails" role="button" aria-expanded="false">
+                <i class="pixelart-icons-font-sliders i8-xs me-1"></i> Tùy chỉnh chi tiết (Tên hiển thị, Thể loại, Lý do chặn) ▼
+            </a>
+            <div class="collapse mt-2" id="collapseDetails">
+                <div class="p-3 bg-body-tertiary rounded-2 border row g-2">
+                    <div class="col-md-3">
+                        <label class="form-label small text-muted mb-1">Loại mục tiêu</label>
+                        <select id="inputCustomType" class="form-select form-select-sm">
+                            <option value="">Tự động nhận diện</option>
+                            <option value="Website">Trang Web</option>
+                            <option value="App">Ứng Dụng</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small text-muted mb-1">Tên gợi nhớ hiển thị</label>
+                        <input type="text" id="inputCustomTitle" class="form-control form-control-sm" placeholder="Tự động trích xuất nếu để trống" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small text-muted mb-1">Thể loại</label>
+                        <select id="inputCustomCategory" class="form-select form-select-sm">
+                            <option value="Khác">Tự động phân loại</option>
+                            <option value="Mạng xã hội">Mạng xã hội</option>
+                            <option value="Trò chơi / Game">Trò chơi / Game</option>
+                            <option value="Cờ bạc & Cá cược">Cờ bạc & Cá cược</option>
+                            <option value="Nội dung độc hại / 18+">Nội dung độc hại / 18+</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small text-muted mb-1">Lý do chặn (Ghi chú)</label>
+                        <input type="text" id="inputCustomReason" class="form-control form-control-sm" placeholder="vd: Xao nhãng bài tập, bạo lực..." />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- KHỐI QUẢN LÝ DANH SÁCH LINK ĐÃ CHẶN -->
+    <div class="apple-card-static p-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+            <div>
+                <h5 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2">
+                    <i class="pixelart-icons-font-shield i8-sm text-danger"></i>
+                    <span>Danh Sách Link Đang Quản Lý</span>
+                </h5>
+                <span class="text-muted small" id="listSummaryText">Đang hiển thị 0 mục</span>
+            </div>
+
+            <!-- Thanh tìm kiếm & Lọc -->
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+                <div class="input-group input-group-sm" style="width: 250px;">
+                    <span class="input-group-text bg-light text-muted">
+                        <i class="pixelart-icons-font-search i8-xs"></i>
+                    </span>
+                    <input type="text" id="searchBlockedInput" class="form-control" placeholder="Tìm theo link hoặc tên..." />
+                </div>
+                <div class="btn-group btn-group-sm" role="group" id="filterTypeGroup">
+                    <button type="button" class="btn btn-danger active" data-filter="all">Tất cả</button>
+                    <button type="button" class="btn btn-outline-secondary" data-filter="Website">
+                        <i class="pixelart-icons-font-globe i8-xs me-1"></i> Web
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" data-filter="App">
+                        <i class="pixelart-icons-font-gamepad i8-xs me-1"></i> App
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" data-filter="active">
+                        <i class="pixelart-icons-font-square-alert i8-xs me-1 text-danger"></i> Đang chặn
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" data-filter="paused">
+                        <i class="pixelart-icons-font-check i8-xs me-1 text-success"></i> Tạm mở
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thanh thao tác hàng loạt (Bulk actions) -->
+        <div id="bulkActionBar" class="p-2 px-3 bg-body-tertiary rounded-2 border mb-3 d-flex justify-content-between align-items-center" style="display: none !important;">
+            <div class="d-flex align-items-center gap-2">
+                <input type="checkbox" id="chkSelectAll" class="form-check-input mt-0" />
+                <label for="chkSelectAll" class="small fw-semibold text-secondary mb-0">Chọn tất cả (<span id="selectedCount">0</span> đã chọn)</label>
+            </div>
+            <div>
+                <button type="button" class="btn btn-sm btn-danger px-3 fw-semibold" id="btnBatchDelete">
+                    <i class="pixelart-icons-font-trash i8-xs me-1"></i> Xóa các link đã chọn
+                </button>
+            </div>
+        </div>
+
+        <!-- Bảng danh sách mục chặn -->
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="blockedTable">
+                <thead class="table-light small text-secondary">
+                    <tr>
+                        <th style="width: 40px;">
+                            <input type="checkbox" id="chkHeaderAll" class="form-check-input" />
+                        </th>
+                        <th style="min-width: 220px;">Tên & Đường Link Mục Tiêu</th>
+                        <th>Loại</th>
+                        <th>Áp dụng cho</th>
+                        <th>Thể loại</th>
+                        <th>Ghi chú / Lý do</th>
+                        <th>Trạng thái</th>
+                        <th class="text-end" style="width: 130px;">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody id="blockedTableBody">
+                    <!-- Sẽ render bằng JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Trạng thái trống -->
+        <div id="emptyTableState" class="text-center py-5" style="display: none;">
+            <i class="pixelart-icons-font-shield i8-xl text-muted mb-2"></i>
+            <h6 class="fw-bold text-dark mt-2 pixel-font">Chưa có link web hay ứng dụng nào bị chặn</h6>
+            <p class="text-muted small mb-3">Hãy dán đường link bất kỳ vào ô nhập phía trên hoặc nhấn vào gợi ý nhanh để bắt đầu bảo vệ các bé.</p>
+            <button class="btn btn-sm btn-danger px-4" onclick="document.getElementById('dedicatedLinkInput').focus()">
+                <i class="pixelart-icons-font-plus i8-xs me-1"></i> Dán Link Chặn Ngay
+            </button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    let myKidsList = [];
+    let allBlockedItems = [];
+    let cachedPresets = [];
+    let currentKidFilter = 'all'; // 'all' hoặc kidId
+    let currentTypeFilter = 'all'; // 'all', 'Website', 'App', 'active', 'paused'
+    let selectedItemIds = new Set();
+
+    function getAuthHeaders() {
+        const token = localStorage.getItem('authToken');
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+        return headers;
+    }
+
+    // Tải toàn bộ dữ liệu khi vào trang
+    async function loadData() {
+        try {
+            const res = await fetch('/api/blockeditems/my-kids-overview', { headers: getAuthHeaders() });
+            if (res.status === 401) {
+                document.getElementById('pageAlert').innerHTML = `
+                    <div class="alert alert-warning py-3 rounded-4 shadow-sm d-flex align-items-center justify-content-between">
+                        <div><strong>Vui lòng đăng nhập!</strong> Bạn cần đăng nhập tài khoản phụ huynh để sử dụng Trung tâm Chặn Web & App.</div>
+                        <button class="btn btn-primary btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#modalLogin">Đăng nhập ngay</button>
+                    </div>`;
+                return;
+            }
+            if (!res.ok) throw new Error('Không thể tải dữ liệu kiểm soát web/app');
+
+            const data = await res.json();
+            myKidsList = data.kids || [];
+            allBlockedItems = data.items || [];
+
+            renderStats();
+            renderKidSelectors();
+            renderTargetKidOptions();
+            renderBlockedTable();
+        } catch (err) {
+            document.getElementById('pageAlert').innerHTML = `<div class="alert alert-danger py-2 small">${err.message}</div>`;
+        }
+    }
+
+    // Tải danh sách presets
+    async function loadPresets() {
+        try {
+            const res = await fetch('/api/blockeditems/presets', { headers: getAuthHeaders() });
+            if (res.ok) {
+                cachedPresets = await res.json();
+                renderPresets();
+            }
+        } catch (_) {}
+    }
+
+    function get8BitPresetIcon(title, itemType) {
+        const t = (title || '').toLowerCase();
+        if (t.includes('tiktok')) return '<i class="pixelart-icons-font-sunglasses i8-xs text-danger me-1"></i>';
+        if (t.includes('fire') || t.includes('liên quân') || t.includes('game')) return '<i class="pixelart-icons-font-gamepad i8-xs text-warning me-1"></i>';
+        if (t.includes('roblox')) return '<i class="pixelart-icons-font-blocks i8-xs text-danger me-1"></i>';
+        if (t.includes('b52') || t.includes('cờ bạc') || t.includes('go88')) return '<i class="pixelart-icons-font-square-alert i8-xs text-danger me-1"></i>';
+        if (t.includes('18+') || t.includes('độc hại')) return '<i class="pixelart-icons-font-eye-off i8-xs text-danger me-1"></i>';
+        return itemType === 'App' 
+            ? '<i class="pixelart-icons-font-gamepad i8-xs text-warning me-1"></i>' 
+            : '<i class="pixelart-icons-font-globe i8-xs text-primary me-1"></i>';
+    }
+
+    function renderPresets() {
+        const container = document.getElementById('presetsContainer');
+        if (!container) return;
+
+        container.innerHTML = cachedPresets.map((p, idx) => {
+            const iconHtml = get8BitPresetIcon(p.title, p.itemType);
+            return `
+            <button type="button" class="btn btn-sm btn-outline-danger py-1 px-3 d-inline-flex align-items-center gap-1 shadow-sm" style="font-size: 12px;" onclick="addPresetQuickly(${idx})">
+                ${iconHtml}
+                <span>${p.title}</span>
+                <span class="text-danger fw-bold ms-1">+</span>
+            </button>`;
+        }).join('');
+    }
+
+    // Bấm thêm nhanh Preset
+    window.addPresetQuickly = async function(index) {
+        const p = cachedPresets[index];
+        if (!p) return;
+
+        const targetKidValue = document.getElementById('selectTargetKid').value;
+        const alertBox = document.getElementById('pageAlert');
+        alertBox.innerHTML = '<div class="alert alert-info py-2 small">Đang thêm link chặn...</div>';
+
+        try {
+            let res;
+            if (targetKidValue === 'all') {
+                res = await fetch('/api/blockeditems/add-to-all', {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({
+                        target: p.target,
+                        itemType: p.itemType,
+                        title: p.title,
+                        category: p.category,
+                        reason: p.defaultReason
+                    })
+                });
+            } else {
+                res = await fetch(`/api/kids/${targetKidValue}/blocked-items`, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({
+                        target: p.target,
+                        itemType: p.itemType,
+                        title: p.title,
+                        category: p.category,
+                        reason: p.defaultReason
+                    })
+                });
+            }
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Lỗi khi thêm mục chặn');
+
+            alertBox.innerHTML = `<div class="alert alert-success py-2 small alert-dismissible fade show">
+                <strong>Thành công!</strong> ${data.message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>`;
+
+            await loadData();
+        } catch (err) {
+            alertBox.innerHTML = `<div class="alert alert-danger py-2 small">${err.message}</div>`;
+        }
+    };
+
+    // Cập nhật thẻ thống kê
+    function renderStats() {
+        const totalBlocked = allBlockedItems.filter(x => x.isBlocked).length;
+        const webCount = allBlockedItems.filter(x => x.itemType === 'Website' && x.isBlocked).length;
+        const appCount = allBlockedItems.filter(x => x.itemType === 'App' && x.isBlocked).length;
+        const kidsCount = myKidsList.length;
+
+        document.getElementById('statTotalBlocked').textContent = totalBlocked;
+        document.getElementById('statWebCount').textContent = webCount;
+        document.getElementById('statAppCount').textContent = appCount;
+        document.getElementById('statKidsProtected').textContent = kidsCount;
+    }
+
+    // Render thanh chọn bé
+    function renderKidSelectors() {
+        const pillsBox = document.getElementById('kidSelectorPills');
+        if (!pillsBox) return;
+
+        const totalItemsCount = allBlockedItems.length;
+
+        let pillsHtml = `
+            <button type="button" class="btn btn-sm ${currentKidFilter === 'all' ? 'btn-danger text-white' : 'btn-light border'} px-3 py-1 fw-semibold d-inline-flex align-items-center gap-1" onclick="selectKidFilter('all')">
+                <i class="pixelart-icons-font-users i8-xs"></i>
+                <span>Tất cả các bé (${totalItemsCount})</span>
+            </button>
+        `;
+
+        pillsHtml += myKidsList.map(k => {
+            const countForKid = allBlockedItems.filter(x => x.kidId === k.id).length;
+            const isSelected = currentKidFilter === k.id.toString();
+            return `
+            <button type="button" class="btn btn-sm ${isSelected ? 'btn-danger text-white' : 'btn-light border'} px-3 py-1 fw-semibold d-inline-flex align-items-center gap-1" onclick="selectKidFilter('${k.id}')">
+                <i class="pixelart-icons-font-heart i8-xs text-danger"></i>
+                <span>${k.fullName} (${countForKid})</span>
+            </button>`;
+        }).join('');
+
+        pillsBox.innerHTML = pillsHtml;
+    }
+
+    // Render danh sách lựa chọn bé trong Form thêm
+    function renderTargetKidOptions() {
+        const select = document.getElementById('selectTargetKid');
+        if (!select) return;
+
+        let optionsHtml = `<option value="all">👨‍👩‍👧‍👦 Áp dụng cho TẤT CẢ các bé</option>`;
+        optionsHtml += myKidsList.map(k => `
+            <option value="${k.id}">🧒 Riêng cho: ${k.fullName}</option>
+        `).join('');
+
+        select.innerHTML = optionsHtml;
+
+        // Nếu đang chọn lọc theo 1 bé thì ưu tiên gán mặc định bé đó
+        if (currentKidFilter !== 'all') {
+            select.value = currentKidFilter;
+        }
+    }
+
+    window.selectKidFilter = function(filter) {
+        currentKidFilter = filter;
+        selectedItemIds.clear();
+
+        const label = document.getElementById('currentSelectedKidLabel');
+        if (filter === 'all') {
+            label.textContent = 'Đang hiển thị toàn bộ link chặn của tất cả các bé';
+        } else {
+            const k = myKidsList.find(x => x.id.toString() === filter);
+            label.textContent = k ? `Đang lọc riêng cho bé: ${k.fullName}` : '';
+        }
+
+        renderKidSelectors();
+        renderBlockedTable();
+    };
+
+    // Render bảng danh sách link bị chặn
+    function renderBlockedTable() {
+        const tbody = document.getElementById('blockedTableBody');
+        const emptyState = document.getElementById('emptyTableState');
+        const table = document.getElementById('blockedTable');
+        const bulkBar = document.getElementById('bulkActionBar');
+        const searchKw = (document.getElementById('searchBlockedInput')?.value || '').toLowerCase().trim();
+
+        // 1. Lọc theo Bé
+        let list = allBlockedItems;
+        if (currentKidFilter !== 'all') {
+            list = list.filter(x => x.kidId.toString() === currentKidFilter);
+        }
+
+        // 2. Lọc theo Loại / Trạng thái
+        if (currentTypeFilter === 'Website') {
+            list = list.filter(x => x.itemType === 'Website');
+        } else if (currentTypeFilter === 'App') {
+            list = list.filter(x => x.itemType === 'App');
+        } else if (currentTypeFilter === 'active') {
+            list = list.filter(x => x.isBlocked);
+        } else if (currentTypeFilter === 'paused') {
+            list = list.filter(x => !x.isBlocked);
+        }
+
+        // 3. Tìm kiếm từ khóa
+        if (searchKw) {
+            list = list.filter(x =>
+                (x.title && x.title.toLowerCase().includes(searchKw)) ||
+                (x.target && x.target.toLowerCase().includes(searchKw)) ||
+                (x.category && x.category.toLowerCase().includes(searchKw)) ||
+                (x.kidFullName && x.kidFullName.toLowerCase().includes(searchKw)) ||
+                (x.reason && x.reason.toLowerCase().includes(searchKw))
+            );
+        }
+
+        document.getElementById('listSummaryText').textContent = `Đang hiển thị ${list.length} mục`;
+
+        if (list.length === 0) {
+            tbody.innerHTML = '';
+            table.style.display = 'none';
+            emptyState.style.display = 'block';
+            bulkBar.style.setProperty('display', 'none', 'important');
+            return;
+        }
+
+        emptyState.style.display = 'none';
+        table.style.display = 'table';
+        bulkBar.style.setProperty('display', 'flex', 'important');
+
+        tbody.innerHTML = list.map(item => {
+            const isWeb = item.itemType === 'Website';
+            const iconHtml = isWeb 
+                ? '<i class="pixelart-icons-font-globe i8-lg text-primary"></i>' 
+                : '<i class="pixelart-icons-font-gamepad i8-lg text-warning"></i>';
+            const badgeClass = isWeb ? 'badge bg-primary-subtle text-primary border border-primary' : 'badge bg-warning-subtle text-warning-emphasis border border-warning';
+            const isChecked = selectedItemIds.has(item.id);
+
+            const statusHtml = item.isBlocked
+                ? `<span class="badge bg-danger text-white"><i class="pixelart-icons-font-square-alert i8-xs me-1"></i> Đang chặn</span>`
+                : `<span class="badge bg-success-subtle text-success border border-success"><i class="pixelart-icons-font-check i8-xs me-1"></i> Tạm mở</span>`;
+
+            const dateStr = item.createdAt ? new Date(item.createdAt).toLocaleDateString('vi-VN') : '';
+            const safeTitle = (item.title || '').replace(/'/g, "\\'");
+
+            return `
+            <tr>
+                <td>
+                    <input type="checkbox" class="form-check-input item-checkbox" value="${item.id}" ${isChecked ? 'checked' : ''} onchange="toggleItemSelect(${item.id}, this.checked)" />
+                </td>
+                <td>
+                    <div class="d-flex align-items-center gap-3">
+                        ${iconHtml}
+                        <div>
+                            <div class="fw-bold text-dark">${item.title}</div>
+                            <div class="small font-monospace text-muted d-flex align-items-center gap-1">
+                                <span>${item.target}</span>
+                                ${isWeb ? `<a href="https://${item.target.replace('https://', '').replace('http://', '')}" target="_blank" class="text-decoration-none text-muted" title="Mở thử link">↗</a>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <span class="${badgeClass}">${item.itemType}</span>
+                </td>
+                <td>
+                    <span class="badge bg-light text-dark border"><i class="pixelart-icons-font-heart i8-xs text-danger me-1"></i> ${item.kidFullName}</span>
+                </td>
+                <td>
+                    <span class="small text-secondary">${item.category || 'Khác'}</span>
+                </td>
+                <td>
+                    <span class="small text-muted">${item.reason || '—'}</span>
+                </td>
+                <td>
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="form-check form-switch m-0" title="Gạt để bật/tắt chặn">
+                            <input class="form-check-input" type="checkbox" role="switch" ${item.isBlocked ? 'checked' : ''} onchange="toggleItemBlockStatus(${item.id})">
+                        </div>
+                        ${statusHtml}
+                    </div>
+                </td>
+                <td class="text-end">
+                    <button type="button" class="btn btn-sm btn-danger px-3 py-1 shadow-sm" onclick="deleteSingleItem(${item.id}, '${safeTitle}')" title="Xóa link chặn này">
+                        <i class="pixelart-icons-font-trash i8-xs me-1"></i> Xóa
+                    </button>
+                </td>
+            </tr>`;
+        }).join('');
+
+        updateSelectionUI();
+    }
+
+    // Toggle chọn checkbox
+    window.toggleItemSelect = function(id, checked) {
+        if (checked) {
+            selectedItemIds.add(id);
+        } else {
+            selectedItemIds.delete(id);
+        }
+        updateSelectionUI();
+    };
+
+    function updateSelectionUI() {
+        const count = selectedItemIds.size;
+        document.getElementById('selectedCount').textContent = count;
+        document.getElementById('chkSelectAll').checked = count > 0 && count === allBlockedItems.length;
+        document.getElementById('chkHeaderAll').checked = count > 0 && count === allBlockedItems.length;
+    }
+
+    // Chọn / Bỏ chọn tất cả
+    document.getElementById('chkSelectAll')?.addEventListener('change', (e) => {
+        handleSelectAllToggle(e.target.checked);
+    });
+    document.getElementById('chkHeaderAll')?.addEventListener('change', (e) => {
+        handleSelectAllToggle(e.target.checked);
+    });
+
+    function handleSelectAllToggle(checked) {
+        if (checked) {
+            allBlockedItems.forEach(x => selectedItemIds.add(x.id));
+        } else {
+            selectedItemIds.clear();
+        }
+        renderBlockedTable();
+    }
+
+    // Lọc loại
+    document.getElementById('filterTypeGroup')?.addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-filter]');
+        if (!btn) return;
+
+        document.querySelectorAll('#filterTypeGroup button').forEach(b => {
+            b.classList.remove('btn-danger', 'active');
+            b.classList.add('btn-outline-secondary');
+        });
+        btn.classList.remove('btn-outline-secondary');
+        btn.classList.add('btn-danger', 'active');
+
+        currentTypeFilter = btn.getAttribute('data-filter');
+        renderBlockedTable();
+    });
+
+    // Tìm kiếm tức thì
+    document.getElementById('searchBlockedInput')?.addEventListener('input', () => {
+        renderBlockedTable();
+    });
+
+    // Xử lý gửi Form Thêm Link Chuyên Biệt
+    document.getElementById('formAddLinkDedicated')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const inputEl = document.getElementById('dedicatedLinkInput');
+        const rawLink = inputEl.value.trim();
+        const targetKidValue = document.getElementById('selectTargetKid').value;
+        const btn = document.getElementById('btnAddDedicatedLink');
+        const alertBox = document.getElementById('pageAlert');
+
+        if (!rawLink) return;
+
+        // Đọc các giá trị tùy chọn (nếu người dùng có nhập thêm)
+        const customType = document.getElementById('inputCustomType')?.value || null;
+        const customTitle = document.getElementById('inputCustomTitle')?.value.trim() || null;
+        const customCategory = document.getElementById('inputCustomCategory')?.value || null;
+        const customReason = document.getElementById('inputCustomReason')?.value.trim() || null;
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang thêm link...';
+        alertBox.innerHTML = '';
+
+        try {
+            let res;
+            const payload = {
+                target: rawLink,
+                itemType: customType,
+                title: customTitle,
+                category: customCategory,
+                reason: customReason
+            };
+
+            if (targetKidValue === 'all') {
+                res = await fetch('/api/blockeditems/add-to-all', {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify(payload)
+                });
+            } else {
+                res = await fetch(`/api/kids/${targetKidValue}/blocked-items`, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify(payload)
+                });
+            }
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Lỗi khi thêm link chặn');
+
+            inputEl.value = '';
+            if (document.getElementById('inputCustomTitle')) document.getElementById('inputCustomTitle').value = '';
+            if (document.getElementById('inputCustomReason')) document.getElementById('inputCustomReason').value = '';
+
+            alertBox.innerHTML = `<div class="alert alert-success py-2 small alert-dismissible fade show">
+                <strong>Thành công!</strong> ${data.message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>`;
+
+            await loadData();
+        } catch (err) {
+            alertBox.innerHTML = `<div class="alert alert-danger py-2 small">${err.message}</div>`;
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '+ Thêm Chặn Link Này';
+        }
+    });
+
+    // Toggle trạng thái Bật / Tắt chặn trực tiếp
+    window.toggleItemBlockStatus = async function(id) {
+        try {
+            const res = await fetch(`/api/blockeditems/${id}/toggle`, {
+                method: 'PUT',
+                headers: getAuthHeaders()
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Không thể đổi trạng thái');
+
+            await loadData();
+        } catch (err) {
+            alert(err.message);
+        }
+    };
+
+    // Xóa một link đơn lẻ
+    window.deleteSingleItem = async function(id, title) {
+        if (!confirm(`Bạn có chắc chắn muốn xóa link/ứng dụng "${title}" khỏi danh sách chặn không?`)) return;
+
+        try {
+            const res = await fetch(`/api/blockeditems/${id}`, {
+                method: 'DELETE',
+                headers: getAuthHeaders()
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Lỗi khi xóa link');
+
+            selectedItemIds.delete(id);
+            await loadData();
+        } catch (err) {
+            alert(err.message);
+        }
+    };
+
+    // Xóa hàng loạt các link đã chọn
+    document.getElementById('btnBatchDelete')?.addEventListener('click', async () => {
+        const ids = Array.from(selectedItemIds);
+        if (ids.length === 0) return;
+
+        if (!confirm(`Bạn có chắc muốn xóa cùng lúc ${ids.length} link chặn đã chọn không?`)) return;
+
+        const btn = document.getElementById('btnBatchDelete');
+        btn.disabled = true;
+
+        try {
+            const res = await fetch('/api/blockeditems/batch-delete', {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ ids })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Lỗi khi xóa hàng loạt');
+
+            selectedItemIds.clear();
+            await loadData();
+        } catch (err) {
+            alert(err.message);
+        } finally {
+            btn.disabled = false;
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadData();
+        loadPresets();
+    });
+</script>
+}

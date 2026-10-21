@@ -60,6 +60,14 @@ public class Kid
     [JsonIgnore]
     public ApplicationUser? KidUser { get; set; }
 
+    // Liên kết với Nhóm gia đình (Family Group)
+    [Column("family_group_id")]
+    public int? FamilyGroupId { get; set; }
+
+    [ForeignKey(nameof(FamilyGroupId))]
+    [JsonIgnore]
+    public FamilyGroup? FamilyGroup { get; set; }
+
     [Column("total_points")]
     public int TotalPoints { get; set; } = 0; // Điểm tích lũy / Số sao khen thưởng khi hoàn thành nhiệm vụ
 
@@ -72,9 +80,24 @@ public class Kid
     // Danh sách lịch sinh hoạt và hoạt động của trẻ
     public ICollection<KidActivity> Activities { get; set; } = new List<KidActivity>();
 
+    // Danh sách các mục Web và App bị chặn của trẻ (Parental Control)
+    public ICollection<BlockedItem> BlockedItems { get; set; } = new List<BlockedItem>();
+
+    // Cấu hình Lịch trình & Giới hạn thời gian sử dụng thiết bị của trẻ (Screen Time)
+    public KidScreenTime? ScreenTime { get; set; }
+
+    // Lịch sử tọa độ GPS của trẻ (Location Tracking)
+    public ICollection<KidLocation> Locations { get; set; } = new List<KidLocation>();
+
+    // Danh sách các vùng an toàn (Geofences)
+    public ICollection<KidGeofence> Geofences { get; set; } = new List<KidGeofence>();
+
     // ==========================================
     // Các trường trợ giúp Serialized cho API hiển thị Tài khoản con & Phụ huynh an toàn
     // ==========================================
+    [NotMapped]
+    public int BlockedItemsCount => BlockedItems?.Count(b => b.IsBlocked) ?? 0;
+
     [NotMapped]
     public string? ParentName => Parent?.FullName ?? Parent?.UserName;
 

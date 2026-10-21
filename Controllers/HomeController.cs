@@ -19,8 +19,34 @@ namespace Giahuy0790.Controllers
             return View();
         }
 
+        [HttpGet("tracking")]
+        [HttpGet("gps")]
+        public IActionResult Tracking()
+        {
+            return View();
+        }
+
+        [HttpGet("parental-control")]
+        public IActionResult ParentalControl()
+        {
+            return View();
+        }
+
         [HttpGet("activities")]
         public IActionResult Activities()
+        {
+            return View();
+        }
+
+        [HttpGet("screen-time")]
+        [HttpGet("screentime")]
+        public IActionResult ScreenTime()
+        {
+            return View();
+        }
+
+        [HttpGet("join-family")]
+        public IActionResult JoinFamily()
         {
             return View();
         }

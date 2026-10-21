@@ -101,6 +101,228 @@ namespace Giahuy0790.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("Giahuy0790.Models.BlockedItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Category")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasDefaultValue("Khác")
+                        .HasColumnName("category");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<string>("CreatedByUserId")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_user_id");
+
+                    b.Property<bool>("IsBlocked")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("is_blocked");
+
+                    b.Property<string>("ItemType")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("Website")
+                        .HasColumnName("item_type");
+
+                    b.Property<int>("KidId")
+                        .HasColumnType("integer")
+                        .HasColumnName("kid_id");
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("reason");
+
+                    b.Property<string>("Target")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("target");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("title");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("KidId");
+
+                    b.HasIndex("KidId", "Target");
+
+                    b.ToTable("blocked_items", (string)null);
+                });
+
+            modelBuilder.Entity("Giahuy0790.Models.FamilyGroup", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("OwnerId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("owner_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerId");
+
+                    b.ToTable("family_groups", (string)null);
+                });
+
+            modelBuilder.Entity("Giahuy0790.Models.FamilyMember", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("FamilyGroupId")
+                        .HasColumnType("integer")
+                        .HasColumnName("family_group_id");
+
+                    b.Property<DateTime>("JoinedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("joined_at")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<string>("RoleInFamily")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasDefaultValue("Parent")
+                        .HasColumnName("role_in_family");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FamilyGroupId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("family_members", (string)null);
+                });
+
+            modelBuilder.Entity("Giahuy0790.Models.FamilyQrInvite", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<string>("CreatedByUserId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_user_id");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at");
+
+                    b.Property<int>("FamilyGroupId")
+                        .HasColumnType("integer")
+                        .HasColumnName("family_group_id");
+
+                    b.Property<string>("InviteToken")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("invite_token");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_used");
+
+                    b.Property<string>("ShortCode")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("short_code");
+
+                    b.Property<DateTime?>("UsedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("used_at");
+
+                    b.Property<string>("UsedByUserId")
+                        .HasColumnType("text")
+                        .HasColumnName("used_by_user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("FamilyGroupId");
+
+                    b.HasIndex("InviteToken")
+                        .IsUnique();
+
+                    b.HasIndex("ShortCode");
+
+                    b.HasIndex("UsedByUserId");
+
+                    b.ToTable("family_qr_invites", (string)null);
+                });
+
             modelBuilder.Entity("Giahuy0790.Models.Kid", b =>
                 {
                     b.Property<int>("Id")
@@ -123,6 +345,10 @@ namespace Giahuy0790.Migrations
                     b.Property<DateTime?>("DateOfBirth")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("date_of_birth");
+
+                    b.Property<int?>("FamilyGroupId")
+                        .HasColumnType("integer")
+                        .HasColumnName("family_group_id");
 
                     b.Property<string>("FullName")
                         .IsRequired()
@@ -172,6 +398,8 @@ namespace Giahuy0790.Migrations
                         .HasColumnName("updated_at");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("FamilyGroupId");
 
                     b.HasIndex("KidUserId");
 
@@ -244,6 +472,260 @@ namespace Giahuy0790.Migrations
                     b.HasIndex("KidId");
 
                     b.ToTable("kid_activities", (string)null);
+                });
+
+            modelBuilder.Entity("Giahuy0790.Models.KidGeofence", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("AlertOnEnter")
+                        .HasColumnType("boolean")
+                        .HasColumnName("alert_on_enter");
+
+                    b.Property<bool>("AlertOnExit")
+                        .HasColumnType("boolean")
+                        .HasColumnName("alert_on_exit");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<int>("KidId")
+                        .HasColumnType("integer")
+                        .HasColumnName("kid_id");
+
+                    b.Property<double>("Latitude")
+                        .HasColumnType("double precision")
+                        .HasColumnName("latitude");
+
+                    b.Property<double>("Longitude")
+                        .HasColumnType("double precision")
+                        .HasColumnName("longitude");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("name");
+
+                    b.Property<double>("RadiusMeters")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("double precision")
+                        .HasDefaultValue(200.0)
+                        .HasColumnName("radius_meters");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("KidId");
+
+                    b.ToTable("kid_geofences", (string)null);
+                });
+
+            modelBuilder.Entity("Giahuy0790.Models.KidLocation", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<double?>("Accuracy")
+                        .HasColumnType("double precision")
+                        .HasColumnName("accuracy");
+
+                    b.Property<string>("Address")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("address");
+
+                    b.Property<double?>("Altitude")
+                        .HasColumnType("double precision")
+                        .HasColumnName("altitude");
+
+                    b.Property<int?>("BatteryLevel")
+                        .HasColumnType("integer")
+                        .HasColumnName("battery_level");
+
+                    b.Property<bool?>("IsCharging")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_charging");
+
+                    b.Property<int>("KidId")
+                        .HasColumnType("integer")
+                        .HasColumnName("kid_id");
+
+                    b.Property<double>("Latitude")
+                        .HasColumnType("double precision")
+                        .HasColumnName("latitude");
+
+                    b.Property<double>("Longitude")
+                        .HasColumnType("double precision")
+                        .HasColumnName("longitude");
+
+                    b.Property<DateTime>("RecordedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("recorded_at")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<double?>("Speed")
+                        .HasColumnType("double precision")
+                        .HasColumnName("speed");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("KidId");
+
+                    b.HasIndex("KidId", "RecordedAt");
+
+                    b.ToTable("kid_locations", (string)null);
+                });
+
+            modelBuilder.Entity("Giahuy0790.Models.KidScreenTime", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AllowedEndTime")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasDefaultValue("21:00")
+                        .HasColumnName("allowed_end_time");
+
+                    b.Property<string>("AllowedStartTime")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasDefaultValue("07:00")
+                        .HasColumnName("allowed_start_time");
+
+                    b.Property<string>("BedtimeEnd")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasDefaultValue("06:30")
+                        .HasColumnName("bedtime_end");
+
+                    b.Property<string>("BedtimeStart")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasDefaultValue("21:30")
+                        .HasColumnName("bedtime_start");
+
+                    b.Property<string>("BonusDate")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("bonus_date");
+
+                    b.Property<int>("BonusMinutesToday")
+                        .HasColumnType("integer")
+                        .HasColumnName("bonus_minutes_today");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<int>("DailyLimitMinutes")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(120)
+                        .HasColumnName("daily_limit_minutes");
+
+                    b.Property<string>("DeviceName")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasDefaultValue("Máy tính / Điện thoại của bé")
+                        .HasColumnName("device_name");
+
+                    b.Property<bool>("IsAllowedWindowEnabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_allowed_window_enabled");
+
+                    b.Property<bool>("IsBedtimeEnabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_bedtime_enabled");
+
+                    b.Property<bool>("IsDailyLimitEnabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_daily_limit_enabled");
+
+                    b.Property<bool>("IsLockedNow")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_locked_now");
+
+                    b.Property<int>("KidId")
+                        .HasColumnType("integer")
+                        .HasColumnName("kid_id");
+
+                    b.Property<DateTime?>("LastHeartbeatAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_heartbeat_at");
+
+                    b.Property<string>("LastUsageDate")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("last_usage_date");
+
+                    b.Property<string>("LockMessage")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("lock_message");
+
+                    b.Property<string>("LockReason")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("lock_reason");
+
+                    b.Property<DateTime?>("LockedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("locked_at");
+
+                    b.Property<string>("ScheduleJson")
+                        .HasColumnType("text")
+                        .HasColumnName("schedule_json");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<int>("UsedMinutesToday")
+                        .HasColumnType("integer")
+                        .HasColumnName("used_minutes_today");
+
+                    b.Property<int>("WeekendLimitMinutes")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(180)
+                        .HasColumnName("weekend_limit_minutes");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("KidId")
+                        .IsUnique();
+
+                    b.ToTable("kid_screen_times", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -378,8 +860,87 @@ namespace Giahuy0790.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Giahuy0790.Models.BlockedItem", b =>
+                {
+                    b.HasOne("Giahuy0790.Models.ApplicationUser", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Giahuy0790.Models.Kid", "Kid")
+                        .WithMany("BlockedItems")
+                        .HasForeignKey("KidId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("Kid");
+                });
+
+            modelBuilder.Entity("Giahuy0790.Models.FamilyGroup", b =>
+                {
+                    b.HasOne("Giahuy0790.Models.ApplicationUser", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Owner");
+                });
+
+            modelBuilder.Entity("Giahuy0790.Models.FamilyMember", b =>
+                {
+                    b.HasOne("Giahuy0790.Models.FamilyGroup", "FamilyGroup")
+                        .WithMany("Members")
+                        .HasForeignKey("FamilyGroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Giahuy0790.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("FamilyGroup");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Giahuy0790.Models.FamilyQrInvite", b =>
+                {
+                    b.HasOne("Giahuy0790.Models.ApplicationUser", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Giahuy0790.Models.FamilyGroup", "FamilyGroup")
+                        .WithMany()
+                        .HasForeignKey("FamilyGroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Giahuy0790.Models.ApplicationUser", "UsedByUser")
+                        .WithMany()
+                        .HasForeignKey("UsedByUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("FamilyGroup");
+
+                    b.Navigation("UsedByUser");
+                });
+
             modelBuilder.Entity("Giahuy0790.Models.Kid", b =>
                 {
+                    b.HasOne("Giahuy0790.Models.FamilyGroup", "FamilyGroup")
+                        .WithMany("Kids")
+                        .HasForeignKey("FamilyGroupId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("Giahuy0790.Models.ApplicationUser", "KidUser")
                         .WithMany()
                         .HasForeignKey("KidUserId")
@@ -389,6 +950,8 @@ namespace Giahuy0790.Migrations
                         .WithMany()
                         .HasForeignKey("ParentId")
                         .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("FamilyGroup");
 
                     b.Navigation("KidUser");
 
@@ -400,6 +963,39 @@ namespace Giahuy0790.Migrations
                     b.HasOne("Giahuy0790.Models.Kid", "Kid")
                         .WithMany("Activities")
                         .HasForeignKey("KidId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Kid");
+                });
+
+            modelBuilder.Entity("Giahuy0790.Models.KidGeofence", b =>
+                {
+                    b.HasOne("Giahuy0790.Models.Kid", "Kid")
+                        .WithMany("Geofences")
+                        .HasForeignKey("KidId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Kid");
+                });
+
+            modelBuilder.Entity("Giahuy0790.Models.KidLocation", b =>
+                {
+                    b.HasOne("Giahuy0790.Models.Kid", "Kid")
+                        .WithMany("Locations")
+                        .HasForeignKey("KidId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Kid");
+                });
+
+            modelBuilder.Entity("Giahuy0790.Models.KidScreenTime", b =>
+                {
+                    b.HasOne("Giahuy0790.Models.Kid", "Kid")
+                        .WithOne("ScreenTime")
+                        .HasForeignKey("Giahuy0790.Models.KidScreenTime", "KidId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -457,9 +1053,24 @@ namespace Giahuy0790.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Giahuy0790.Models.FamilyGroup", b =>
+                {
+                    b.Navigation("Kids");
+
+                    b.Navigation("Members");
+                });
+
             modelBuilder.Entity("Giahuy0790.Models.Kid", b =>
                 {
                     b.Navigation("Activities");
+
+                    b.Navigation("BlockedItems");
+
+                    b.Navigation("Geofences");
+
+                    b.Navigation("Locations");
+
+                    b.Navigation("ScreenTime");
                 });
 #pragma warning restore 612, 618
         }

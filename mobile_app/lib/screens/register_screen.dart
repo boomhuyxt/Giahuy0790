@@ -18,8 +18,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   final AuthService _authService = AuthService();
 
-  String _selectedRole = 'User';
-  final List<String> _roles = ['User', 'Staff', 'Admin'];
+  String _selectedRole = 'Parents';
+  final List<String> _roles = ['Parents', 'Kid', 'Admin'];
 
   bool _isLoading = false;
   bool _obscurePassword = true;
@@ -39,9 +39,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     if (_passwordController.text != _confirmPasswordController.text) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Mật khẩu xác nhận không khớp!'),
-          backgroundColor: Colors.red,
+        SnackBar(
+          content: const Text('Mật khẩu xác nhận không khớp!'),
+          backgroundColor: const Color(0xFF1D1D1F),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
       );
       return;
@@ -70,21 +72,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
         context: context,
         barrierDismissible: false,
         builder: (ctx) => AlertDialog(
-          title: const Row(
-            children: [
-              Icon(Icons.check_circle, color: Colors.green),
-              SizedBox(width: 8),
-              Text('Đăng ký thành công'),
-            ],
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          title: const Text('Đăng ký thành công', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
           content: Text(
             'Tài khoản "${_usernameController.text.trim()}" đã được tạo với quyền [$_selectedRole]!\nBạn có thể đăng nhập ngay.',
           ),
           actions: [
             ElevatedButton(
               onPressed: () {
-                Navigator.pop(ctx); // Close dialog
-                Navigator.pop(context); // Back to Login screen
+                Navigator.pop(ctx);
+                Navigator.pop(context);
               },
               child: const Text('Đến trang Đăng nhập'),
             ),
@@ -95,18 +92,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Row(
-            children: [
-              Icon(Icons.error_outline, color: Colors.red),
-              SizedBox(width: 8),
-              Text('Đăng ký thất bại'),
-            ],
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          title: const Text('Đăng ký thất bại', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
           content: Text(result['message'] ?? 'Có lỗi xảy ra trong quá trình đăng ký.'),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Đóng'),
+              child: const Text('Đóng', style: TextStyle(color: Color(0xFF0071E3), fontWeight: FontWeight.w600)),
             ),
           ],
         ),
@@ -117,15 +109,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF5F5F7),
       appBar: AppBar(
         title: const Text('Đăng Ký Tài Khoản'),
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.white,
         elevation: 0,
-        foregroundColor: const Color(0xFF1E293B),
+        foregroundColor: const Color(0xFF1D1D1F),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
           child: Form(
             key: _formKey,
             child: Column(
@@ -136,15 +129,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF1E293B),
+                    color: Color(0xFF1D1D1F),
+                    letterSpacing: -0.4,
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  'Phân quyền tài khoản trong hệ thống Identity',
+                const Text(
+                  'Tham gia hệ thống đồng hành cùng bé KidCare',
                   style: TextStyle(
                     fontSize: 13,
-                    color: Colors.grey.shade600,
+                    color: Color(0xFF86868B),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -152,12 +146,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 // Họ và tên
                 TextFormField(
                   controller: _fullNameController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Họ và tên',
-                    prefixIcon: const Icon(Icons.badge_outlined),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                    prefixIcon: Icon(Icons.badge_outlined, color: Color(0xFF86868B)),
                   ),
                   validator: (val) {
                     if (val == null || val.trim().isEmpty) {
@@ -171,12 +162,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 // Tên đăng nhập
                 TextFormField(
                   controller: _usernameController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Tên đăng nhập (Username)',
-                    prefixIcon: const Icon(Icons.person_outline),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                    prefixIcon: Icon(Icons.person_outline, color: Color(0xFF86868B)),
                   ),
                   validator: (val) {
                     if (val == null || val.trim().isEmpty) {
@@ -194,12 +182,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Địa chỉ Email',
-                    prefixIcon: const Icon(Icons.email_outlined),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                    prefixIcon: Icon(Icons.email_outlined, color: Color(0xFF86868B)),
                   ),
                   validator: (val) {
                     if (val == null || val.trim().isEmpty) {
@@ -216,40 +201,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 // Chọn Quyền (Role)
                 DropdownButtonFormField<String>(
                   initialValue: _selectedRole,
-                  decoration: InputDecoration(
-                    labelText: 'Vai trò & Phân quyền (Role)',
-                    prefixIcon: const Icon(Icons.security),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    helperText: 'Lựa chọn quyền người dùng trong hệ thống',
+                  decoration: const InputDecoration(
+                    labelText: 'Vai trò (Role)',
+                    prefixIcon: Icon(Icons.security, color: Color(0xFF86868B)),
                   ),
                   items: _roles.map((role) {
-                    IconData iconData;
-                    Color color;
                     String label;
                     if (role == 'Admin') {
-                      iconData = Icons.admin_panel_settings;
-                      color = Colors.red;
-                      label = 'Admin (Toàn quyền quản trị)';
-                    } else if (role == 'Staff') {
-                      iconData = Icons.point_of_sale;
-                      color = Colors.orange;
-                      label = 'Staff (Nhân viên thu ngân & kho)';
+                      label = 'Admin (Quản trị viên)';
+                    } else if (role == 'Kid') {
+                      label = 'Kid (Trẻ em)';
                     } else {
-                      iconData = Icons.person;
-                      color = Colors.blue;
-                      label = 'User (Khách hàng thông thường)';
+                      label = 'Parents (Phụ huynh)';
                     }
                     return DropdownMenuItem<String>(
                       value: role,
-                      child: Row(
-                        children: [
-                          Icon(iconData, color: color, size: 20),
-                          const SizedBox(width: 8),
-                          Text(label, style: const TextStyle(fontSize: 13)),
-                        ],
-                      ),
+                      child: Text(label, style: const TextStyle(fontSize: 13, color: Color(0xFF1D1D1F))),
                     );
                   }).toList(),
                   onChanged: (val) {
@@ -268,10 +235,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   obscureText: _obscurePassword,
                   decoration: InputDecoration(
                     labelText: 'Mật khẩu',
-                    prefixIcon: const Icon(Icons.lock_outline),
+                    prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFF86868B)),
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                        _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                        color: const Color(0xFF86868B),
                       ),
                       onPressed: () {
                         setState(() {
@@ -279,10 +247,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         });
                       },
                     ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    helperText: 'Ít nhất 6 ký tự, gồm chữ hoa, chữ thường và số (VD: User@123)',
                   ),
                   validator: (val) {
                     if (val == null || val.isEmpty) {
@@ -300,12 +264,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 TextFormField(
                   controller: _confirmPasswordController,
                   obscureText: _obscurePassword,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Xác nhận lại mật khẩu',
-                    prefixIcon: const Icon(Icons.lock_reset),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                    prefixIcon: Icon(Icons.lock_reset, color: Color(0xFF86868B)),
                   ),
                   validator: (val) {
                     if (val == null || val.isEmpty) {
@@ -319,14 +280,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 // Nút Đăng ký
                 ElevatedButton(
                   onPressed: _isLoading ? null : _handleRegister,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2563EB),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
                   child: _isLoading
                       ? const SizedBox(
                           height: 20,
@@ -337,11 +290,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                         )
                       : const Text(
-                          'ĐĂNG KÝ TÀI KHOẢN',
+                          'Đăng ký tài khoản',
                           style: TextStyle(
                             fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.5,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                 ),

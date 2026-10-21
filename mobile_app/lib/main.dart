@@ -5,11 +5,8 @@ import 'screens/register_screen.dart';
 import 'screens/splash_screen.dart';
 
 Future<void> main() async {
-  // Đảm bảo Flutter Binding sẵn sàng trước khi nạp file môi trường .env
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 1. Nạp biến môi trường từ file .env qua thư viện flutter_dotenv
-  // Tách biệt hoàn toàn API endpoints khỏi mã nguồn Dart
   try {
     await dotenv.load(fileName: ".env");
     debugPrint("Đã tải cấu hình .env thành công. API_BASE_URL: ${dotenv.env['API_BASE_URL']}");
@@ -26,32 +23,71 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'POS & Auth System',
+      title: 'KidCare & POS System',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF2563EB),
-          primary: const Color(0xFF2563EB),
-          secondary: const Color(0xFFD97706),
+        scaffoldBackgroundColor: const Color(0xFFF5F5F7), // Apple System Gray
+        colorScheme: const ColorScheme.light(
+          primary: Color(0xFF0071E3), // Apple Blue
+          secondary: Color(0xFF1D1D1F), // Apple Charcoal Black
+          surface: Colors.white,
+          onPrimary: Colors.white,
+          onSecondary: Colors.white,
+          onSurface: Color(0xFF1D1D1F),
         ),
         appBarTheme: const AppBarTheme(
           elevation: 0,
+          scrolledUnderElevation: 0,
           centerTitle: false,
+          backgroundColor: Colors.white,
+          foregroundColor: Color(0xFF1D1D1F),
+          titleTextStyle: TextStyle(
+            color: Color(0xFF1D1D1F),
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            letterSpacing: -0.4,
+          ),
+        ),
+        cardTheme: CardThemeData(
+          elevation: 0,
+          color: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: const BorderSide(color: Color(0x14000000)),
+          ),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF0071E3),
+            foregroundColor: Colors.white,
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(980),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+            textStyle: const TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 15,
+              letterSpacing: -0.2,
+            ),
+          ),
         ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
-          fillColor: Colors.grey.shade50,
+          fillColor: Colors.white,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Color(0x26000000)),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey.shade300),
+            borderSide: const BorderSide(color: Color(0x26000000)),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFF2563EB), width: 1.8),
+            borderSide: const BorderSide(color: Color(0xFF0071E3), width: 1.8),
           ),
         ),
       ),

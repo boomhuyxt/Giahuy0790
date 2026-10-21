@@ -1,0 +1,757 @@
+@{
+    ViewData["Title"] = "Đặt Lịch & Giới Hạn Giờ Dùng Máy Cho Bé";
+}
+
+<div class="container py-4">
+    <!-- Header banner (8-Bit Screen Time Guardian) -->
+    <div class="apple-card-static p-4 mb-4 border-2">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                    <i class="pixelart-icons-font-clock i8-xl text-primary i8-bounce"></i>
+                    <h2 class="fw-bold mb-0 text-primary pixel-font" style="letter-spacing: 0.04em;">
+                        ĐẶT LỊCH & GIỚI HẠN GIỜ DÙNG MÁY
+                    </h2>
+                    <span class="badge bg-primary text-white">8-BIT SCREEN TIME</span>
+                </div>
+                <p class="text-muted mb-0 small">
+                    Thiết lập thời gian biểu, đặt hạn mức số giờ sử dụng máy tính & điện thoại mỗi ngày, khóa máy ban đêm và điều khiển khóa tức thì từ xa để bảo vệ mắt và sức khỏe cho bé.
+                </p>
+            </div>
+            <div class="d-flex gap-2 flex-wrap align-items-center">
+                <a href="/parental-control" class="btn btn-outline-danger px-3 small">
+                    <i class="pixelart-icons-font-shield i8-xs me-1"></i> Chặn Web & App
+                </a>
+                <a href="/kids" class="btn btn-outline-secondary px-3 small">
+                    <i class="pixelart-icons-font-users i8-xs me-1"></i> Hồ Sơ Bé
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert placeholder -->
+    <div id="pageAlert"></div>
+
+    <!-- KHỐI CHỌN BÉ CẦN QUẢN LÝ THỜI GIAN -->
+    <div class="apple-card-static p-3 mb-4">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <span class="fw-bold text-secondary small d-flex align-items-center gap-1">
+                    <i class="pixelart-icons-font-user i8-xs text-primary"></i> Chọn Bé Yêu:
+                </span>
+                <div id="kidSelectorPills" class="d-flex flex-wrap gap-2">
+                    <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                </div>
+            </div>
+            <div class="text-muted small" id="currentSelectedKidLabel" style="font-size: 12px;">
+                Đang tải danh sách bé...
+            </div>
+        </div>
+    </div>
+
+    <!-- NỘI DUNG CHÍNH (SẼ HIỂN THỊ KHI ĐÃ CHỌN BÉ) -->
+    <div id="screenTimeMainContent" style="display: none;">
+
+        <!-- BẢNG ĐIỀU KHIỂN NHANH TỪ XA (REMOTE CONTROL & LIVE STATUS) -->
+        <div class="row g-3 mb-4">
+            <!-- Cột 1: Trạng thái Khóa / Mở máy trực tiếp -->
+            <div class="col-lg-6">
+                <div class="apple-card p-4 h-100 d-flex flex-column justify-content-between border-2" id="cardLockStatus">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="small text-muted fw-bold text-uppercase pixel-font" style="font-size: 11px;">
+                                <i class="pixelart-icons-font-device-phone i8-xs text-primary me-1"></i> Trạng Thái Thiết Bị Của Bé
+                            </span>
+                            <span class="badge" id="badgeOnlineStatus">
+                                <i class="pixelart-icons-font-zap i8-xs me-1"></i> Ngoại tuyến
+                            </span>
+                        </div>
+
+                        <!-- Trạng thái to trực quan -->
+                        <div class="p-3 rounded-3 text-center mb-3 border" id="boxLockIndicator">
+                            <div class="mb-2" id="iconLockState">
+                                <i class="pixelart-icons-font-lock-open i8-xl text-success i8-bounce"></i>
+                            </div>
+                            <h4 class="fw-bold pixel-font mb-1" id="textLockState">MÁY ĐANG ĐƯỢC PHÉP SỬ DỤNG</h4>
+                            <div class="small text-muted" id="textLockReason">Bé đang trong thời gian được phép dùng máy.</div>
+                        </div>
+
+                        <div class="small text-muted mb-3 d-flex justify-content-between">
+                            <span>Thiết bị: <strong id="lblDeviceName" class="text-primary">Máy của bé</strong></span>
+                            <span>Giờ VN: <span id="lblServerTime">--:--</span></span>
+                        </div>
+                    </div>
+
+                    <!-- Nút bấm Khóa / Mở Khóa Tức Thì -->
+                    <div class="d-flex gap-2 pt-2 border-top">
+                        <button type="button" class="btn btn-danger flex-grow-1 py-2 fw-semibold shadow-sm" id="btnQuickLock" onclick="toggleQuickLock(true)">
+                            <i class="pixelart-icons-font-lock i8-xs me-1"></i> Khóa Máy Bé Ngay Bây Giờ
+                        </button>
+                        <button type="button" class="btn btn-success flex-grow-1 py-2 fw-semibold shadow-sm" id="btnQuickUnlock" onclick="toggleQuickLock(false)" style="display: none;">
+                            <i class="pixelart-icons-font-lock-open i8-xs me-1"></i> Mở Khóa Máy Cho Bé
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cột 2: Thời lượng sử dụng hôm nay (Arcade Timer Progress) -->
+            <div class="col-lg-6">
+                <div class="apple-card p-4 h-100 d-flex flex-column justify-content-between border-2">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="small text-muted fw-bold text-uppercase pixel-font" style="font-size: 11px;">
+                                <i class="pixelart-icons-font-clock i8-xs text-warning me-1"></i> Thời Gian Dùng Hôm Nay
+                            </span>
+                            <span class="badge bg-warning text-dark px-2 py-1" id="badgeDayType">Ngày thường</span>
+                        </div>
+
+                        <!-- Số phút to đùng -->
+                        <div class="d-flex align-items-baseline gap-2 mb-2">
+                            <span class="display-5 fw-bold text-primary pixel-font" id="displayUsedMinutes">0</span>
+                            <span class="fs-4 text-muted pixel-font">/ <span id="displayLimitMinutes">120</span> phút</span>
+                            <span class="ms-auto small text-muted" id="displayRemainingText">(Còn lại 120 phút)</span>
+                        </div>
+
+                        <!-- Thanh Progress Bar 8-bit -->
+                        <div class="progress mb-3 border" style="height: 18px; border-radius: 6px; background-color: var(--bs-tertiary-bg);">
+                            <div id="progressBarTime" class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+
+                        <div class="p-2 rounded-2 border bg-body-tertiary small mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Hạn mức gốc: <strong id="lblBaseLimit">120</strong> phút</span>
+                                <span>Thưởng thêm hôm nay: <strong class="text-success" id="lblBonusMinutes">+0</strong> phút</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>Giờ đi ngủ: <strong class="text-danger" id="lblBedtimeHours">21:30 - 06:30</strong></span>
+                                <span>Khung giờ ban ngày: <strong id="lblWindowHours">Tự do</strong></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Nút thưởng thêm giờ nhanh -->
+                    <div>
+                        <div class="small text-muted fw-bold mb-1" style="font-size: 11px;">
+                            <i class="pixelart-icons-font-star i8-xs text-warning me-1"></i> Thưởng thêm giờ khi bé ngoan:
+                        </div>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button type="button" class="btn btn-sm btn-outline-primary flex-grow-1" onclick="addBonusMinutes(15)">+15 Phút</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary flex-grow-1" onclick="addBonusMinutes(30)">+30 Phút</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary flex-grow-1" onclick="addBonusMinutes(60)">+1 Tiếng</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="resetUsageTime()" title="Đặt lại thời gian đã dùng về 0 phút">
+                                <i class="pixelart-icons-font-reload i8-xs"></i> Reset 0p
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FORM CẤU HÌNH THỜI GIAN BIỂU & GIỜ GIỚI HẠN -->
+        <div class="row g-4 mb-4">
+            <div class="col-lg-7">
+                <div class="apple-card p-4 border-2">
+                    <h5 class="fw-bold mb-3 d-flex align-items-center gap-2 pixel-font">
+                        <i class="pixelart-icons-font-sliders i8-md text-primary"></i>
+                        <span>Cấu Hình Lịch Trình & Giới Hạn Máy</span>
+                    </h5>
+
+                    <form id="formScreenTimeSettings">
+                        <!-- Tên thiết bị -->
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-muted mb-1">Tên thiết bị của bé (Laptop / iPad / Điện thoại)</label>
+                            <input type="text" id="inputDeviceName" class="form-control" placeholder="vd: iPad học tiếng Anh của Tin Tin" />
+                        </div>
+
+                        <hr class="my-3 opacity-25" />
+
+                        <!-- MỤC 1: GIỚI HẠN THỜI GIAN THEO NGÀY -->
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="form-label fw-bold mb-0 d-flex align-items-center gap-1">
+                                    <i class="pixelart-icons-font-clock i8-sm text-primary"></i> 1. Giới hạn số phút sử dụng mỗi ngày
+                                </label>
+                                <div class="form-check form-switch mb-0">
+                                    <input class="form-check-input" type="checkbox" id="checkDailyLimitEnabled" checked>
+                                    <label class="form-check-label small" for="checkDailyLimitEnabled">Kích hoạt</label>
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label small text-muted mb-1">Ngày thường (Thứ 2 - Thứ 6)</label>
+                                    <div class="input-group">
+                                        <input type="number" id="inputDailyLimit" class="form-control" min="0" max="1440" step="15" value="120" />
+                                        <span class="input-group-text">Phút</span>
+                                    </div>
+                                    <!-- Preset chips -->
+                                    <div class="d-flex gap-1 mt-1">
+                                        <button type="button" class="btn btn-xs btn-outline-secondary py-0 px-2" style="font-size: 10px;" onclick="setDailyLimit(60)">60p</button>
+                                        <button type="button" class="btn btn-xs btn-outline-secondary py-0 px-2" style="font-size: 10px;" onclick="setDailyLimit(90)">90p</button>
+                                        <button type="button" class="btn btn-xs btn-outline-secondary py-0 px-2" style="font-size: 10px;" onclick="setDailyLimit(120)">120p</button>
+                                        <button type="button" class="btn btn-xs btn-outline-secondary py-0 px-2" style="font-size: 10px;" onclick="setDailyLimit(180)">180p</button>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small text-muted mb-1">Cuối tuần (Thứ 7 & Chủ Nhật)</label>
+                                    <div class="input-group">
+                                        <input type="number" id="inputWeekendLimit" class="form-control" min="0" max="1440" step="15" value="180" />
+                                        <span class="input-group-text">Phút</span>
+                                    </div>
+                                    <!-- Preset chips -->
+                                    <div class="d-flex gap-1 mt-1">
+                                        <button type="button" class="btn btn-xs btn-outline-secondary py-0 px-2" style="font-size: 10px;" onclick="setWeekendLimit(120)">120p</button>
+                                        <button type="button" class="btn btn-xs btn-outline-secondary py-0 px-2" style="font-size: 10px;" onclick="setWeekendLimit(180)">180p</button>
+                                        <button type="button" class="btn btn-xs btn-outline-secondary py-0 px-2" style="font-size: 10px;" onclick="setWeekendLimit(240)">240p</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-3 opacity-25" />
+
+                        <!-- MỤC 2: GIỜ ĐI NGỦ (BEDTIME DOWNTIME) -->
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="form-label fw-bold mb-0 d-flex align-items-center gap-1">
+                                    <i class="pixelart-icons-font-moon i8-sm text-info"></i> 2. Giờ đi ngủ / Giới nghiêm ban đêm (Bedtime Lock)
+                                </label>
+                                <div class="form-check form-switch mb-0">
+                                    <input class="form-check-input" type="checkbox" id="checkBedtimeEnabled" checked>
+                                    <label class="form-check-label small" for="checkBedtimeEnabled">Bật giờ ngủ</label>
+                                </div>
+                            </div>
+                            <p class="text-muted small mb-2" style="font-size: 12px;">
+                                Thiết bị sẽ tự động khóa toàn bộ trong khoảng thời gian này để đảm bảo bé đi ngủ đúng giờ.
+                            </p>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <label class="form-label small text-muted mb-1">Khóa máy từ (buổi tối)</label>
+                                    <input type="time" id="inputBedtimeStart" class="form-control" value="21:30" />
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small text-muted mb-1">Mở khóa lại lúc (buổi sáng)</label>
+                                    <input type="time" id="inputBedtimeEnd" class="form-control" value="06:30" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-3 opacity-25" />
+
+                        <!-- MỤC 3: KHUNG GIỜ CHO PHÉP BAN NGÀY (ALLOWED WINDOW) -->
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="form-label fw-bold mb-0 d-flex align-items-center gap-1">
+                                    <i class="pixelart-icons-font-sun i8-sm text-warning"></i> 3. Khung giờ được phép mở máy ban ngày
+                                </label>
+                                <div class="form-check form-switch mb-0">
+                                    <input class="form-check-input" type="checkbox" id="checkWindowEnabled">
+                                    <label class="form-check-label small" for="checkWindowEnabled">Giới hạn khung giờ</label>
+                                </div>
+                            </div>
+                            <p class="text-muted small mb-2" style="font-size: 12px;">
+                                Khi bật, bé chỉ được phép mở máy trong khoảng thời gian này (ví dụ từ 07:00 sáng đến 21:00 tối).
+                            </p>
+                            <div class="row g-2" id="boxWindowInputs">
+                                <div class="col-6">
+                                    <label class="form-label small text-muted mb-1">Sớm nhất từ</label>
+                                    <input type="time" id="inputWindowStart" class="form-control" value="07:00" />
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small text-muted mb-1">Muộn nhất đến</label>
+                                    <input type="time" id="inputWindowEnd" class="form-control" value="21:00" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-3 opacity-25" />
+
+                        <!-- MỤC 4: LỜI NHẮN TRÊN MÀN HÌNH KHÓA -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold mb-1 d-flex align-items-center gap-1">
+                                <i class="pixelart-icons-font-mail i8-sm text-primary"></i> 4. Lời nhắn hiển thị trên máy bé khi bị khóa
+                            </label>
+                            <textarea id="inputLockMessage" class="form-control" rows="2" placeholder="Nhập thông điệp gửi tới bé khi hết giờ..."></textarea>
+                        </div>
+
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary px-4 py-2 fw-semibold" id="btnSaveSettings">
+                                <i class="pixelart-icons-font-check i8-xs me-1"></i> Lưu Cấu Hình Lịch Dùng Máy
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Cột Phải: TRÌNH MÔ PHỎNG MÀN HÌNH MÁY BÉ (KID'S DEVICE SIMULATOR) -->
+            <div class="col-lg-5">
+                <div class="apple-card p-4 border-2 h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h5 class="fw-bold mb-0 pixel-font d-flex align-items-center gap-1">
+                                <i class="pixelart-icons-font-gamepad i8-md text-warning"></i>
+                                <span>Mô Phỏng Máy Bé</span>
+                            </h5>
+                            <span class="badge bg-warning text-dark">LIVE SIMULATOR</span>
+                        </div>
+                        <p class="text-muted small mb-3">
+                            Xem trực tiếp màn hình máy tính / điện thoại của bé sẽ hiển thị thế nào theo cấu hình thời gian thực của bạn.
+                        </p>
+
+                        <!-- Khung Mô Phỏng Màn Hình Thiết Bị (Arcade Device Frame) -->
+                        <div class="p-3 rounded-4 border border-3 border-dark bg-dark shadow-sm text-center mb-3" style="min-height: 330px; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative;">
+                            <!-- Camera notch / Loa thoại giả lập -->
+                            <div style="width: 48px; height: 5px; background: #374151; border-radius: 4px; margin-bottom: 12px;"></div>
+
+                            <!-- Màn hình bên trong -->
+                            <div id="simScreenContainer" class="w-100 p-3 rounded-3 text-white d-flex flex-column justify-content-center align-items-center" style="background-color: #064e3b; min-height: 270px; transition: background-color 0.3s ease;">
+                                
+                                <div id="simUnlockedView" class="w-100">
+                                    <div class="badge bg-success text-white mb-2 px-3 py-1 pixel-font" style="font-size: 10px;">
+                                        ● MÁY ĐANG MỞ
+                                    </div>
+                                    <div class="mb-2">
+                                        <i class="pixelart-icons-font-gamepad i8-xl text-warning i8-pulse"></i>
+                                    </div>
+                                    <h6 class="fw-bold mb-1 pixel-font" id="simKidName">Bé Nguyễn Gia Huy</h6>
+                                    <div class="small text-light opacity-75 mb-2">Được phép học tập & giải trí</div>
+                                    
+                                    <div class="p-2 rounded-2 bg-black bg-opacity-40 mb-2 border border-success border-opacity-50">
+                                        <div class="small opacity-75">Thời gian còn lại hôm nay:</div>
+                                        <div class="fs-3 fw-bold text-warning pixel-font" id="simRemainingTime">75 phút</div>
+                                    </div>
+                                </div>
+
+                                <div id="simLockedView" class="w-100" style="display: none;">
+                                    <div class="badge bg-danger text-white mb-2 px-3 py-1 pixel-font" style="font-size: 10px;">
+                                        🔒 THIẾT BỊ ĐÃ BỊ KHÓA
+                                    </div>
+                                    <div class="mb-2">
+                                        <i class="pixelart-icons-font-lock i8-xl text-danger i8-bounce"></i>
+                                    </div>
+                                    <h6 class="fw-bold mb-1 text-danger-emphasis pixel-font">HẾT GIỜ SỬ DỤNG</h6>
+                                    <div class="small text-warning fw-semibold mb-2" id="simLockReason">Phụ huynh tạm khóa từ xa</div>
+                                    
+                                    <div class="p-2 rounded-2 bg-black bg-opacity-40 border border-danger border-opacity-50 text-light small fst-italic" id="simLockMessage">
+                                        "Đã hết giờ sử dụng máy hôm nay. Bé hãy nghỉ ngơi và đọc sách nhé!"
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Các nút tương tác thử nghiệm trực tiếp -->
+                    <div class="p-3 rounded-3 border bg-body-tertiary">
+                        <div class="small fw-bold text-muted mb-2 pixel-font" style="font-size: 11px;">
+                            <i class="pixelart-icons-font-sliders i8-xs text-primary me-1"></i> Bấm để thử phản ứng máy bé:
+                        </div>
+                        <div class="d-flex flex-column gap-2">
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-sm btn-outline-success flex-grow-1" onclick="simulateHeartbeat(1)">
+                                    <i class="pixelart-icons-font-zap i8-xs me-1"></i> Ping online (+1p)
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-warning flex-grow-1" onclick="simulateHeartbeat(15)">
+                                    <i class="pixelart-icons-font-clock i8-xs me-1"></i> Dùng nhanh +15p
+                                </button>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-secondary w-100" onclick="loadScreenTimeData(currentKidId)">
+                                <i class="pixelart-icons-font-reload i8-xs me-1"></i> Làm Mới Dữ Liệu
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Empty State khi chưa có bé nào -->
+    <div id="screenTimeEmptyState" class="text-center py-5 apple-card-static my-4" style="display: none;">
+        <i class="pixelart-icons-font-users i8-xl text-muted mb-2"></i>
+        <h5 class="fw-bold mt-2 pixel-font">Chưa có hồ sơ Bé nào trong hệ thống</h5>
+        <p class="text-muted small mb-4">Hãy tạo hồ sơ bé trước để bắt đầu thiết lập thời gian biểu và giới hạn sử dụng thiết bị.</p>
+        <a href="/kids" class="btn btn-primary px-4">
+            <i class="pixelart-icons-font-plus i8-xs me-1"></i> Tạo Hồ Sơ Bé Ngay
+        </a>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    let currentKidId = null;
+    let kidsList = [];
+    let currentScreenTimeData = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        await loadKidsList();
+    });
+
+    // 1. Tải danh sách bé
+    async function loadKidsList() {
+        const pillsContainer = document.getElementById('kidSelectorPills');
+        const emptyState = document.getElementById('screenTimeEmptyState');
+        const mainContent = document.getElementById('screenTimeMainContent');
+
+        try {
+            const res = await fetch('/api/kids');
+            if (!res.ok) throw new Error('Không thể tải danh sách bé');
+            kidsList = await res.json();
+
+            if (!kidsList || kidsList.length === 0) {
+                pillsContainer.innerHTML = '<span class="text-muted small">Chưa có bé nào</span>';
+                emptyState.style.display = 'block';
+                mainContent.style.display = 'none';
+                return;
+            }
+
+            // Kiểm tra xem URL có query param ?kidId=... không
+            const urlParams = new URLSearchParams(window.location.search);
+            const queryKidId = parseInt(urlParams.get('kidId'));
+
+            if (queryKidId && kidsList.some(k => k.id === queryKidId)) {
+                currentKidId = queryKidId;
+            } else {
+                currentKidId = kidsList[0].id;
+            }
+
+            renderKidPills();
+            await loadScreenTimeData(currentKidId);
+
+        } catch (err) {
+            console.error(err);
+            pillsContainer.innerHTML = '<span class="text-danger small">Lỗi kết nối API</span>';
+        }
+    }
+
+    // 2. Render các nút chọn bé
+    function renderKidPills() {
+        const pillsContainer = document.getElementById('kidSelectorPills');
+        pillsContainer.innerHTML = kidsList.map(k => {
+            const isSelected = k.id === currentKidId;
+            const btnClass = isSelected ? 'btn-primary' : 'btn-outline-secondary';
+            const avatar = k.avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(k.fullName)}`;
+            return `
+                <button type="button" class="btn btn-sm ${btnClass} rounded-2 d-flex align-items-center gap-2 px-3 py-1" onclick="switchKid(${k.id})">
+                    <img src="${avatar}" class="rounded-1" style="width: 20px; height: 20px; object-fit: cover;" alt="${k.fullName}" />
+                    <span class="fw-semibold">${k.fullName}</span>
+                </button>
+            `;
+        }).join('');
+
+        const selectedKid = kidsList.find(k => k.id === currentKidId);
+        if (selectedKid) {
+            document.getElementById('currentSelectedKidLabel').innerHTML = `Đang đặt lịch cho bé: <strong class="text-primary">${selectedKid.fullName}</strong>`;
+            document.getElementById('simKidName').textContent = selectedKid.fullName;
+        }
+    }
+
+    // 3. Chuyển đổi bé
+    async function switchKid(kidId) {
+        if (currentKidId === kidId) return;
+        currentKidId = kidId;
+        renderKidPills();
+        await loadScreenTimeData(currentKidId);
+    }
+
+    // 4. Tải dữ liệu Screen Time của bé
+    async function loadScreenTimeData(kidId) {
+        if (!kidId) return;
+        const mainContent = document.getElementById('screenTimeMainContent');
+
+        try {
+            const res = await fetch(`/api/screentime/${kidId}`);
+            if (!res.ok) throw new Error('Không thể tải cấu hình Screen Time');
+            
+            const data = await res.json();
+            currentScreenTimeData = data;
+            mainContent.style.display = 'block';
+
+            populateUI(data);
+
+        } catch (err) {
+            console.error(err);
+            showAlert('Lỗi khi tải dữ liệu cấu hình giờ dùng máy: ' + err.message, 'danger');
+        }
+    }
+
+    // 5. Cập nhật dữ liệu lên giao diện
+    function populateUI(data) {
+        const { settings, status, kid } = data;
+
+        // Điền vào form cài đặt
+        document.getElementById('inputDeviceName').value = settings.deviceName || 'Máy của bé';
+        document.getElementById('inputDailyLimit').value = settings.dailyLimitMinutes;
+        document.getElementById('inputWeekendLimit').value = settings.weekendLimitMinutes;
+        document.getElementById('checkDailyLimitEnabled').checked = settings.isDailyLimitEnabled;
+
+        document.getElementById('checkBedtimeEnabled').checked = settings.isBedtimeEnabled;
+        document.getElementById('inputBedtimeStart').value = settings.bedtimeStart || '21:30';
+        document.getElementById('inputBedtimeEnd').value = settings.bedtimeEnd || '06:30';
+
+        document.getElementById('checkWindowEnabled').checked = settings.isAllowedWindowEnabled;
+        document.getElementById('inputWindowStart').value = settings.allowedStartTime || '07:00';
+        document.getElementById('inputWindowEnd').value = settings.allowedEndTime || '21:00';
+
+        document.getElementById('inputLockMessage').value = settings.lockMessage || '';
+
+        // Hiển thị Card trạng thái
+        document.getElementById('lblDeviceName').textContent = settings.deviceName || 'Thiết bị của bé';
+        document.getElementById('lblServerTime').textContent = status.currentTimeVn || '';
+
+        // Trạng thái online
+        const badgeOnline = document.getElementById('badgeOnlineStatus');
+        if (status.isOnline) {
+            badgeOnline.className = 'badge bg-success text-white';
+            badgeOnline.innerHTML = '<i class="pixelart-icons-font-zap i8-xs me-1"></i> Đang Online';
+        } else {
+            badgeOnline.className = 'badge bg-secondary text-white';
+            badgeOnline.innerHTML = '<i class="pixelart-icons-font-clock i8-xs me-1"></i> Ngoại tuyến';
+        }
+
+        // Khối hiển thị Khóa / Cho phép
+        const boxLockIndicator = document.getElementById('boxLockIndicator');
+        const iconLockState = document.getElementById('iconLockState');
+        const textLockState = document.getElementById('textLockState');
+        const textLockReason = document.getElementById('textLockReason');
+        const btnQuickLock = document.getElementById('btnQuickLock');
+        const btnQuickUnlock = document.getElementById('btnQuickUnlock');
+
+        if (status.isLocked) {
+            boxLockIndicator.style.backgroundColor = 'rgba(239, 68, 68, 0.15)';
+            boxLockIndicator.style.borderColor = 'var(--pixel-ruby)';
+            iconLockState.innerHTML = '<i class="pixelart-icons-font-lock i8-xl text-danger i8-bounce"></i>';
+            textLockState.textContent = 'MÁY ĐANG BỊ KHÓA';
+            textLockState.className = 'fw-bold pixel-font mb-1 text-danger';
+            textLockReason.textContent = status.lockReason || 'Thiết bị đang bị khóa.';
+
+            btnQuickLock.style.display = 'none';
+            btnQuickUnlock.style.display = 'block';
+        } else {
+            boxLockIndicator.style.backgroundColor = 'rgba(16, 185, 129, 0.15)';
+            boxLockIndicator.style.borderColor = 'var(--pixel-green)';
+            iconLockState.innerHTML = '<i class="pixelart-icons-font-lock-open i8-xl text-success i8-bounce"></i>';
+            textLockState.textContent = 'MÁY ĐANG ĐƯỢC PHÉP DÙNG';
+            textLockState.className = 'fw-bold pixel-font mb-1 text-success';
+            textLockReason.textContent = 'Bé đang trong thời gian được phép sử dụng máy bình thường.';
+
+            btnQuickLock.style.display = 'block';
+            btnQuickUnlock.style.display = 'none';
+        }
+
+        // Cột thời gian dùng
+        document.getElementById('badgeDayType').textContent = status.isWeekend ? 'Cuối tuần' : 'Ngày thường';
+        document.getElementById('displayUsedMinutes').textContent = status.usedMinutesToday;
+        document.getElementById('displayLimitMinutes').textContent = status.effectiveLimitToday;
+        document.getElementById('displayRemainingText').textContent = `(Còn lại ${status.remainingMinutesToday} phút)`;
+
+        const percent = Math.min(100, Math.round((status.usedMinutesToday / Math.max(1, status.effectiveLimitToday)) * 100));
+        const progressBar = document.getElementById('progressBarTime');
+        progressBar.style.width = percent + '%';
+        progressBar.setAttribute('aria-valuenow', percent);
+
+        if (percent >= 100) {
+            progressBar.className = 'progress-bar progress-bar-striped progress-bar-animated bg-danger';
+        } else if (percent >= 80) {
+            progressBar.className = 'progress-bar progress-bar-striped progress-bar-animated bg-warning';
+        } else {
+            progressBar.className = 'progress-bar progress-bar-striped progress-bar-animated bg-primary';
+        }
+
+        document.getElementById('lblBaseLimit').textContent = status.baseLimitToday;
+        document.getElementById('lblBonusMinutes').textContent = '+' + status.bonusMinutesToday;
+        document.getElementById('lblBedtimeHours').textContent = settings.isBedtimeEnabled 
+            ? `${settings.bedtimeStart} - ${settings.bedtimeEnd}` 
+            : 'Đã tắt';
+        document.getElementById('lblWindowHours').textContent = settings.isAllowedWindowEnabled 
+            ? `${settings.allowedStartTime} - ${settings.allowedEndTime}` 
+            : 'Tự do';
+
+        // CẬP NHẬT TRÌNH MÔ PHỎNG MÁY BÉ (SIMULATOR)
+        updateSimulator(status, settings);
+    }
+
+    // 6. Cập nhật màn hình mô phỏng máy bé
+    function updateSimulator(status, settings) {
+        const simScreenContainer = document.getElementById('simScreenContainer');
+        const simUnlockedView = document.getElementById('simUnlockedView');
+        const simLockedView = document.getElementById('simLockedView');
+        const simRemainingTime = document.getElementById('simRemainingTime');
+        const simLockReason = document.getElementById('simLockReason');
+        const simLockMessage = document.getElementById('simLockMessage');
+
+        if (status.isLocked) {
+            simScreenContainer.style.backgroundColor = '#450a0a'; // Nền đỏ đậm retro
+            simUnlockedView.style.display = 'none';
+            simLockedView.style.display = 'block';
+
+            simLockReason.textContent = status.lockReason || 'Đã bị khóa';
+            simLockMessage.textContent = `"${settings.lockMessage || 'Đã hết giờ sử dụng máy hôm nay. Bé hãy nghỉ ngơi nhé!'}"`;
+        } else {
+            simScreenContainer.style.backgroundColor = '#064e3b'; // Nền xanh lá đậm retro
+            simUnlockedView.style.display = 'block';
+            simLockedView.style.display = 'none';
+
+            simRemainingTime.textContent = `${status.remainingMinutesToday} phút`;
+        }
+    }
+
+    // 7. Lưu biểu mẫu cài đặt
+    document.getElementById('formScreenTimeSettings')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!currentKidId) return;
+
+        const btnSave = document.getElementById('btnSaveSettings');
+        btnSave.disabled = true;
+        btnSave.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang lưu...';
+
+        const payload = {
+            deviceName: document.getElementById('inputDeviceName').value,
+            dailyLimitMinutes: parseInt(document.getElementById('inputDailyLimit').value) || 120,
+            weekendLimitMinutes: parseInt(document.getElementById('inputWeekendLimit').value) || 180,
+            isDailyLimitEnabled: document.getElementById('checkDailyLimitEnabled').checked,
+            isBedtimeEnabled: document.getElementById('checkBedtimeEnabled').checked,
+            bedtimeStart: document.getElementById('inputBedtimeStart').value,
+            bedtimeEnd: document.getElementById('inputBedtimeEnd').value,
+            isAllowedWindowEnabled: document.getElementById('checkWindowEnabled').checked,
+            allowedStartTime: document.getElementById('inputWindowStart').value,
+            allowedEndTime: document.getElementById('inputWindowEnd').value,
+            lockMessage: document.getElementById('inputLockMessage').value
+        };
+
+        try {
+            const res = await fetch(`/api/screentime/${currentKidId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!res.ok) throw new Error('Không thể lưu cài đặt');
+            const data = await res.json();
+            
+            showAlert('✅ Đã lưu cấu hình lịch trình & giờ giới hạn máy thành công!', 'success');
+            await loadScreenTimeData(currentKidId);
+
+        } catch (err) {
+            console.error(err);
+            showAlert('Lỗi khi lưu cài đặt: ' + err.message, 'danger');
+        } finally {
+            btnSave.disabled = false;
+            btnSave.innerHTML = '<i class="pixelart-icons-font-check i8-xs me-1"></i> Lưu Cấu Hình Lịch Dùng Máy';
+        }
+    });
+
+    // 8. Khóa / Mở khóa nhanh tức thì từ xa
+    async function toggleQuickLock(lock) {
+        if (!currentKidId) return;
+        const actionText = lock ? 'khóa máy' : 'mở khóa máy';
+
+        try {
+            const res = await fetch(`/api/screentime/${currentKidId}/quick-lock`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ isLocked: lock, reason: lock ? 'Phụ huynh đã tạm khóa máy từ xa' : null })
+            });
+
+            if (!res.ok) throw new Error(`Không thể ${actionText}`);
+            const data = await res.json();
+            
+            showAlert(lock ? '🔒 Đã khóa máy của bé ngay lập tức!' : '🔓 Đã mở khóa máy cho bé!', lock ? 'warning' : 'success');
+            await loadScreenTimeData(currentKidId);
+
+        } catch (err) {
+            console.error(err);
+            showAlert(`Lỗi khi ${actionText}: ` + err.message, 'danger');
+        }
+    }
+
+    // 9. Thưởng thêm phút sử dụng hôm nay
+    async function addBonusMinutes(mins) {
+        if (!currentKidId) return;
+
+        try {
+            const res = await fetch(`/api/screentime/${currentKidId}/add-bonus`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ minutes: mins })
+            });
+
+            if (!res.ok) throw new Error('Không thể cộng thêm giờ');
+            const data = await res.json();
+
+            showAlert(`⭐ Đã thưởng thêm +${mins} phút dùng máy hôm nay cho bé!`, 'success');
+            await loadScreenTimeData(currentKidId);
+
+        } catch (err) {
+            console.error(err);
+            showAlert('Lỗi khi cộng thêm giờ: ' + err.message, 'danger');
+        }
+    }
+
+    // 10. Đặt lại thời gian sử dụng hôm nay về 0
+    async function resetUsageTime() {
+        if (!currentKidId) return;
+        if (!confirm('Bạn có chắc muốn đặt lại thời gian bé đã dùng hôm nay về 0 phút không?')) return;
+
+        try {
+            const res = await fetch(`/api/screentime/${currentKidId}/reset-usage`, {
+                method: 'POST'
+            });
+
+            if (!res.ok) throw new Error('Không thể đặt lại thời gian');
+            showAlert('🔄 Đã đặt lại thời gian sử dụng hôm nay về 0 phút!', 'info');
+            await loadScreenTimeData(currentKidId);
+
+        } catch (err) {
+            console.error(err);
+            showAlert('Lỗi khi reset: ' + err.message, 'danger');
+        }
+    }
+
+    // 11. Mô phỏng Heartbeat từ máy bé (để kiểm tra phản ứng)
+    async function simulateHeartbeat(increment) {
+        if (!currentKidId) return;
+
+        try {
+            const res = await fetch(`/api/screentime/${currentKidId}/heartbeat`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ deviceName: document.getElementById('inputDeviceName').value, incrementMinutes: increment })
+            });
+
+            if (!res.ok) throw new Error('Không thể gửi heartbeat');
+            const data = await res.json();
+
+            showAlert(`📡 Tín hiệu máy bé: Trạng thái ${data.isLocked ? '🔒 BỊ KHÓA' : '🟢 HOẠT ĐỘNG'} (Còn ${data.remainingMinutes} phút)`, data.isLocked ? 'warning' : 'success');
+            await loadScreenTimeData(currentKidId);
+
+        } catch (err) {
+            console.error(err);
+            showAlert('Lỗi khi gửi heartbeat: ' + err.message, 'danger');
+        }
+    }
+
+    // Các hàm phụ trợ tiện ích
+    function setDailyLimit(val) {
+        document.getElementById('inputDailyLimit').value = val;
+    }
+
+    function setWeekendLimit(val) {
+        document.getElementById('inputWeekendLimit').value = val;
+    }
+
+    function showAlert(msg, type = 'info') {
+        const alertBox = document.getElementById('pageAlert');
+        alertBox.innerHTML = `
+            <div class="alert alert-${type} alert-dismissible fade show rounded-2 border shadow-sm" role="alert">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="pixelart-icons-font-circle-info i8-sm"></i>
+                    <span>${msg}</span>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        `;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
+}

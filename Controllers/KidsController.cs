@@ -1,6 +1,8 @@
 using System.Security.Claims;
+using Giahuy0790.Data;
 using Giahuy0790.Models;
 using Giahuy0790.Repositories;
+using Giahuy0790.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -10,17 +12,19 @@ namespace Giahuy0790.Controllers;
 
 /// <summary>
 /// Controller API quản lý Hồ sơ Trẻ em (Kids) & Quản lý Tài khoản con (Sub-accounts):
-/// Thêm / Sửa / Xóa / Liên kết tài khoản con / Tạo mới tài khoản con / Đổi mật khẩu tài khoản con
+/// Thêm / Sửa / Xóa / Liên kết tài khoản con / Tạo mới tài khoản con / Đổi mật khẩu tài khoản con / Gửi danh sách qua Gmail
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class KidsController(
     IKidRepository kidRepo,
     UserManager<ApplicationUser> userManager,
-    RoleManager<IdentityRole> roleManager) : ControllerBase
+    RoleManager<IdentityRole> roleManager,
+    IEmailService emailService,
+    AppDbContext dbContext) : ControllerBase
 {
     /// <summary>
-    /// Lấy danh sách Trẻ em (Admin xem tất cả, Phụ huynh xem các bé của mình, Trẻ xem hồ sơ chính mình)
+    /// Lấy danh sách Trẻ em (Admin xem tất cả, Phụ huynh xem đúng các bé của mình hoặc gia đình mình, Trẻ xem hồ sơ chính mình)
     /// </summary>
     [HttpGet]
     public async Task<IActionResult> GetAll()
@@ -37,7 +41,7 @@ public class KidsController(
             return Ok(myKidProfiles);
         }
 
-        // 2. Nếu là Phụ huynh (Parents): xem các bé do mình quản lý
+        // 2. Nếu là Phụ huynh (Parents): chỉ xem đúng các bé do mình quản lý hoặc trong nhóm gia đình của mình
         if (isParent && !string.IsNullOrEmpty(userId))
         {
             var myKids = await kidRepo.GetKidsByParentAsync(userId);
@@ -51,29 +55,19 @@ public class KidsController(
             return Ok(allKids);
         }
 
-        // 4. Nếu người dùng đã đăng nhập nhưng chưa gán claim role cụ thể
+        // 4. Nếu người dùng đã đăng nhập (bất kể role nào): chỉ xem các bé của chính người dùng đó
         if (!string.IsNullOrEmpty(userId))
         {
-            var parentKids = (await kidRepo.GetKidsByParentAsync(userId)).ToList();
-            if (parentKids.Count != 0)
-            {
-                return Ok(parentKids);
-            }
-
-            var kidProfiles = (await kidRepo.GetKidsByKidUserAsync(userId)).ToList();
-            if (kidProfiles.Count != 0)
-            {
-                return Ok(kidProfiles);
-            }
+            var myKids = await kidRepo.GetKidsByParentAsync(userId);
+            return Ok(myKids);
         }
 
-        // Mặc định khách vãng lai hoặc chưa có hồ sơ riêng
-        var defaultKids = await kidRepo.GetAllAsync();
-        return Ok(defaultKids);
+        // 5. Khách vãng lai (Chưa đăng nhập): Tuyệt đối KHÔNG trả về danh sách trẻ của người khác!
+        return Ok(Array.Empty<Kid>());
     }
 
     /// <summary>
-    /// Lấy chi tiết hồ sơ một trẻ kèm lịch hoạt động và thông tin tài khoản con
+    /// Lấy chi tiết hồ sơ một trẻ kèm lịch hoạt động và thông tin tài khoản con (có kiểm tra quyền phụ huynh)
     /// </summary>
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id)
@@ -83,6 +77,25 @@ public class KidsController(
         {
             return NotFound(new { message = $"Không tìm thấy hồ sơ trẻ với ID = {id}" });
         }
+
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var isAdmin = User.IsInRole("Admin") || User.IsInRole("admin");
+        if (!isAdmin && !string.IsNullOrEmpty(currentUserId))
+        {
+            var isOwner = kid.ParentId == currentUserId;
+            var isKidSelf = kid.KidUserId == currentUserId;
+            var isFamilyCoParent = kid.FamilyGroupId != null && await dbContext.FamilyMembers.AnyAsync(m => m.FamilyGroupId == kid.FamilyGroupId && m.UserId == currentUserId);
+
+            if (!isOwner && !isKidSelf && !isFamilyCoParent)
+            {
+                return StatusCode(403, new { message = "Bạn không có quyền xem thông tin hồ sơ của trẻ này." });
+            }
+        }
+        else if (!isAdmin && string.IsNullOrEmpty(currentUserId))
+        {
+            return Unauthorized(new { message = "Vui lòng đăng nhập để xem thông tin trẻ." });
+        }
+
         return Ok(kid);
     }
 
@@ -123,25 +136,31 @@ public class KidsController(
     }
 
     /// <summary>
-    /// Tìm kiếm tài khoản khác trong hệ thống để Phụ huynh chọn liên kết làm tài khoản con
+    /// Lấy danh sách các tài khoản người dùng đã đăng ký trong hệ thống (kèm Gmail) để Phụ huynh xem và đưa vào danh sách con
     /// </summary>
+    [HttpGet("registered-users")]
     [HttpGet("search-subaccounts")]
-    public async Task<IActionResult> SearchSubAccounts([FromQuery] string? keyword)
+    public async Task<IActionResult> GetRegisteredUsers([FromQuery] string? keyword = null)
     {
-        if (string.IsNullOrWhiteSpace(keyword))
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var query = userManager.Users.AsQueryable();
+
+        if (!string.IsNullOrEmpty(currentUserId))
         {
-            return Ok(new List<object>());
+            query = query.Where(u => u.Id != currentUserId);
         }
 
-        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var kw = keyword.Trim().ToLower();
+        if (!string.IsNullOrWhiteSpace(keyword))
+        {
+            var kw = keyword.Trim().ToLower();
+            query = query.Where(u => (u.UserName != null && u.UserName.ToLower().Contains(kw)) ||
+                                     (u.Email != null && u.Email.ToLower().Contains(kw)) ||
+                                     (u.FullName != null && u.FullName.ToLower().Contains(kw)));
+        }
 
-        var matchedUsers = await userManager.Users
-            .Where(u => u.Id != currentUserId &&
-                        ((u.UserName != null && u.UserName.ToLower().Contains(kw)) ||
-                         (u.Email != null && u.Email.ToLower().Contains(kw)) ||
-                         (u.FullName != null && u.FullName.ToLower().Contains(kw))))
-            .Take(8)
+        var matchedUsers = await query
+            .OrderByDescending(u => u.CreatedAt)
+            .Take(30)
             .ToListAsync();
 
         var allKids = await kidRepo.GetAllAsync();
@@ -156,6 +175,7 @@ public class KidsController(
             email = u.Email,
             fullName = u.FullName,
             avatarUrl = u.AvatarUrl,
+            createdAt = u.CreatedAt,
             isAlreadyLinked = linkedMap.ContainsKey(u.Id),
             linkedKidName = linkedMap.TryGetValue(u.Id, out var linkedKid) ? linkedKid.FullName : null
         });
@@ -175,6 +195,17 @@ public class KidsController(
         }
 
         var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(currentUserId))
+        {
+            return Unauthorized(new { message = "Vui lòng đăng nhập tài khoản Phụ huynh để thêm trẻ." });
+        }
+
+        var isAdmin = User.IsInRole("Admin") || User.IsInRole("admin");
+        var assignedParentId = (isAdmin && !string.IsNullOrEmpty(dto.ParentId)) ? dto.ParentId : currentUserId;
+
+        // Tự động gắn vào nhóm gia đình của phụ huynh này nếu có
+        var parentFamilyGroup = await dbContext.FamilyGroups
+            .FirstOrDefaultAsync(g => g.OwnerId == currentUserId || g.Members.Any(m => m.UserId == currentUserId));
 
         var kid = new Kid
         {
@@ -188,7 +219,8 @@ public class KidsController(
             SchoolName = dto.SchoolName?.Trim(),
             HealthNotes = dto.HealthNotes?.Trim(),
             Interests = dto.Interests?.Trim(),
-            ParentId = !string.IsNullOrEmpty(dto.ParentId) ? dto.ParentId : currentUserId,
+            ParentId = assignedParentId,
+            FamilyGroupId = parentFamilyGroup?.Id,
             TotalPoints = dto.InitialPoints ?? 0,
             CreatedAt = DateTime.UtcNow
         };
@@ -281,7 +313,15 @@ public class KidsController(
 
         var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var isAdmin = User.IsInRole("Admin") || User.IsInRole("admin");
-        if (!isAdmin && !string.IsNullOrEmpty(currentUserId) && !string.IsNullOrEmpty(kid.ParentId) && kid.ParentId != currentUserId)
+        if (string.IsNullOrEmpty(currentUserId))
+        {
+            return Unauthorized(new { message = "Vui lòng đăng nhập để cập nhật hồ sơ." });
+        }
+
+        var isOwner = kid.ParentId == currentUserId;
+        var isFamilyCoParent = kid.FamilyGroupId != null && await dbContext.FamilyMembers.AnyAsync(m => m.FamilyGroupId == kid.FamilyGroupId && m.UserId == currentUserId);
+
+        if (!isAdmin && !isOwner && !isFamilyCoParent)
         {
             return StatusCode(403, new { message = "Bạn không có quyền chỉnh sửa hồ sơ trẻ này." });
         }
@@ -368,9 +408,51 @@ public class KidsController(
         kid.UpdatedAt = DateTime.UtcNow;
         await kidRepo.UpdateAsync(kid);
 
+        // Gửi Gmail thông báo tự động cho cả Phụ huynh và Bé
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                var parentUser = !string.IsNullOrEmpty(currentUserId) ? await userManager.FindByIdAsync(currentUserId) : null;
+                var parentName = parentUser?.FullName ?? parentUser?.UserName ?? "Phụ huynh";
+
+                // 1. Gửi Gmail cho tài khoản con
+                if (!string.IsNullOrWhiteSpace(targetUser.Email))
+                {
+                    await emailService.SendChildLinkedNotificationAsync(
+                        targetUser.Email,
+                        targetUser.FullName ?? targetUser.UserName ?? "Bé yêu",
+                        parentName,
+                        kid.FullName,
+                        targetUser.UserName ?? string.Empty,
+                        targetUser.Email,
+                        isParent: false
+                    );
+                }
+
+                // 2. Gửi Gmail cho Phụ huynh
+                if (parentUser != null && !string.IsNullOrWhiteSpace(parentUser.Email))
+                {
+                    await emailService.SendChildLinkedNotificationAsync(
+                        parentUser.Email,
+                        parentName,
+                        parentName,
+                        kid.FullName,
+                        targetUser.UserName ?? string.Empty,
+                        targetUser.Email ?? string.Empty,
+                        isParent: true
+                    );
+                }
+            }
+            catch
+            {
+                // Tránh lỗi ngắt background task
+            }
+        });
+
         return Ok(new
         {
-            message = $"🎉 Đã liên kết thành công tài khoản '{targetUser.UserName}' làm tài khoản con cho bé {kid.FullName}!",
+            message = $"🎉 Đã liên kết thành công tài khoản '{targetUser.UserName}' làm tài khoản con cho bé {kid.FullName}! Email thông báo đã được gửi qua Gmail.",
             kidId = kid.Id,
             kidName = kid.FullName,
             childAccount = new
@@ -594,9 +676,15 @@ public class KidsController(
 
         var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var isAdmin = User.IsInRole("Admin") || User.IsInRole("admin");
-        if (!isAdmin && !string.IsNullOrEmpty(currentUserId) && !string.IsNullOrEmpty(kid.ParentId) && kid.ParentId != currentUserId)
+        if (string.IsNullOrEmpty(currentUserId))
         {
-            return StatusCode(403, new { message = "Bạn không có quyền xóa hồ sơ trẻ này." });
+            return Unauthorized(new { message = "Vui lòng đăng nhập để xóa hồ sơ." });
+        }
+
+        var isOwner = kid.ParentId == currentUserId;
+        if (!isAdmin && !isOwner)
+        {
+            return StatusCode(403, new { message = "Chỉ phụ huynh sở hữu hồ sơ mới có quyền xóa bé này." });
         }
 
         var success = await kidRepo.DeleteAsync(id);
@@ -606,7 +694,95 @@ public class KidsController(
         }
         return Ok(new { message = "Đã xóa hồ sơ trẻ thành công" });
     }
+
+    /// <summary>
+    /// Gửi danh sách toàn bộ các bé và tài khoản con về Gmail của Phụ huynh đang đăng nhập
+    /// </summary>
+    [HttpPost("send-summary-email")]
+    public async Task<IActionResult> SendSummaryEmail()
+    {
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(currentUserId))
+        {
+            return Unauthorized(new { message = "Vui lòng đăng nhập để nhận báo cáo qua Gmail." });
+        }
+
+        var parentUser = await userManager.FindByIdAsync(currentUserId);
+        if (parentUser == null || string.IsNullOrWhiteSpace(parentUser.Email))
+        {
+            return BadRequest(new { message = "Tài khoản của bạn chưa có địa chỉ Gmail hợp lệ để nhận email." });
+        }
+
+        var myKids = (await kidRepo.GetKidsByParentAsync(currentUserId)).ToList();
+        if (myKids.Count == 0)
+        {
+            return BadRequest(new { message = "Bạn hiện chưa có bé nào trong danh sách con để gửi báo cáo." });
+        }
+
+        var summaryItems = myKids.Select(k => new KidSummaryItem(
+            k.Id,
+            k.FullName,
+            k.Nickname,
+            k.SchoolName,
+            k.TotalPoints,
+            k.HasKidAccount,
+            k.KidUserName,
+            k.KidUserEmail
+        ));
+
+        var parentName = string.IsNullOrWhiteSpace(parentUser.FullName) ? parentUser.UserName : parentUser.FullName;
+        var sent = await emailService.SendKidsSummaryEmailAsync(parentUser.Email, parentName ?? "Quý Phụ Huynh", summaryItems);
+
+        if (!sent)
+        {
+            return StatusCode(500, new { message = "Không thể gửi email qua máy chủ SMTP Gmail. Vui lòng kiểm tra lại cấu hình." });
+        }
+
+        return Ok(new
+        {
+            message = $"🎉 Đã gửi danh sách tổng hợp {myKids.Count} bé về Gmail: {parentUser.Email} thành công! Hãy kiểm tra hộp thư của bạn."
+        });
+    }
+
+    /// <summary>
+    /// Gửi thư mời qua Gmail đến người dùng hoặc bé để kết nối vào danh sách con
+    /// </summary>
+    [HttpPost("invite-by-email")]
+    public async Task<IActionResult> InviteByEmail([FromBody] InviteChildEmailDto dto)
+    {
+        if (string.IsNullOrWhiteSpace(dto.TargetEmail))
+        {
+            return BadRequest(new { message = "Vui lòng cung cấp địa chỉ Gmail của người nhận." });
+        }
+
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var parentUser = !string.IsNullOrEmpty(currentUserId) ? await userManager.FindByIdAsync(currentUserId) : null;
+        var parentName = parentUser?.FullName ?? parentUser?.UserName ?? "Phụ huynh";
+
+        var kidName = "bé yêu";
+        if (dto.KidId.HasValue)
+        {
+            var kid = await kidRepo.GetByIdAsync(dto.KidId.Value);
+            if (kid != null) kidName = kid.FullName;
+        }
+
+        var sent = await emailService.SendInviteChildEmailAsync(dto.TargetEmail.Trim(), parentName, kidName);
+        if (!sent)
+        {
+            return StatusCode(500, new { message = "Không thể gửi email mời qua Gmail. Vui lòng thử lại sau." });
+        }
+
+        return Ok(new
+        {
+            message = $"💌 Đã gửi lời mời tham gia qua Gmail đến: {dto.TargetEmail.Trim()} thành công!"
+        });
+    }
 }
+
+public record InviteChildEmailDto(
+    string TargetEmail,
+    int? KidId = null
+);
 
 public record CreateKidDto(
     string FullName,

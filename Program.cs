@@ -42,6 +42,9 @@ namespace Giahuy0790
                     options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
                 });
 
+            // Đăng ký SignalR để phát sóng Real-time GPS Tracking
+            builder.Services.AddSignalR();
+
             // Cấu hình Swagger / OpenAPI
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(options =>
@@ -166,7 +169,8 @@ namespace Giahuy0790
                 var userMgr = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
                 var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-                string[] roles = ["Admin", "Parents", "Kid"];
+                // Khởi tạo các Role cơ bản trong hệ thống
+                string[] roles = ["Admin", "Parents", "Kid", "Staff", "User"];
                 foreach (var r in roles)
                 {
                     if (!await roleMgr.RoleExistsAsync(r))
@@ -175,7 +179,7 @@ namespace Giahuy0790
                     }
                 }
 
-                // 1. Tài khoản Quản trị viên (Admin)
+                // Khởi tạo tài khoản Quản trị viên (Admin) nếu chưa có
                 if (await userMgr.FindByNameAsync("admin") == null)
                 {
                     var admin = new ApplicationUser
@@ -188,108 +192,10 @@ namespace Giahuy0790
                     var res = await userMgr.CreateAsync(admin, "Admin@123");
                     if (res.Succeeded) await userMgr.AddToRoleAsync(admin, "Admin");
                 }
-
-                // 2. Tài khoản Phụ huynh (Parents)
-                ApplicationUser? parentUser = await userMgr.FindByNameAsync("parents");
-                if (parentUser == null)
-                {
-                    parentUser = new ApplicationUser
-                    {
-                        UserName = "parents",
-                        Email = "parents@kidcare.com",
-                        FullName = "Phụ Huynh Nguyễn Văn A",
-                        AvatarUrl = "https://api.dicebear.com/7.x/bottts/svg?seed=Parents"
-                    };
-                    var res = await userMgr.CreateAsync(parentUser, "Parents@123");
-                    if (res.Succeeded) await userMgr.AddToRoleAsync(parentUser, "Parents");
-                }
-
-                // 3. Tài khoản Trẻ em (Kid)
-                ApplicationUser? kidUser = await userMgr.FindByNameAsync("kid");
-                if (kidUser == null)
-                {
-                    kidUser = new ApplicationUser
-                    {
-                        UserName = "kid",
-                        Email = "kid@kidcare.com",
-                        FullName = "Bé Nguyễn Gia Huy",
-                        AvatarUrl = "https://api.dicebear.com/7.x/bottts/svg?seed=GiaHuy"
-                    };
-                    var res = await userMgr.CreateAsync(kidUser, "Kid@123");
-                    if (res.Succeeded) await userMgr.AddToRoleAsync(kidUser, "Kid");
-                }
-
-                // Khởi tạo dữ liệu mẫu hồ sơ trẻ em nếu chưa có
-                if (!await dbContext.Kids.AnyAsync())
-                {
-                    var sampleKid1 = new Kid
-                    {
-                        FullName = "Nguyễn Gia Huy",
-                        Nickname = "Bé Bơ",
-                        DateOfBirth = DateTime.UtcNow.AddYears(-7),
-                        Gender = "Nam",
-                        AvatarUrl = "https://api.dicebear.com/7.x/bottts/svg?seed=GiaHuyKid",
-                        SchoolName = "Trường Tiểu Học Kim Đồng - Lớp 2A",
-                        HealthNotes = "Sức khỏe tốt, không có tiền sử dị ứng thực phẩm",
-                        Interests = "Vẽ tranh, xếp hình lego, bóng đá",
-                        ParentId = parentUser?.Id,
-                        KidUserId = kidUser?.Id,
-                        TotalPoints = 45,
-                        CreatedAt = DateTime.UtcNow
-                    };
-
-                    var sampleKid2 = new Kid
-                    {
-                        FullName = "Nguyễn Bảo An",
-                        Nickname = "Bé Na",
-                        DateOfBirth = DateTime.UtcNow.AddYears(-5),
-                        Gender = "Nữ",
-                        AvatarUrl = "https://api.dicebear.com/7.x/bottts/svg?seed=BaoAn",
-                        SchoolName = "Trường Mầm Non Họa Mi",
-                        HealthNotes = "Dị ứng hải sản nhẹ, cần nhắc uống nước thường xuyên",
-                        Interests = "Hát múa, nghe kể chuyện cổ tích",
-                        ParentId = parentUser?.Id,
-                        TotalPoints = 30,
-                        CreatedAt = DateTime.UtcNow
-                    };
-
-                    await dbContext.Kids.AddRangeAsync(sampleKid1, sampleKid2);
-                    await dbContext.SaveChangesAsync();
-
-                    // Thêm hoạt động mẫu cho bé
-                    var sampleActivity1 = new KidActivity
-                    {
-                        KidId = sampleKid1.Id,
-                        Title = "Đọc 1 mẩu truyện tiếng Anh",
-                        Description = "Đọc và phát âm truyện tranh song ngữ 15 phút",
-                        Category = "Học tập",
-                        ActivityTime = DateTime.UtcNow.AddHours(2),
-                        Status = "Completed",
-                        RewardPoints = 10,
-                        Notes = "Bé đọc rất chuẩn và tự giác!",
-                        CreatedAt = DateTime.UtcNow
-                    };
-
-                    var sampleActivity2 = new KidActivity
-                    {
-                        KidId = sampleKid1.Id,
-                        Title = "Tự giác dọn dẹp góc học tập",
-                        Description = "Xếp gọn sách vở và để bút vào hộp",
-                        Category = "Nhiệm vụ",
-                        ActivityTime = DateTime.UtcNow.AddHours(4),
-                        Status = "Pending",
-                        RewardPoints = 5,
-                        Notes = "Nhắc bé trước khi đi ngủ",
-                        CreatedAt = DateTime.UtcNow
-                    };
-
-                    await dbContext.KidActivities.AddRangeAsync(sampleActivity1, sampleActivity2);
-                    await dbContext.SaveChangesAsync();
-                }
             }
             catch (Exception ex)
             {
-                app.Logger.LogWarning("Không thể khởi tạo seed users hoặc dữ liệu trẻ em mẫu: {Msg}", ex.Message);
+                app.Logger.LogWarning("Không thể khởi tạo roles hoặc tài khoản admin: {Msg}", ex.Message);
             }
 
             // Configure the HTTP request pipeline.
@@ -322,6 +228,9 @@ namespace Giahuy0790
 
             // Map API Controllers
             app.MapControllers();
+
+            // Map SignalR Hub cho GPS Tracking
+            app.MapHub<Giahuy0790.Hubs.LocationHub>("/hubs/location");
 
             app.MapControllerRoute(
                 name: "default",

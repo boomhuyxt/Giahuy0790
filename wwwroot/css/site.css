@@ -1,8 +1,77 @@
-/* CSS tùy chỉnh hỗ trợ Light & Dark Mode */
+/* ==========================================================================
+   KIDCARE - MODERN BOOTSTRAP 5 DESIGN SYSTEM
+   Professional, Responsive, Clean & Elegant UI with Bootstrap 5.3 & Icons
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('../lib/pixelarticons/pixelart-icons-font.css');
+
+:root {
+  /* Modern Typography */
+  --bs-body-font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --pixel-font: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --pixel-retro-font: 'Plus Jakarta Sans', sans-serif;
+
+  /* Bootstrap 5 Vibrant Primary Palette */
+  --bs-primary: #2563eb;
+  --bs-primary-rgb: 37, 99, 235;
+  --bs-secondary: #64748b;
+  --bs-secondary-rgb: 100, 116, 139;
+  --bs-success: #10b981;
+  --bs-success-rgb: 16, 185, 129;
+  --bs-info: #06b6d4;
+  --bs-info-rgb: 6, 182, 212;
+  --bs-warning: #f59e0b;
+  --bs-warning-rgb: 245, 158, 11;
+  --bs-danger: #ef4444;
+  --bs-danger-rgb: 239, 68, 68;
+  --bs-dark: #0f172a;
+  --bs-dark-rgb: 15, 23, 42;
+  --bs-light: #f8fafc;
+  --bs-light-rgb: 248, 250, 252;
+
+  --bs-body-bg: #f8fafc;
+  --bs-body-color: #1e293b;
+  --bs-border-color: #e2e8f0;
+  --bs-border-color-translucent: rgba(226, 232, 240, 0.7);
+
+  /* Modern Card & Surface Tokens */
+  --pixel-card-bg: #ffffff;
+  --pixel-border: #e2e8f0;
+  --pixel-shadow-color: rgba(15, 23, 42, 0.08);
+
+  /* Soft Elevations */
+  --pixel-box-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --pixel-box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --pixel-box-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+}
+
+[data-bs-theme="dark"] {
+  --bs-body-bg: #090d16;
+  --bs-body-color: #f1f5f9;
+  --bs-border-color: #1e293b;
+  --bs-border-color-translucent: rgba(30, 41, 59, 0.7);
+  --bs-tertiary-bg: #1e293b;
+  --bs-secondary-bg: #111827;
+
+  --pixel-card-bg: #111827;
+  --pixel-border: #1e293b;
+  --pixel-shadow-color: rgba(0, 0, 0, 0.4);
+
+  --pixel-box-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+  --pixel-box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  --pixel-box-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+}
+
+/* ==========================================================================
+   BASE LAYOUT & STICKY FOOTER SYSTEM
+   ========================================================================== */
+
 html {
-  font-size: 14px;
-  position: relative;
-  min-height: 100%;
+  height: 100%;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 @media (min-width: 768px) {
@@ -12,75 +81,522 @@ html {
 }
 
 body {
-  margin-bottom: 70px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  font-family: var(--bs-body-font-family);
+  background-color: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  letter-spacing: -0.011em;
   transition: background-color 0.25s ease, color 0.25s ease;
 }
 
-/* Hiệu ứng chuyển động mượt khi đổi giao diện Dark/Light */
-.navbar, .footer, .card, .modal-content, .dropdown-menu {
-  transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+.page-container {
+  flex: 1 0 auto;
+  width: 100%;
 }
 
-/* Nút chuyển đổi Theme */
+/* ==========================================================================
+   TYPOGRAPHY & ACCENTS
+   ========================================================================== */
+
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6 {
+  font-weight: 700;
+  color: var(--bs-body-color);
+  letter-spacing: -0.02em;
+}
+
+.pixel-font {
+  font-family: var(--bs-body-font-family) !important;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.pixel-retro-font {
+  font-family: var(--bs-body-font-family) !important;
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   MODERN BOOTSTRAP 5 BUTTONS
+   ========================================================================== */
+
+.btn {
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0.5rem 1.15rem;
+  border-radius: 0.5rem;
+  transition: all 0.15s ease-in-out;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  line-height: 1.5;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+}
+
+.btn:active, .btn.active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.btn-sm {
+  font-size: 0.825rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 0.375rem;
+}
+
+.btn-lg {
+  font-size: 1rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.625rem;
+}
+
+.btn-primary {
+  background-color: var(--bs-primary);
+  border-color: var(--bs-primary);
+  color: #ffffff !important;
+}
+
+.btn-primary:hover, .btn-primary:focus {
+  background-color: #1d4ed8;
+  border-color: #1d4ed8;
+  color: #ffffff !important;
+}
+
+.btn-success {
+  background-color: var(--bs-success);
+  border-color: var(--bs-success);
+  color: #ffffff !important;
+}
+
+.btn-danger {
+  background-color: var(--bs-danger);
+  border-color: var(--bs-danger);
+  color: #ffffff !important;
+}
+
+.btn-warning {
+  background-color: var(--bs-warning);
+  border-color: var(--bs-warning);
+  color: #0f172a !important;
+}
+
+.btn-outline-primary {
+  color: var(--bs-primary) !important;
+  border-color: var(--bs-primary);
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--bs-primary);
+  color: #ffffff !important;
+}
+
+/* ==========================================================================
+   MODERN BOOTSTRAP 5 CARDS & PANELS
+   ========================================================================== */
+
+.card,
+.apple-card,
+.apple-card-static,
+.pixel-card {
+  background-color: var(--pixel-card-bg);
+  border: 1px solid var(--bs-border-color);
+  border-radius: 0.75rem;
+  box-shadow: var(--pixel-box-shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.apple-card:hover,
+.pixel-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--pixel-box-shadow);
+  border-color: rgba(37, 99, 235, 0.3);
+}
+
+.card-header,
+.pixel-window-header {
+  background-color: transparent;
+  border-bottom: 1px solid var(--bs-border-color);
+  padding: 1rem 1.25rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-body {
+  padding: 1.25rem;
+}
+
+.card-footer {
+  background-color: transparent;
+  border-top: 1px solid var(--bs-border-color);
+  padding: 0.85rem 1.25rem;
+}
+
+/* ==========================================================================
+   MODERN BOOTSTRAP 5 BADGES & CHIPS
+   ========================================================================== */
+
+.badge,
+.pixel-badge {
+  font-weight: 600;
+  font-size: 0.75rem;
+  letter-spacing: 0.01em;
+  padding: 0.35em 0.65em;
+  border-radius: 0.375rem;
+  line-height: 1.25;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.badge.rounded-pill {
+  border-radius: 50rem !important;
+}
+
+/* Apple/Bootstrap Subtle Badges */
+.apple-badge-blue,
+.badge.bg-primary-subtle {
+  background-color: rgba(37, 99, 235, 0.1) !important;
+  color: var(--bs-primary) !important;
+  border: 1px solid rgba(37, 99, 235, 0.2);
+}
+
+.apple-badge-neutral,
+.badge.bg-secondary-subtle {
+  background-color: rgba(100, 116, 139, 0.1) !important;
+  color: var(--bs-secondary) !important;
+  border: 1px solid rgba(100, 116, 139, 0.2);
+}
+
+.badge.bg-success-subtle {
+  background-color: rgba(16, 185, 129, 0.1) !important;
+  color: var(--bs-success) !important;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.badge.bg-warning-subtle {
+  background-color: rgba(245, 158, 11, 0.12) !important;
+  color: #b45309 !important;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+[data-bs-theme="dark"] .badge.bg-warning-subtle {
+  color: #fde047 !important;
+}
+
+.badge.bg-danger-subtle {
+  background-color: rgba(239, 68, 68, 0.1) !important;
+  color: var(--bs-danger) !important;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+/* ==========================================================================
+   MODERN FORM CONTROLS & INPUTS
+   ========================================================================== */
+
+.form-control,
+.form-select {
+  border-radius: 0.5rem;
+  border: 1px solid var(--bs-border-color);
+  background-color: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  padding: 0.55rem 0.85rem;
+  font-size: 0.92rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: #93c5fd;
+  box-shadow: 0 0 0 0.25rem rgba(37, 99, 235, 0.18);
+  background-color: var(--bs-body-bg);
+  color: var(--bs-body-color);
+}
+
+.input-group-text {
+  border-radius: 0.5rem;
+  border: 1px solid var(--bs-border-color);
+  background-color: var(--bs-tertiary-bg, #f1f5f9);
+  color: var(--bs-secondary);
+}
+
+.form-control-sm,
+.form-select-sm {
+  border-radius: 0.375rem;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.825rem;
+}
+
+.form-check-input:checked {
+  background-color: var(--bs-primary);
+  border-color: var(--bs-primary);
+}
+
+/* ==========================================================================
+   MODERN NAVBAR & NAVIGATION
+   ========================================================================== */
+
+.apple-nav,
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+  background-color: var(--pixel-card-bg) !important;
+  border-bottom: 1px solid var(--bs-border-color) !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.03);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 0.65rem 0;
+}
+
+.apple-nav .nav-link,
+.navbar-nav .nav-link {
+  color: var(--bs-body-color);
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.5rem 0.85rem;
+  border-radius: 0.5rem;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.apple-nav .nav-link:hover,
+.navbar-nav .nav-link:hover {
+  color: var(--bs-primary);
+  background-color: rgba(37, 99, 235, 0.08);
+}
+
+.apple-nav .nav-link.active,
+.navbar-nav .nav-link.active {
+  color: var(--bs-primary);
+  font-weight: 700;
+  background-color: rgba(37, 99, 235, 0.1);
+}
+
+/* ==========================================================================
+   MODALS & DIALOGS
+   ========================================================================== */
+
+.modal-content {
+  background-color: var(--pixel-card-bg);
+  border: 1px solid var(--bs-border-color);
+  border-radius: 1rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.modal-header {
+  border-bottom: 1px solid var(--bs-border-color);
+  padding: 1.15rem 1.5rem;
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.modal-footer {
+  border-top: 1px solid var(--bs-border-color);
+  padding: 1rem 1.5rem;
+}
+
+/* ==========================================================================
+   TABLES & LISTS
+   ========================================================================== */
+
+.table {
+  color: var(--bs-body-color);
+  border-color: var(--bs-border-color);
+}
+
+.table th {
+  font-weight: 600;
+  font-size: 0.825rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--bs-secondary);
+}
+
+.table > :not(caption) > * > * {
+  padding: 0.85rem 1rem;
+}
+
+.table-hover > tbody > tr:hover {
+  background-color: rgba(37, 99, 235, 0.04);
+}
+
+/* ==========================================================================
+   STICKY FOOTER
+   ========================================================================== */
+
+.footer {
+  position: relative !important;
+  margin-top: auto !important;
+  bottom: auto !important;
+  width: 100%;
+  font-size: 0.875rem;
+  border-top: 1px solid var(--bs-border-color);
+  background-color: var(--pixel-card-bg);
+  padding: 1rem 0;
+  line-height: 1.6;
+  z-index: 10;
+}
+
+/* ==========================================================================
+   THEME TOGGLE BUTTON (1-CLICK TOGGLE)
+   ========================================================================== */
+
 .theme-switch-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
+  height: 36px;
+  min-width: 38px;
+  padding: 0 10px;
+  gap: 6px;
+  border-radius: 0.5rem;
   border: 1px solid var(--bs-border-color);
-  background: var(--bs-body-bg);
+  background: var(--pixel-card-bg);
   color: var(--bs-body-color);
   cursor: pointer;
-  transition: transform 0.2s ease, background-color 0.2s ease;
+  transition: all 0.15s ease;
+  user-select: none;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
 .theme-switch-btn:hover {
-  transform: rotate(15deg) scale(1.08);
-  background-color: var(--bs-tertiary-bg);
+  transform: translateY(-1px);
+  background-color: var(--bs-tertiary-bg, rgba(0, 0, 0, 0.05));
+  border-color: var(--bs-primary);
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.08);
 }
 
-/* Thẻ thống kê (Metric Cards) */
-.stat-card {
-  border-radius: 14px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  overflow: hidden;
+.theme-switch-btn:active {
+  transform: translateY(0);
 }
 
-.stat-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
+/* ==========================================================================
+   ICON UTILITIES (Compatible with Pixelarticons & Bootstrap Icons)
+   ========================================================================== */
+
+.i8,
+[class^="pixelart-icons-font-"],
+[class*=" pixelart-icons-font-"] {
+  font-family: 'pixelart-icons-font' !important;
+  font-style: normal;
+  font-weight: normal;
+  display: inline-block;
+  vertical-align: -0.16em;
+  line-height: 1;
 }
 
-[data-bs-theme="dark"] .stat-card:hover {
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.45);
+.i8-xs { font-size: 14px !important; }
+.i8-sm { font-size: 18px !important; }
+.i8-md { font-size: 24px !important; }
+.i8-lg { font-size: 32px !important; }
+.i8-xl { font-size: 44px !important; }
+
+@keyframes soft-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
 }
 
-/* Hộp code mẫu */
-.code-box {
-  background-color: var(--bs-tertiary-bg);
-  border: 1px solid var(--bs-border-color);
-  border-radius: 10px;
-  padding: 1rem 1.25rem;
-  font-family: 'Cascadia Code', Consolas, 'Courier New', monospace;
-  font-size: 0.9rem;
-  overflow-x: auto;
+@keyframes soft-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
 }
 
-/* Footer cố định phía dưới */
-.footer {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  line-height: 60px;
+.i8-bounce {
+  display: inline-block;
+  animation: soft-bounce 2s ease infinite;
 }
 
-/* Chỉnh nút bấm */
-.btn-primary {
-  box-shadow: 0 2px 6px rgba(13, 110, 253, 0.3);
+.i8-pulse {
+  display: inline-block;
+  animation: soft-pulse 1.8s ease infinite;
 }
 
-[data-bs-theme="dark"] .border-subtle-custom {
-  border-color: rgba(255, 255, 255, 0.1) !important;
+/* ==========================================================================
+   BOOTSTRAP 5.3 DARK MODE ADAPTATIONS
+   ========================================================================== */
+
+[data-bs-theme="dark"] .text-dark:not(.badge):not(.btn-warning):not(.btn-warning *) {
+  color: #f1f5f9 !important;
+}
+
+[data-bs-theme="dark"] .bg-white:not(.qr-box-white):not([data-qr-box="true"]) {
+  background-color: var(--pixel-card-bg) !important;
+  color: #f1f5f9 !important;
+}
+
+/* Đảm bảo khung QR Code luôn nền trắng tinh khiết trên mọi chế độ Dark/Light Mode */
+.qr-box-white,
+[data-bs-theme="dark"] .qr-box-white,
+[data-qr-box="true"],
+[data-bs-theme="dark"] [data-qr-box="true"] {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+[data-bs-theme="dark"] .bg-light {
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+}
+
+[data-bs-theme="dark"] .border-light {
+  border-color: #334155 !important;
+}
+
+[data-bs-theme="dark"] .form-control,
+[data-bs-theme="dark"] .form-select {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+[data-bs-theme="dark"] .form-control:focus,
+[data-bs-theme="dark"] .form-select:focus {
+  background-color: #0f172a !important;
+  border-color: var(--bs-primary) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 0 0.25rem rgba(37, 99, 235, 0.25) !important;
+}
+
+[data-bs-theme="dark"] .input-group-text {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #94a3b8 !important;
+}
+
+[data-bs-theme="dark"] .dropdown-menu {
+  background-color: #111827 !important;
+  border: 1px solid #334155 !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5) !important;
+}
+
+[data-bs-theme="dark"] .dropdown-item {
+  color: #e2e8f0 !important;
+}
+
+[data-bs-theme="dark"] .dropdown-item:hover,
+[data-bs-theme="dark"] .dropdown-item:focus {
+  background-color: #1e293b !important;
+  color: #ffffff !important;
+}
+
+[data-bs-theme="dark"] .btn-close {
+  filter: invert(1) grayscale(100%) brightness(200%);
 }

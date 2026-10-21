@@ -1,126 +1,174 @@
 @{
-    ViewData["Title"] = "KidCare - Quản Lý & Đồng Hành Cùng Trẻ";
+    ViewData["Title"] = "KidCare - Nền Tảng Quản Lý & Chăm Sóc Trẻ 8-Bit";
 }
 
 <div class="row g-4 mb-4">
-    <!-- Hero Banner -->
+    <!-- Hero Banner (8-Bit Arcade Header) -->
     <div class="col-12">
-        <div class="p-4 p-md-5 rounded-4 bg-body-tertiary border shadow-sm">
-            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
-                <div>
-                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill mb-2">
-                        🧒 KidCare System • .NET 10 • Supabase PostgreSQL
-                    </span>
-                    <h1 class="display-6 fw-bold mb-2">Hệ Thống Quản Lý & Chăm Sóc Trẻ Em</h1>
-                    <p class="lead text-body-secondary mb-0">
-                        Giải pháp toàn diện kết nối Gia đình và Trẻ nhỏ: Theo dõi sức khỏe, lịch sinh hoạt, giao bài tập rèn luyện và tích điểm thưởng sao.
+        <div class="p-4 p-md-5 apple-card-static border-2">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-4">
+                <div style="max-width: 680px;">
+                    <div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
+                        <span class="badge apple-badge-blue px-3 py-1">
+                            <i class="pixelart-icons-font-gamepad i8-xs me-1"></i> KidCare Arcade Platform
+                        </span>
+                        <span class="badge bg-danger text-white px-3 py-1">
+                            <i class="pixelart-icons-font-zap i8-xs me-1"></i> .NET 10 & Supabase
+                        </span>
+                        <span class="badge bg-warning text-dark px-3 py-1">
+                            <i class="pixelart-icons-font-star i8-xs me-1"></i> 8-BIT UI MODE
+                        </span>
+                    </div>
+                    <h1 class="display-6 fw-bold mb-3 d-flex align-items-center gap-2 flex-wrap">
+                        <span>Nền Tảng Quản Lý & Bảo Vệ Trẻ</span>
+                        <i class="pixelart-icons-font-shield i8-lg text-primary i8-bounce"></i>
+                    </h1>
+                    <p class="lead text-muted mb-0" style="font-size: 1.05rem; line-height: 1.6;">
+                        Hệ thống phong cách 8-bit kết nối Gia đình và Trẻ nhỏ: Theo dõi sức khỏe, giao nhiệm vụ rèn luyện tích sao đổi thưởng, và chặn các trang web / ứng dụng độc hại.
                     </p>
                 </div>
-                <div class="d-flex gap-2">
-                    <a href="/kids" class="btn btn-primary btn-lg rounded-pill px-4 shadow-sm">
-                        🧒 Danh Sách Trẻ
+                <div class="d-flex flex-column flex-sm-row gap-2">
+                    <a href="/kids" class="btn btn-primary px-4 py-2">
+                        <i class="pixelart-icons-font-users i8-xs me-1"></i> Quản Lý Trẻ
                     </a>
-                    <a href="/activities" class="btn btn-outline-primary btn-lg rounded-pill px-4 shadow-sm">
-                        📋 Lịch & Hoạt Động
+                    <a href="/parental-control" class="btn btn-danger px-4 py-2">
+                        <i class="pixelart-icons-font-shield i8-xs me-1"></i> Chặn Web & App
+                    </a>
+                    <a href="/activities" class="btn btn-warning px-4 py-2">
+                        <i class="pixelart-icons-font-calendar i8-xs me-1"></i> Lịch & Nhiệm Vụ
                     </a>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 3 Role Feature Navigation Cards -->
+    <!-- 3 Role Navigation Cards with 8-Bit Icons -->
     <div class="col-md-4">
-        <div class="card border stat-card shadow-sm h-100 rounded-4">
-            <div class="card-body p-4 d-flex flex-column">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                    <span class="fs-1">👑</span>
-                    <span class="badge bg-purple-subtle text-purple border px-3 py-1 rounded-pill">Quyền Admin</span>
-                </div>
-                <h4 class="fw-bold mb-2">Quản Trị Viên (Admin)</h4>
-                <p class="text-body-secondary mb-4 flex-grow-1">
-                    Quản lý toàn bộ danh sách trẻ trong trường học hoặc cộng đồng, phân quyền tài khoản phụ huynh, giám sát hệ thống và cấu hình chung.
-                </p>
-                <div>
-                    <a href="/kids" class="btn btn-primary rounded-pill px-3">Quản lý hồ sơ →</a>
-                </div>
+        <div class="apple-card h-100">
+            <div class="pixel-window-header">
+                <span><i class="pixelart-icons-font-settings-cog i8-xs me-1"></i> ROLE 01 // ADMIN</span>
+                <span class="badge bg-warning text-dark py-0 px-2" style="font-size: 9px;">SYSTEM</span>
             </div>
-        </div>
-    </div>
-
-    <div class="col-md-4">
-        <div class="card border stat-card shadow-sm h-100 rounded-4">
-            <div class="card-body p-4 d-flex flex-column">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                    <span class="fs-1">👨‍👩‍👧</span>
-                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1 rounded-pill">Quyền Parents</span>
+            <div class="p-4 d-flex flex-column h-100">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="p-3 rounded-2 bg-primary-subtle text-primary border border-primary">
+                        <i class="pixelart-icons-font-settings-cog i8-lg"></i>
+                    </div>
+                    <div>
+                        <h4 class="fw-bold mb-0">Quản trị hệ thống</h4>
+                        <span class="badge apple-badge-neutral mt-1">Super Admin</span>
+                    </div>
                 </div>
-                <h4 class="fw-bold mb-2">Phụ Huynh (Parents)</h4>
-                <p class="text-body-secondary mb-4 flex-grow-1">
-                    Thêm và theo dõi các bé yêu trong gia đình, ghi chú sức khỏe, dị ứng, thiết lập thời gian biểu và thưởng sao khi bé hoàn thành việc tốt.
+                <p class="text-muted small mb-4 flex-grow-1" style="line-height: 1.6;">
+                    Giám sát toàn bộ hồ sơ trẻ trong hệ thống, phân quyền tài khoản phụ huynh, bảo mật mã hóa và quản trị cấu hình chung.
                 </p>
                 <div>
-                    <a href="/kids" class="btn btn-success rounded-pill px-3">Hồ sơ con em →</a>
+                    <a href="/kids" class="btn btn-primary btn-sm px-3 w-100">
+                        <i class="pixelart-icons-font-users i8-xs me-1"></i> Quản lý hồ sơ &rarr;
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="col-md-4">
-        <div class="card border stat-card shadow-sm h-100 rounded-4">
-            <div class="card-body p-4 d-flex flex-column">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                    <span class="fs-1">🧒</span>
-                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-3 py-1 rounded-pill">Quyền Kid</span>
+        <div class="apple-card h-100">
+            <div class="pixel-window-header" style="background: linear-gradient(90deg, #0e7490, #06b6d4);">
+                <span><i class="pixelart-icons-font-users i8-xs me-1"></i> ROLE 02 // PARENTS</span>
+                <span class="badge bg-light text-dark py-0 px-2" style="font-size: 9px;">FAMILY</span>
+            </div>
+            <div class="p-4 d-flex flex-column h-100">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="p-3 rounded-2 bg-info-subtle text-info border border-info">
+                        <i class="pixelart-icons-font-heart i8-lg"></i>
+                    </div>
+                    <div>
+                        <h4 class="fw-bold mb-0">Phụ huynh</h4>
+                        <span class="badge apple-badge-blue mt-1">Parents Group</span>
+                    </div>
                 </div>
-                <h4 class="fw-bold mb-2">Trẻ Em (Kid)</h4>
-                <p class="text-body-secondary mb-4 flex-grow-1">
-                    Bé có thể đăng nhập để xem nhiệm vụ được giao hàng ngày (học tập, dọn dẹp, đánh răng), đánh dấu hoàn thành và tích lũy sao đổi quà!
+                <p class="text-muted small mb-4 flex-grow-1" style="line-height: 1.6;">
+                    Thêm và theo dõi các bé yêu, thêm thành viên gia đình qua email, thiết lập danh sách chặn web/app và thưởng điểm sao rèn luyện.
                 </p>
                 <div>
-                    <a href="/activities" class="btn btn-warning rounded-pill px-3 text-dark fw-bold">Xem nhiệm vụ & Sao ⭐ →</a>
+                    <a href="/kids" class="btn btn-primary btn-sm px-3 w-100">
+                        <i class="pixelart-icons-font-heart i8-xs me-1"></i> Hồ sơ con em &rarr;
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Quick Stats -->
-    <div class="col-sm-6 col-lg-3">
-        <div class="card stat-card h-100 border shadow-sm rounded-4">
-            <div class="card-body">
-                <div class="text-body-secondary fw-semibold small mb-1">3 NHÓM QUYỀN (ROLES)</div>
-                <h4 class="fw-bold mb-1 text-primary">Admin • Parents • Kid</h4>
-                <small class="text-body-secondary">Bảo mật chuẩn JWT & ASP.NET Identity</small>
+    <div class="col-md-4">
+        <div class="apple-card h-100">
+            <div class="pixel-window-header" style="background: linear-gradient(90deg, #b45309, #f59e0b);">
+                <span><i class="pixelart-icons-font-gamepad i8-xs me-1"></i> ROLE 03 // KID</span>
+                <span class="badge bg-danger text-white py-0 px-2" style="font-size: 9px;">PLAYER</span>
+            </div>
+            <div class="p-4 d-flex flex-column h-100">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="p-3 rounded-2 bg-warning-subtle text-warning border border-warning">
+                        <i class="pixelart-icons-font-gamepad i8-lg text-dark"></i>
+                    </div>
+                    <div>
+                        <h4 class="fw-bold mb-0">Trẻ em (Con yêu)</h4>
+                        <span class="badge bg-warning text-dark mt-1">Gamified Level</span>
+                    </div>
+                </div>
+                <p class="text-muted small mb-4 flex-grow-1" style="line-height: 1.6;">
+                    Bé tự đăng nhập nhận nhiệm vụ hàng ngày (học tập, dọn dẹp, tập thể thao), tích lũy sao thưởng và nâng cấp bảng huy chương.
+                </p>
+                <div>
+                    <a href="/activities" class="btn btn-warning btn-sm px-3 w-100">
+                        <i class="pixelart-icons-font-star i8-xs me-1"></i> Xem nhiệm vụ & sao &rarr;
+                    </a>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- 4 8-Bit Stats Highlights -->
     <div class="col-sm-6 col-lg-3">
-        <div class="card stat-card h-100 border shadow-sm rounded-4">
-            <div class="card-body">
-                <div class="text-body-secondary fw-semibold small mb-1">DATABASE SUPABASE</div>
-                <h4 class="fw-bold mb-1 text-success">Đã kết nối</h4>
-                <small class="text-body-secondary">Bảng kids & kid_activities</small>
+        <div class="apple-card-static p-4 h-100">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <div class="text-muted fw-bold small pixel-font" style="font-size: 10px;">PHÂN QUYỀN</div>
+                <i class="pixelart-icons-font-users i8-md text-primary"></i>
             </div>
+            <div class="fs-4 fw-bold mb-1 text-primary">3 Nhóm Roles</div>
+            <div class="small text-muted">Admin · Parents · Kid</div>
         </div>
     </div>
 
     <div class="col-sm-6 col-lg-3">
-        <div class="card stat-card h-100 border shadow-sm rounded-4">
-            <div class="card-body">
-                <div class="text-body-secondary fw-semibold small mb-1">QUẢN LÝ LỊCH TRÌNH</div>
-                <h4 class="fw-bold mb-1 text-info">Sinh hoạt & Nhiệm vụ</h4>
-                <small class="text-body-secondary">Học tập, Sức khỏe, Thể thao...</small>
+        <div class="apple-card-static p-4 h-100">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <div class="text-muted fw-bold small pixel-font" style="font-size: 10px;">HẠ TẦNG CSDL</div>
+                <i class="pixelart-icons-font-download i8-md text-info"></i>
             </div>
+            <div class="fs-4 fw-bold mb-1">Supabase Cloud</div>
+            <div class="small text-muted">PostgreSQL · EF Core 10</div>
         </div>
     </div>
 
     <div class="col-sm-6 col-lg-3">
-        <div class="card stat-card h-100 border shadow-sm rounded-4">
-            <div class="card-body">
-                <div class="text-body-secondary fw-semibold small mb-1">KHEN THƯỞNG</div>
-                <h4 class="fw-bold mb-1 text-warning">Tích Sao ⭐</h4>
-                <small class="text-body-secondary">Khích lệ tính tự giác cho trẻ</small>
+        <div class="apple-card-static p-4 h-100">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <div class="text-muted fw-bold small pixel-font" style="font-size: 10px;">ĐA NỀN TẢNG</div>
+                <i class="pixelart-icons-font-smartphone i8-md text-warning"></i>
             </div>
+            <div class="fs-4 fw-bold mb-1">Web & Mobile</div>
+            <div class="small text-muted">ASP.NET Core + Flutter POS</div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-3">
+        <div class="apple-card-static p-4 h-100">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <div class="text-muted fw-bold small pixel-font" style="font-size: 10px;">BẢO MẬT PHỤ HUYNH</div>
+                <i class="pixelart-icons-font-shield i8-md text-danger"></i>
+            </div>
+            <div class="fs-4 fw-bold mb-1 text-danger">Chặn Web & App</div>
+            <div class="small text-muted">Bảo vệ an toàn không gian số</div>
         </div>
     </div>
 </div>

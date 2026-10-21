@@ -1,0 +1,645 @@
+@{
+    ViewData["Title"] = "Định Vị Vị Trí & Vùng An Toàn";
+}
+
+<!-- Leaflet CSS & SignalR CDN -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+
+<style>
+    #mapContainer {
+        height: 540px;
+        width: 100%;
+        border-radius: 18px;
+        z-index: 1;
+    }
+    .leaflet-popup-content-wrapper {
+        border-radius: 14px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+    }
+    /* Pulse Marker Apple Blue */
+    .apple-pulse-marker {
+        position: relative;
+    }
+    .apple-pulse-dot {
+        width: 18px;
+        height: 18px;
+        background: #0071e3;
+        border: 3px solid #ffffff;
+        border-radius: 50%;
+        box-shadow: 0 0 10px rgba(0, 113, 227, 0.6);
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+    .apple-pulse-wave {
+        width: 36px;
+        height: 36px;
+        background: rgba(0, 113, 227, 0.25);
+        border-radius: 50%;
+        position: absolute;
+        top: -9px;
+        left: -9px;
+        animation: pulseAnimation 2s infinite ease-out;
+    }
+    @@keyframes pulseAnimation {
+        0% { transform: scale(0.5); opacity: 1; }
+        100% { transform: scale(1.6); opacity: 0; }
+    }
+</style>
+
+<div class="container py-4">
+    <!-- Header banner (Apple Minimalist) -->
+    <div class="apple-card-static p-4 mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <span class="badge apple-badge-blue">GPS Live Tracking</span>
+                    <span id="signalRStatusBadge" class="badge apple-badge-neutral">
+                        <span class="spinner-grow spinner-grow-sm me-1" style="width: 8px; height: 8px;" role="status"></span> Đang kết nối Realtime...
+                    </span>
+                </div>
+                <h2 class="fw-bold mb-1" style="letter-spacing: -0.025em;">
+                    Định Vị Vị Trí & Vùng An Toàn
+                </h2>
+                <p class="text-muted mb-0 small">
+                    Theo dõi vị trí thời gian thực, giám sát lộ trình di chuyển và tự động cảnh báo khi bé rời vùng an toàn
+                </p>
+            </div>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <select id="selectKid" class="form-select rounded-pill px-3" style="min-width: 200px;">
+                    <option value="">-- Đang nạp danh sách bé --</option>
+                </select>
+                <button class="btn btn-outline-primary rounded-pill px-3 py-2 btn-sm" id="btnPingMyDeviceLocation" title="Gửi tọa độ GPS từ trình duyệt thiết bị này cho bé">
+                    🛰️ Vị trí máy này
+                </button>
+                <button class="btn btn-primary rounded-pill px-3 py-2 btn-sm" id="btnSimulateRoute" title="Chạy mô phỏng di chuyển từ Trường về Nhà">
+                    ▶️ Mô phỏng di chuyển
+                </button>
+                <button class="btn btn-secondary rounded-pill px-3 py-2 btn-sm" data-bs-toggle="modal" data-bs-target="#modalGeofences">
+                    🛡️ Vùng an toàn
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert placeholder cho cảnh báo Vùng An Toàn Real-time -->
+    <div id="liveAlertBox"></div>
+
+    <!-- Live Status Card (Tóm tắt nhanh trạng thái của bé) -->
+    <div class="apple-card p-3 mb-4">
+        <div class="row g-3 align-items-center">
+            <div class="col-md-4 d-flex align-items-center gap-3">
+                <img id="statusKidAvatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=Kid" class="rounded-circle border" style="width: 52px; height: 52px; object-fit: cover;" alt="Avatar" />
+                <div>
+                    <h5 class="fw-bold mb-0 text-body" id="statusKidName">Chọn bé để theo dõi</h5>
+                    <div class="small text-muted mt-1" id="statusKidSchool">Đang kiểm tra tọa độ...</div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+                <div class="small text-muted" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">Trạng thái di chuyển</div>
+                <div class="fw-semibold text-body fs-6" id="statusMovement">-- km/h</div>
+                <div class="small text-muted" id="statusLastUpdated">Chưa có tín hiệu</div>
+            </div>
+            <div class="col-sm-6 col-md-2">
+                <div class="small text-muted" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">Pin thiết bị</div>
+                <div class="fw-semibold text-primary fs-6" id="statusBattery">-- %</div>
+                <div class="small text-muted" id="statusCharging">--</div>
+            </div>
+            <div class="col-md-3 text-md-end">
+                <div class="small text-muted" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">Tọa độ hiện tại</div>
+                <div class="fw-semibold text-body small font-monospace" id="statusCoordinates">-- , --</div>
+                <div class="small text-muted text-truncate" id="statusAddress" style="max-width: 250px;">Chưa rõ địa chỉ</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bản Đồ Leaflet Map (Apple Standard) -->
+    <div class="apple-card p-2 position-relative mb-4">
+        <div id="mapContainer"></div>
+
+        <!-- Quick Map Overlays / Legend -->
+        <div class="position-absolute bottom-0 start-0 m-4 p-2 px-3 apple-card-static bg-white bg-opacity-90 shadow-sm small" style="z-index: 1000; border-radius: 12px; font-size: 11px;">
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="d-inline-block rounded-circle" style="width: 10px; height: 10px; background-color: #0071e3;"></span>
+                <span>Vị trí hiện tại của bé</span>
+            </div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="d-inline-block rounded-circle border" style="width: 10px; height: 10px; background-color: rgba(0, 113, 227, 0.2); border-color: #0071e3 !important;"></span>
+                <span>Vùng an toàn (Geofence)</span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="d-inline-block" style="width: 14px; height: 3px; background-color: #0071e3;"></span>
+                <span>Lộ trình di chuyển hôm nay</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ================= MODAL QUẢN LÝ VÙNG AN TOÀN (GEOFENCES) ================= -->
+<div class="modal fade" id="modalGeofences" tabindex="-1" aria-labelledby="modalGeofencesLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content shadow-lg">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="modalGeofencesLabel">🛡️ Quản Lý Vùng An Toàn (Geofence)</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="geofenceAlertBox"></div>
+
+                <div class="row g-4">
+                    <!-- Cột 1: Danh sách các vùng an toàn hiện có -->
+                    <div class="col-md-6 border-end">
+                        <div class="fw-semibold small text-muted mb-2 text-uppercase" style="letter-spacing: 0.05em;">Danh sách vùng đã thiết lập:</div>
+                        <div id="geofenceListContainer" class="d-flex flex-column gap-2" style="max-height: 320px; overflow-y: auto;">
+                            <div class="text-center py-4 text-muted small">Đang tải danh sách vùng...</div>
+                        </div>
+                    </div>
+
+                    <!-- Cột 2: Form thêm vùng an toàn mới -->
+                    <div class="col-md-6">
+                        <div class="fw-semibold small text-muted mb-2 text-uppercase" style="letter-spacing: 0.05em;">Thêm vùng an toàn mới:</div>
+                        <form id="formAddGeofence">
+                            <div class="mb-2">
+                                <label class="form-label small fw-medium">Tên vùng an toàn <span class="text-primary">*</span></label>
+                                <input type="text" id="geoName" class="form-control form-control-sm" placeholder="Ví dụ: Trường Tiểu Học Kim Đồng, Nhà riêng..." required />
+                            </div>
+                            <div class="row g-2 mb-2">
+                                <div class="col-6">
+                                    <label class="form-label small fw-medium">Vĩ độ (Lat) <span class="text-primary">*</span></label>
+                                    <input type="number" step="any" id="geoLat" class="form-control form-control-sm" placeholder="21.0285" required />
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small fw-medium">Kinh độ (Lng) <span class="text-primary">*</span></label>
+                                    <input type="number" step="any" id="geoLng" class="form-control form-control-sm" placeholder="105.8542" required />
+                                </div>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label small fw-medium">Bán kính an toàn (mét): <strong id="geoRadiusVal" class="text-primary">200m</strong></label>
+                                <input type="range" class="form-range" id="geoRadius" min="50" max="2000" step="50" value="200" oninput="document.getElementById('geoRadiusVal').textContent = this.value + 'm'" />
+                            </div>
+                            <div class="form-check form-switch mb-2">
+                                <input class="form-check-input" type="checkbox" id="geoAlertExit" checked />
+                                <label class="form-check-label small" for="geoAlertExit">Cảnh báo khi bé <strong>rời khỏi</strong> vùng này</label>
+                            </div>
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="geoAlertEnter" />
+                                <label class="form-check-label small" for="geoAlertEnter">Thông báo khi bé <strong>đến nơi</strong> (nhập vùng)</label>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary rounded-pill btn-sm py-2" id="btnSaveGeofence">
+                                    + Lưu Vùng An Toàn Mới
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-secondary rounded-pill px-3 btn-sm" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    let allKids = [];
+    let currentKidId = null;
+    let currentKid = null;
+    let map = null;
+    let kidMarker = null;
+    let geofenceCircles = [];
+    let routePolyline = null;
+    let signalRConnection = null;
+    let simulationStep = 0;
+
+    const selectKid = document.getElementById('selectKid');
+    const signalRStatusBadge = document.getElementById('signalRStatusBadge');
+    const liveAlertBox = document.getElementById('liveAlertBox');
+
+    function getAuthHeaders() {
+        const token = localStorage.getItem('authToken');
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+        return headers;
+    }
+
+    // Khởi tạo Leaflet Map
+    function initMap() {
+        if (map) return;
+
+        // Tọa độ mặc định (Hà Nội, Việt Nam)
+        map = L.map('mapContainer', {
+            zoomControl: true,
+            attributionControl: true
+        }).setView([21.028511, 105.854167], 15);
+
+        // Tile layer chuẩn OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+
+        // Bắt sự kiện click trên bản đồ để điền nhanh tọa độ khi tạo vùng an toàn
+        map.on('click', (e) => {
+            const lat = e.latlng.lat.toFixed(6);
+            const lng = e.latlng.lng.toFixed(6);
+            document.getElementById('geoLat').value = lat;
+            document.getElementById('geoLng').value = lng;
+        });
+    }
+
+    // Khởi tạo kết nối SignalR Real-time
+    async function initSignalR() {
+        try {
+            signalRConnection = new signalR.HubConnectionBuilder()
+                .withUrl('/hubs/location')
+                .withAutomaticReconnect()
+                .build();
+
+            signalRConnection.onreconnecting(() => {
+                signalRStatusBadge.className = 'badge apple-badge-neutral';
+                signalRStatusBadge.innerHTML = '<span class="spinner-grow spinner-grow-sm me-1" style="width: 8px; height: 8px;"></span> Mất kết nối, đang thử lại...';
+            });
+
+            signalRConnection.onreconnected(async () => {
+                signalRStatusBadge.className = 'badge apple-badge-blue';
+                signalRStatusBadge.innerHTML = '● Realtime Live';
+                if (currentKidId) {
+                    await signalRConnection.invoke('JoinKidTracking', currentKidId);
+                }
+            });
+
+            // Lắng nghe tọa độ vị trí được đẩy xuống
+            signalRConnection.on('ReceiveLocationUpdate', (data) => {
+                if (data.kidId === currentKidId) {
+                    updateKidPositionOnMap(data);
+                    updateStatusPanel(data);
+
+                    if (data.alerts && data.alerts.length > 0) {
+                        data.alerts.forEach(alert => showGeofenceAlert(alert));
+                    }
+                }
+            });
+
+            await signalRConnection.start();
+            signalRStatusBadge.className = 'badge apple-badge-blue';
+            signalRStatusBadge.innerHTML = '● Realtime Live';
+
+            if (currentKidId) {
+                await signalRConnection.invoke('JoinKidTracking', currentKidId);
+            }
+        } catch (err) {
+            signalRStatusBadge.className = 'badge apple-badge-neutral';
+            signalRStatusBadge.innerHTML = '○ Offline (HTTP Mode)';
+            console.warn('Không thể kết nối SignalR Hub:', err);
+        }
+    }
+
+    // Hiển thị marker vị trí bé trên bản đồ với hiệu ứng Apple Pulse
+    function updateKidPositionOnMap(data) {
+        if (!map) return;
+
+        const latLng = [data.latitude, data.longitude];
+
+        const pulseIcon = L.divIcon({
+            className: 'apple-pulse-marker',
+            html: '<div class="apple-pulse-wave"></div><div class="apple-pulse-dot"></div>',
+            iconSize: [18, 18],
+            iconAnchor: [9, 9]
+        });
+
+        if (!kidMarker) {
+            kidMarker = L.marker(latLng, { icon: pulseIcon }).addTo(map);
+        } else {
+            kidMarker.setLatLng(latLng);
+        }
+
+        const timeStr = new Date(data.recordedAt).toLocaleTimeString('vi-VN');
+        const popupContent = `
+            <div style="min-width: 180px;">
+                <div class="fw-bold fs-6 text-primary mb-1">${data.kidName || (currentKid ? currentKid.fullName : 'Bé yêu')}</div>
+                <div class="small text-muted mb-1">${data.address || 'Đang cập nhật địa chỉ...'}</div>
+                <div class="small border-top pt-1 mt-1 text-secondary">
+                    <span>⚡ Vận tốc: <strong>${data.speed ? data.speed.toFixed(1) + ' km/h' : '0 km/h'}</strong></span><br>
+                    <span>🔋 Pin: <strong>${data.batteryLevel || 95}%</strong></span><br>
+                    <span>🕒 Cập nhật: ${timeStr}</span>
+                </div>
+            </div>`;
+
+        kidMarker.bindPopup(popupContent);
+        map.panTo(latLng);
+    }
+
+    // Cập nhật thẻ trạng thái phía trên bản đồ
+    function updateStatusPanel(data) {
+        document.getElementById('statusKidName').textContent = currentKid ? currentKid.fullName : 'Hồ sơ trẻ';
+        document.getElementById('statusKidSchool').textContent = currentKid ? (currentKid.schoolName || 'Chưa cập nhật trường') : '';
+        if (currentKid && currentKid.avatarUrl) {
+            document.getElementById('statusKidAvatar').src = currentKid.avatarUrl;
+        }
+
+        const isMoving = data.speed && data.speed > 1.5;
+        document.getElementById('statusMovement').textContent = isMoving 
+            ? `Đang di chuyển (${data.speed.toFixed(1)} km/h)` 
+            : 'Đang đứng yên (0 km/h)';
+
+        document.getElementById('statusBattery').textContent = `${data.batteryLevel || 95}%`;
+        document.getElementById('statusCharging').textContent = data.isCharging ? 'Đang sạc pin ⚡' : 'Dùng pin máy';
+
+        const timeAgo = new Date(data.recordedAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        document.getElementById('statusLastUpdated').textContent = `Lúc ${timeAgo} · Sai số ~${data.accuracy ? Math.round(data.accuracy) : 10}m`;
+        document.getElementById('statusCoordinates').textContent = `${data.latitude.toFixed(5)}, ${data.longitude.toFixed(5)}`;
+        document.getElementById('statusAddress').textContent = data.address || 'Đang xác định địa chỉ...';
+    }
+
+    // Vẽ các vùng an toàn (Geofences) lên bản đồ
+    async function loadAndDrawGeofences(kidId) {
+        geofenceCircles.forEach(c => map.removeLayer(c));
+        geofenceCircles = [];
+
+        try {
+            const res = await fetch(`/api/kids/${kidId}/locations/geofences`, { headers: getAuthHeaders() });
+            if (!res.ok) return;
+            const fences = await res.json();
+
+            // Render danh sách trong modal
+            const listContainer = document.getElementById('geofenceListContainer');
+            if (fences.length === 0) {
+                listContainer.innerHTML = '<div class="text-center py-4 text-muted small">Chưa có vùng an toàn nào được thiết lập.</div>';
+            } else {
+                listContainer.innerHTML = fences.map(f => `
+                    <div class="apple-card-static p-2 px-3 d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="fw-bold small text-body">${f.name}</div>
+                            <div class="small text-muted" style="font-size: 11px;">Bán kính: ${f.radiusMeters}m · (${f.latitude.toFixed(4)}, ${f.longitude.toFixed(4)})</div>
+                        </div>
+                        <button class="btn btn-outline-danger btn-sm rounded-pill px-2 py-0" style="font-size: 11px;" onclick="deleteGeofence(${f.id})">
+                            Xóa
+                        </button>
+                    </div>
+                `).join('');
+            }
+
+            // Vẽ hình tròn lên Leaflet
+            fences.forEach(f => {
+                const circle = L.circle([f.latitude, f.longitude], {
+                    color: '#0071e3',
+                    fillColor: '#0071e3',
+                    fillOpacity: 0.12,
+                    weight: 2,
+                    radius: f.radiusMeters
+                }).addTo(map);
+
+                circle.bindPopup(`<strong>🛡️ Vùng an toàn:</strong> ${f.name}<br>Bán kính: ${f.radiusMeters} mét`);
+                geofenceCircles.push(circle);
+            });
+        } catch (_) {}
+    }
+
+    // Tải và vẽ lộ trình di chuyển trong ngày (Polyline)
+    async function loadRouteHistory(kidId) {
+        if (routePolyline) {
+            map.removeLayer(routePolyline);
+            routePolyline = null;
+        }
+
+        try {
+            const res = await fetch(`/api/kids/${kidId}/locations/history`, { headers: getAuthHeaders() });
+            if (!res.ok) return;
+            const data = await res.json();
+
+            if (data.points && data.points.length > 1) {
+                const latLngs = data.points.map(p => [p.latitude, p.longitude]);
+                routePolyline = L.polyline(latLngs, {
+                    color: '#0071e3',
+                    weight: 3.5,
+                    opacity: 0.85,
+                    dashArray: '6, 8'
+                }).addTo(map);
+            }
+        } catch (_) {}
+    }
+
+    // Tải vị trí mới nhất đã lưu của bé
+    async function loadLatestLocation(kidId) {
+        try {
+            const res = await fetch(`/api/kids/${kidId}/locations/latest`, { headers: getAuthHeaders() });
+            if (!res.ok) return;
+            const data = await res.json();
+
+            if (data.hasLocation) {
+                updateKidPositionOnMap(data);
+                updateStatusPanel(data);
+            } else {
+                document.getElementById('statusMovement').textContent = 'Chưa có tín hiệu GPS';
+                document.getElementById('statusLastUpdated').textContent = 'Chờ thiết bị gửi tọa độ';
+            }
+        } catch (_) {}
+    }
+
+    // Chuyển đổi theo dõi sang bé khác
+    async function switchKid(kidId) {
+        if (signalRConnection && signalRConnection.state === signalR.HubConnectionState.Connected && currentKidId) {
+            await signalRConnection.invoke('LeaveKidTracking', currentKidId);
+        }
+
+        currentKidId = kidId;
+        currentKid = allKids.find(k => k.id === kidId);
+
+        if (signalRConnection && signalRConnection.state === signalR.HubConnectionState.Connected) {
+            await signalRConnection.invoke('JoinKidTracking', kidId);
+        }
+
+        await loadLatestLocation(kidId);
+        await loadAndDrawGeofences(kidId);
+        await loadRouteHistory(kidId);
+    }
+
+    // Tải danh sách bé
+    async function initPage() {
+        initMap();
+
+        try {
+            const res = await fetch('/api/kids', { headers: getAuthHeaders() });
+            if (!res.ok) throw new Error('Không thể tải danh sách trẻ');
+            allKids = await res.json();
+
+            if (allKids.length === 0) {
+                selectKid.innerHTML = '<option value="">Chưa có hồ sơ trẻ nào</option>';
+                return;
+            }
+
+            selectKid.innerHTML = allKids.map(k => `
+                <option value="${k.id}">${k.fullName} ${k.nickname ? `(Bé ${k.nickname})` : ''}</option>
+            `).join('');
+
+            const params = new URLSearchParams(window.location.search);
+            const queryKidId = parseInt(params.get('kidId'));
+
+            if (queryKidId && allKids.some(k => k.id === queryKidId)) {
+                selectKid.value = queryKidId;
+                await switchKid(queryKidId);
+            } else {
+                selectKid.value = allKids[0].id;
+                await switchKid(allKids[0].id);
+            }
+
+            await initSignalR();
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    selectKid.addEventListener('change', async (e) => {
+        const id = parseInt(e.target.value);
+        if (id) await switchKid(id);
+    });
+
+    // Cảnh báo Vùng An Toàn
+    function showGeofenceAlert(alert) {
+        liveAlertBox.innerHTML = `
+            <div class="alert alert-danger alert-dismissible fade show shadow-sm mb-3" role="alert">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="fs-5">⚠️</span>
+                    <div>
+                        <strong>CẢNH BÁO VÙNG AN TOÀN:</strong> ${alert.message}
+                        <div class="small text-muted" style="font-size: 11px;">Thời gian: ${new Date(alert.timestamp).toLocaleTimeString('vi-VN')}</div>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>`;
+    }
+
+    // Nút Gửi vị trí thiết bị này (HTML5 Geolocation)
+    document.getElementById('btnPingMyDeviceLocation')?.addEventListener('click', () => {
+        if (!navigator.geolocation) {
+            alert('Trình duyệt không hỗ trợ Geolocation HTML5');
+            return;
+        }
+
+        const btn = document.getElementById('btnPingMyDeviceLocation');
+        btn.disabled = true;
+        btn.textContent = '🛰️ Đang lấy GPS...';
+
+        navigator.geolocation.getCurrentPosition(
+            async (pos) => {
+                const payload = {
+                    latitude: pos.coords.latitude,
+                    longitude: pos.coords.longitude,
+                    accuracy: pos.coords.accuracy,
+                    speed: pos.coords.speed ? pos.coords.speed * 3.6 : 0,
+                    altitude: pos.coords.altitude,
+                    batteryLevel: 98,
+                    isCharging: false,
+                    address: 'Tọa độ GPS thực từ trình duyệt thiết bị',
+                    recordedAt: new Date().toISOString()
+                };
+
+                try {
+                    const res = await fetch(`/api/kids/${currentKidId}/locations`, {
+                        method: 'POST',
+                        headers: getAuthHeaders(),
+                        body: JSON.stringify(payload)
+                    });
+                    if (res.ok) {
+                        alert('✅ Đã cập nhật thành công vị trí GPS của thiết bị này cho bé!');
+                    }
+                } catch (err) {
+                    alert('Lỗi gửi vị trí: ' + err.message);
+                } finally {
+                    btn.disabled = false;
+                    btn.textContent = '🛰️ Vị trí máy này';
+                }
+            },
+            (err) => {
+                alert('Không thể lấy vị trí GPS: ' + err.message);
+                btn.disabled = false;
+                btn.textContent = '🛰️ Vị trí máy này';
+            },
+            { enableHighAccuracy: true, timeout: 10000 }
+        );
+    });
+
+    // Nút Mô Phỏng Di Chuyển (Simulate Movement)
+    document.getElementById('btnSimulateRoute')?.addEventListener('click', async () => {
+        if (!currentKidId) return;
+        const btn = document.getElementById('btnSimulateRoute');
+        btn.disabled = true;
+        btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Điểm ${simulationStep + 1}/5...`;
+
+        try {
+            const res = await fetch(`/api/kids/${currentKidId}/locations/simulate?step=${simulationStep}`, {
+                method: 'POST',
+                headers: getAuthHeaders()
+            });
+            if (res.ok) {
+                simulationStep = (simulationStep + 1) % 5;
+            }
+        } catch (err) {
+            console.error(err);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '▶️ Mô phỏng di chuyển';
+        }
+    });
+
+    // Thêm Vùng An Toàn Mới
+    document.getElementById('formAddGeofence')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const alertBox = document.getElementById('geofenceAlertBox');
+        const btn = document.getElementById('btnSaveGeofence');
+
+        btn.disabled = true;
+        btn.innerHTML = 'Đang lưu...';
+
+        const payload = {
+            name: document.getElementById('geoName').value.trim(),
+            latitude: parseFloat(document.getElementById('geoLat').value),
+            longitude: parseFloat(document.getElementById('geoLng').value),
+            radiusMeters: parseFloat(document.getElementById('geoRadius').value),
+            alertOnExit: document.getElementById('geoAlertExit').checked,
+            alertOnEnter: document.getElementById('geoAlertEnter').checked
+        };
+
+        try {
+            const res = await fetch(`/api/kids/${currentKidId}/locations/geofences`, {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify(payload)
+            });
+
+            if (!res.ok) throw new Error('Không thể tạo vùng an toàn');
+
+            document.getElementById('formAddGeofence').reset();
+            document.getElementById('geoRadiusVal').textContent = '200m';
+            alertBox.innerHTML = '<div class="alert alert-success py-2 small">Đã lưu vùng an toàn mới thành công!</div>';
+            await loadAndDrawGeofences(currentKidId);
+        } catch (err) {
+            alertBox.innerHTML = `<div class="alert alert-danger py-2 small">${err.message}</div>`;
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '+ Lưu Vùng An Toàn Mới';
+        }
+    });
+
+    // Xóa Vùng An Toàn
+    window.deleteGeofence = async function(fenceId) {
+        if (!confirm('Bạn có chắc chắn muốn xóa vùng an toàn này?')) return;
+        try {
+            const res = await fetch(`/api/kids/${currentKidId}/locations/geofences/${fenceId}`, {
+                method: 'DELETE',
+                headers: getAuthHeaders()
+            });
+            if (res.ok) {
+                await loadAndDrawGeofences(currentKidId);
+            }
+        } catch (_) {}
+    };
+
+    document.addEventListener('DOMContentLoaded', initPage);
+</script>
+}

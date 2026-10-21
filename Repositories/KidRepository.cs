@@ -16,18 +16,33 @@ public class KidRepository(AppDbContext context) : Repository<Kid>(context), IKi
             .Include(k => k.Parent)
             .Include(k => k.KidUser)
             .Include(k => k.Activities)
+            .Include(k => k.BlockedItems)
             .OrderByDescending(k => k.Id)
             .ToListAsync();
     }
 
     public async Task<IEnumerable<Kid>> GetKidsByParentAsync(string parentId)
     {
+        // Lấy tất cả mã nhóm gia đình mà user này là Chủ nhóm (Owner) hoặc Thành viên (Member)
+        var memberGroupIds = await _context.FamilyMembers
+            .Where(m => m.UserId == parentId)
+            .Select(m => m.FamilyGroupId)
+            .ToListAsync();
+
+        var ownerGroupIds = await _context.FamilyGroups
+            .Where(g => g.OwnerId == parentId)
+            .Select(g => g.Id)
+            .ToListAsync();
+
+        var allFamilyGroupIds = memberGroupIds.Union(ownerGroupIds).Distinct().ToList();
+
         return await _dbSet
             .AsNoTracking()
-            .Where(k => k.ParentId == parentId)
+            .Where(k => k.ParentId == parentId || (k.FamilyGroupId != null && allFamilyGroupIds.Contains(k.FamilyGroupId.Value)))
             .Include(k => k.Parent)
             .Include(k => k.KidUser)
             .Include(k => k.Activities)
+            .Include(k => k.BlockedItems)
             .OrderByDescending(k => k.Id)
             .ToListAsync();
     }
@@ -40,6 +55,7 @@ public class KidRepository(AppDbContext context) : Repository<Kid>(context), IKi
             .Include(k => k.Parent)
             .Include(k => k.KidUser)
             .Include(k => k.Activities)
+            .Include(k => k.BlockedItems)
             .OrderByDescending(k => k.Id)
             .ToListAsync();
     }
@@ -50,6 +66,7 @@ public class KidRepository(AppDbContext context) : Repository<Kid>(context), IKi
             .Include(k => k.Parent)
             .Include(k => k.KidUser)
             .Include(k => k.Activities.OrderByDescending(a => a.ActivityTime))
+            .Include(k => k.BlockedItems)
             .FirstOrDefaultAsync(k => k.Id == kidId);
     }
 
@@ -58,6 +75,7 @@ public class KidRepository(AppDbContext context) : Repository<Kid>(context), IKi
         return await _dbSet
             .Include(k => k.Parent)
             .Include(k => k.KidUser)
+            .Include(k => k.BlockedItems)
             .FirstOrDefaultAsync(k => k.Id == kidId);
     }
 

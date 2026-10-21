@@ -1,97 +1,87 @@
 // ========================================================
-// Quản lý Dark Mode & Light Mode cho Website (Bootstrap 5.3)
+// KidCare 8-Bit Retro Gaming - Quản lý Theme Dark / Light
+// Tối ưu chuyển đổi mượt mà, đồng bộ icon & nhãn 8-bit
 // ========================================================
 
 (() => {
     'use strict';
 
-    const getStoredTheme = () => localStorage.getItem('theme');
-    const setStoredTheme = theme => localStorage.setItem('theme', theme);
+    const THEME_KEY = 'theme';
+
+    const getStoredTheme = () => localStorage.getItem(THEME_KEY);
+    const setStoredTheme = theme => localStorage.setItem(THEME_KEY, theme);
 
     const getPreferredTheme = () => {
         const storedTheme = getStoredTheme();
-        if (storedTheme) {
+        if (storedTheme === 'dark' || storedTheme === 'light') {
             return storedTheme;
         }
         return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     };
 
     const setTheme = theme => {
-        if (theme === 'auto') {
-            document.documentElement.setAttribute('data-bs-theme', (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+        const resolvedTheme = (theme === 'auto')
+            ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+            : theme;
+        document.documentElement.setAttribute('data-bs-theme', resolvedTheme);
+        return resolvedTheme;
+    };
+
+    const updateThemeButtonUI = (resolvedTheme) => {
+        const btn = document.getElementById('themeToggleBtn') || document.getElementById('quickThemeToggle');
+        if (!btn) return;
+
+        const iconContainer = document.getElementById('themeToggleIcon') || btn.querySelector('.theme-icon-active');
+        const textContainer = document.getElementById('themeToggleText');
+
+        if (resolvedTheme === 'dark') {
+            // Khi đang ở Dark mode: Icon mặt trời để chuyển về Sáng
+            if (iconContainer) {
+                iconContainer.innerHTML = '<i class="pixelart-icons-font-sun i8-sm text-warning"></i>';
+            }
+            if (textContainer) {
+                textContainer.textContent = 'Sáng';
+            }
+            btn.setAttribute('title', 'Chuyển sang chế độ Sáng (Light Mode)');
+            btn.setAttribute('aria-label', 'Chuyển sang chế độ Sáng (Light Mode)');
         } else {
-            document.documentElement.setAttribute('data-bs-theme', theme);
+            // Khi đang ở Light mode: Icon mặt trăng để chuyển sang Tối
+            if (iconContainer) {
+                iconContainer.innerHTML = '<i class="pixelart-icons-font-moon i8-sm text-info"></i>';
+            }
+            if (textContainer) {
+                textContainer.textContent = 'Tối';
+            }
+            btn.setAttribute('title', 'Chuyển sang chế độ Tối (Dark Mode)');
+            btn.setAttribute('aria-label', 'Chuyển sang chế độ Tối (Dark Mode)');
         }
     };
 
-    // Áp dụng theme ngay khi script chạy
-    setTheme(getPreferredTheme());
+    // Khởi tạo ngay lập tức
+    const initialTheme = setTheme(getPreferredTheme());
 
-    const showActiveTheme = (theme, focus = false) => {
-        const themeSwitcher = document.querySelector('#themeSwitcher');
-        if (!themeSwitcher) return;
-
-        const activeThemeIcon = document.querySelector('.theme-icon-active');
-        const btnToActive = document.querySelector(`[data-bs-theme-value="${theme}"]`);
-        
-        if (!btnToActive) return;
-
-        const svgOfActiveBtn = btnToActive.querySelector('svg use')?.getAttribute('href') ||
-                               btnToActive.querySelector('i')?.className;
-
-        document.querySelectorAll('[data-bs-theme-value]').forEach(element => {
-            element.classList.remove('active');
-            element.setAttribute('aria-pressed', 'false');
-            const check = element.querySelector('.theme-check');
-            if (check) check.classList.add('d-none');
-        });
-
-        btnToActive.classList.add('active');
-        btnToActive.setAttribute('aria-pressed', 'true');
-        const check = btnToActive.querySelector('.theme-check');
-        if (check) check.classList.remove('d-none');
-
-        // Cập nhật icon trên nút chính
-        const targetIcon = btnToActive.getAttribute('data-icon');
-        if (activeThemeIcon && targetIcon) {
-            activeThemeIcon.innerHTML = targetIcon;
-        }
-
-        if (focus) {
-            themeSwitcher.focus();
-        }
-    };
-
-    // Lắng nghe thay đổi theme từ hệ điều hành (OS)
+    // Lắng nghe thay đổi theme hệ điều hành khi người dùng không cố định lựa chọn
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
         const storedTheme = getStoredTheme();
-        if (storedTheme !== 'light' && storedTheme !== 'dark') {
-            setTheme(getPreferredTheme());
+        if (!storedTheme) {
+            const nextTheme = setTheme(getPreferredTheme());
+            updateThemeButtonUI(nextTheme);
         }
     });
 
-    window.addEventListener('DOMContentLoaded', () => {
-        showActiveTheme(getPreferredTheme());
+    document.addEventListener('DOMContentLoaded', () => {
+        const currentActiveTheme = document.documentElement.getAttribute('data-bs-theme') || initialTheme;
+        updateThemeButtonUI(currentActiveTheme);
 
-        document.querySelectorAll('[data-bs-theme-value]').forEach(toggle => {
-            toggle.addEventListener('click', (e) => {
-                e.preventDefault();
-                const theme = toggle.getAttribute('data-bs-theme-value');
-                setStoredTheme(theme);
-                setTheme(theme);
-                showActiveTheme(theme, true);
-            });
-        });
-
-        // Hỗ trợ nút click 1 chạm toggle nhanh giữa Dark và Light (nếu có)
-        const quickToggle = document.querySelector('#quickThemeToggle');
-        if (quickToggle) {
-            quickToggle.addEventListener('click', () => {
-                const current = document.documentElement.getAttribute('data-bs-theme');
+        // Gắn sự kiện click cho nút toggle theme 8-bit
+        const toggleBtn = document.getElementById('themeToggleBtn') || document.getElementById('quickThemeToggle');
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', () => {
+                const current = document.documentElement.getAttribute('data-bs-theme') || 'light';
                 const nextTheme = current === 'dark' ? 'light' : 'dark';
                 setStoredTheme(nextTheme);
                 setTheme(nextTheme);
-                showActiveTheme(nextTheme);
+                updateThemeButtonUI(nextTheme);
             });
         }
     });

@@ -20,17 +20,21 @@ class _StaffPosScreenState extends State<StaffPosScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Đăng xuất'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        title: const Text('Đăng xuất', style: TextStyle(fontWeight: FontWeight.bold)),
         content: const Text('Bạn có chắc muốn đăng xuất ca làm việc không?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Hủy'),
+            child: const Text('Hủy', style: TextStyle(color: Color(0xFF86868B))),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF1D1D1F),
+              foregroundColor: Colors.white,
+            ),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Đăng xuất', style: TextStyle(color: Colors.white)),
+            child: const Text('Đăng xuất'),
           ),
         ],
       ),
@@ -56,14 +60,15 @@ class _StaffPosScreenState extends State<StaffPosScreen> {
         : 'Không xác định';
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF5F5F7),
       appBar: AppBar(
-        title: const Text('Bàn Thu Ngân & Kho (Staff POS)', style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: const Color(0xFFD97706), // Cam vàng Staff
-        foregroundColor: Colors.white,
+        title: const Text('Bàn Thu Ngân & Kho (Staff)', style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.white,
+        foregroundColor: const Color(0xFF1D1D1F),
         actions: [
           IconButton(
-            tooltip: 'Đăng xuất ca',
-            icon: const Icon(Icons.logout),
+            tooltip: 'Đăng xuất',
+            icon: const Icon(Icons.logout, color: Color(0xFF1D1D1F)),
             onPressed: _handleLogout,
           ),
         ],
@@ -73,86 +78,84 @@ class _StaffPosScreenState extends State<StaffPosScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Thẻ Thông tin Vai trò & Quyền Staff
-            Card(
-              elevation: 3,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
+            // Thẻ Thông tin Ca trực Staff (Apple Minimalist)
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: const Color(0x14000000)),
               ),
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: Colors.amber.shade300, width: 1.5),
-                ),
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: Colors.amber.shade100,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(Icons.point_of_sale, color: Color(0xFFD97706), size: 28),
+              padding: const EdgeInsets.all(18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF0071E3).withValues(alpha: 0.1),
+                          shape: BoxShape.circle,
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFD97706),
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                child: Text(
-                                  'QUYỀN HẠN: ${user.role.toUpperCase()}',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
+                        child: const Icon(Icons.point_of_sale_outlined, color: Color(0xFF0071E3), size: 26),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF0071E3),
+                                borderRadius: BorderRadius.circular(980),
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                user.fullName.isNotEmpty ? user.fullName : user.username,
+                              child: Text(
+                                user.role.toUpperCase(),
                                 style: const TextStyle(
-                                  fontSize: 18,
+                                  color: Colors.white,
+                                  fontSize: 10,
                                   fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.5,
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              user.fullName.isNotEmpty ? user.fullName : user.username,
+                              style: const TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF1D1D1F),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    const Divider(height: 24),
-                    _buildInfoRow(Icons.account_circle, 'Tài khoản ca trực', user.username),
-                    _buildInfoRow(Icons.email, 'Email nhân viên', user.email.isNotEmpty ? user.email : 'N/A'),
-                    _buildInfoRow(Icons.fingerprint, 'User ID', user.userId),
-                    _buildInfoRow(
-                      Icons.timer_outlined,
-                      'Hết hạn phiên (JWT exp)',
-                      expiryText,
-                      highlight: true,
-                    ),
-                  ],
-                ),
+                      ),
+                    ],
+                  ),
+                  const Divider(height: 24, color: Color(0x14000000)),
+                  _buildInfoRow(Icons.account_circle_outlined, 'Tài khoản', user.username),
+                  _buildInfoRow(Icons.email_outlined, 'Email nhân viên', user.email.isNotEmpty ? user.email : 'N/A'),
+                  _buildInfoRow(Icons.fingerprint, 'User ID', user.userId),
+                  _buildInfoRow(
+                    Icons.timer_outlined,
+                    'Hết hạn phiên (exp)',
+                    expiryText,
+                    highlight: true,
+                  ),
+                ],
               ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
             const Text(
-              'Nghiệp Vụ Bán Hàng & Quản Lý Kho (Staff POS)',
+              'Nghiệp Vụ Bán Hàng & Kho',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF1E293B),
+                color: Color(0xFF1D1D1F),
+                letterSpacing: -0.3,
               ),
             ),
             const SizedBox(height: 12),
@@ -168,45 +171,41 @@ class _StaffPosScreenState extends State<StaffPosScreen> {
               children: [
                 _buildActionCard(
                   title: 'Bàn Bán Hàng (POS)',
-                  subtitle: 'Tạo đơn hàng tại quầy thu ngân',
-                  icon: Icons.shopping_cart_checkout,
-                  color: Colors.amber.shade800,
+                  subtitle: 'Tạo đơn hàng tại quầy',
+                  icon: Icons.shopping_cart_outlined,
                   onTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Mở màn hình POS tính tiền thu ngân')),
+                      const SnackBar(content: Text('Màn hình POS bán hàng'), backgroundColor: Color(0xFF0071E3)),
                     );
                   },
                 ),
                 _buildActionCard(
-                  title: 'Quét Mã Vạch (Barcode)',
-                  subtitle: 'Tra cứu nhanh giá sản phẩm',
-                  icon: Icons.qr_code_scanner,
-                  color: Colors.teal.shade700,
+                  title: 'Quét Mã Vạch',
+                  subtitle: 'Tra cứu nhanh barcode',
+                  icon: Icons.qr_code_scanner_outlined,
                   onTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Tính năng quét barcode bằng camera')),
+                      const SnackBar(content: Text('Quét mã vạch kiểm kho'), backgroundColor: Color(0xFF0071E3)),
                     );
                   },
                 ),
                 _buildActionCard(
                   title: 'Tra Cứu Tồn Kho',
-                  subtitle: 'Xem số lượng sản phẩm trong kho',
-                  icon: Icons.inventory,
-                  color: Colors.indigo,
+                  subtitle: 'Xem tồn kho thực tế',
+                  icon: Icons.inventory_2_outlined,
                   onTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Gọi API: /api/products/search?name=...')),
+                      const SnackBar(content: Text('Tra cứu kho'), backgroundColor: Color(0xFF0071E3)),
                     );
                   },
                 ),
                 _buildActionCard(
                   title: 'Lịch Sử Hóa Đơn',
-                  subtitle: 'Xem & in lại hóa đơn trong ca',
-                  icon: Icons.receipt_long,
-                  color: Colors.purple.shade700,
+                  subtitle: 'Xem & in lại trong ca',
+                  icon: Icons.receipt_long_outlined,
                   onTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Danh sách hóa đơn bán lẻ trong ca')),
+                      const SnackBar(content: Text('Danh sách hóa đơn'), backgroundColor: Color(0xFF0071E3)),
                     );
                   },
                 ),
@@ -220,19 +219,19 @@ class _StaffPosScreenState extends State<StaffPosScreen> {
 
   Widget _buildInfoRow(IconData icon, String label, String value, {bool highlight = false}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 5),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 16, color: highlight ? Colors.amber.shade900 : Colors.grey.shade600),
+          Icon(icon, size: 16, color: highlight ? const Color(0xFF0071E3) : const Color(0xFF86868B)),
           const SizedBox(width: 8),
           SizedBox(
-            width: 140,
+            width: 130,
             child: Text(
               label,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 12,
-                color: Colors.grey.shade700,
+                color: Color(0xFF86868B),
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -243,7 +242,7 @@ class _StaffPosScreenState extends State<StaffPosScreen> {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: highlight ? FontWeight.bold : FontWeight.w600,
-                color: highlight ? Colors.amber.shade900 : const Color(0xFF1E293B),
+                color: highlight ? const Color(0xFF0071E3) : const Color(0xFF1D1D1F),
               ),
             ),
           ),
@@ -256,19 +255,19 @@ class _StaffPosScreenState extends State<StaffPosScreen> {
     required String title,
     required String subtitle,
     required IconData icon,
-    required Color color,
     required VoidCallback onTap,
   }) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0x14000000)),
       ),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(14),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
@@ -276,22 +275,22 @@ class _StaffPosScreenState extends State<StaffPosScreen> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(8),
+                  color: const Color(0xFF0071E3).withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(icon, color: color, size: 24),
+                child: Icon(icon, color: const Color(0xFF0071E3), size: 22),
               ),
               const SizedBox(height: 10),
               Text(
                 title,
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF1D1D1F)),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 2),
               Text(
                 subtitle,
-                style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                style: const TextStyle(fontSize: 11, color: Color(0xFF86868B)),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),

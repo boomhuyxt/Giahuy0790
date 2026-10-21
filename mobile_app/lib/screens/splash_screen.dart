@@ -6,9 +6,6 @@ import 'staff_pos_screen.dart';
 import 'user_home_screen.dart';
 import 'login_screen.dart';
 
-/// Màn hình Splash kiểm tra Tự động Đăng nhập (Auto-Login)
-/// Đọc token từ SharedPreferences, giải mã JWT bằng jwt_decode,
-/// nếu token hợp lệ thì chuyển hướng thẳng tới màn hình theo đúng Role.
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -26,21 +23,17 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _checkLogin() async {
-    // Chờ 1.2s tạo hiệu ứng chuyển cảnh mượt mà
-    await Future.delayed(const Duration(milliseconds: 1200));
+    await Future.delayed(const Duration(milliseconds: 1000));
 
     if (!mounted) return;
 
-    // Kiểm tra token đã lưu trong máy qua SharedPreferences
     final UserTokenModel? user = await _authService.checkAutoLogin();
 
     if (!mounted) return;
 
     if (user != null) {
-      // Đã có Token hợp lệ và chưa hết hạn -> Điều hướng theo Role
       _navigateToRoleScreen(user);
     } else {
-      // Chưa đăng nhập hoặc Token đã hết hạn -> Chuyển sang màn hình Đăng nhập
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const LoginScreen()),
@@ -67,63 +60,65 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF1E3A8A), Color(0xFF3B82F6), Color(0xFF60A5FA)],
-          ),
-        ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.15),
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 2),
-                ),
-                child: const Icon(
-                  Icons.storefront_rounded,
-                  size: 72,
-                  color: Colors.white,
-                ),
+      backgroundColor: const Color(0xFFF5F5F7),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 76,
+              height: 76,
+              decoration: BoxDecoration(
+                color: const Color(0xFF0071E3),
+                borderRadius: BorderRadius.circular(22),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x330071E3),
+                    blurRadius: 20,
+                    offset: Offset(0, 8),
+                  ),
+                ],
               ),
-              const SizedBox(height: 24),
-              const Text(
-                'POS & STORE SYSTEM',
-                style: TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.5,
-                  color: Colors.white,
+              child: const Center(
+                child: Text(
+                  'KC',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: -1.5,
+                  ),
                 ),
               ),
-              const SizedBox(height: 8),
-              Text(
-                'ASP.NET Core Identity & JWT Role Auth',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.white.withValues(alpha: 0.9),
-                ),
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              'KidCare',
+              style: TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+                letterSpacing: -0.5,
+                color: Color(0xFF1D1D1F),
               ),
-              const SizedBox(height: 40),
-              const CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            ),
+            const SizedBox(height: 6),
+            const Text(
+              'Quản Lý & Đồng Hành Cùng Trẻ',
+              style: TextStyle(
+                fontSize: 13,
+                color: Color(0xFF86868B),
               ),
-              const SizedBox(height: 16),
-              Text(
-                'Đang kiểm tra phiên đăng nhập...',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Colors.white.withValues(alpha: 0.8),
-                ),
+            ),
+            const SizedBox(height: 48),
+            const SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.5,
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF0071E3)),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

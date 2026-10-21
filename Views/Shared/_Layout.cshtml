@@ -3,9 +3,9 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Giahuy0790 App</title>
+    <title>@ViewData["Title"] - KidCare</title>
     
-    <!-- Script chạy sớm nhất để áp dụng Dark/Light Mode trước khi render tránh chớp màn hình -->
+    <!-- Script khởi động sớm Dark/Light Theme tránh nhấp nháy -->
     <script>
         (function() {
             const storedTheme = localStorage.getItem('theme');
@@ -14,156 +14,148 @@
         })();
     </script>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Silkscreen:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/lib/pixelarticons/pixelart-icons-font.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Giahuy0790.styles.css" asp-append-version="true" />
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom shadow-sm mb-4">
+        <nav class="navbar navbar-expand-lg apple-nav mb-4">
             <div class="container">
                 <a class="navbar-brand fw-bold d-flex align-items-center gap-2" asp-area="" asp-controller="Home" asp-action="Index">
-                    <span class="badge bg-primary text-white p-2 rounded-3">KC</span>
-                    <span class="text-primary">KidCare</span>
+                    <span class="badge bg-primary text-white p-2 rounded-3 d-inline-flex align-items-center gap-1 shadow-sm">
+                        <i class="pixelart-icons-font-gamepad i8-sm"></i>
+                        <span class="fw-bold">KC</span>
+                    </span>
+                    <span class="fw-bold fs-5 tracking-tight">KidCare</span>
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-0 ms-1 d-none d-sm-inline-block rounded-pill" style="font-size: 10px;">BOOTSTRAP 5</span>
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-2">
                         <li class="nav-item">
-                            <a class="nav-link fw-medium" asp-area="" asp-controller="Home" asp-action="Index">Trang chủ</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link fw-medium" href="/kids">
-                                🧒 Quản lý Trẻ
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">
+                                <i class="pixelart-icons-font-home i8-sm text-primary"></i> Trang chủ
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link fw-medium" href="/activities">
-                                📋 Lịch & Hoạt động
+                            <a class="nav-link" href="/kids">
+                                <i class="pixelart-icons-font-users i8-sm text-info"></i> Quản lý Trẻ & Gia đình
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link fw-medium" href="/swagger" target="_blank">
-                                Swagger API <span class="badge bg-success-subtle text-success border border-success-subtle ms-1">v1</span>
+                            <a class="nav-link" href="/tracking">
+                                <i class="pixelart-icons-font-map-pin i8-sm text-primary"></i> Định Vị GPS
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/parental-control">
+                                <i class="pixelart-icons-font-shield i8-sm text-danger"></i> Chặn Web & App
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/screentime">
+                                <i class="pixelart-icons-font-clock i8-sm text-primary"></i> Đặt Giờ Máy
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/activities">
+                                <i class="pixelart-icons-font-calendar i8-sm text-warning"></i> Lịch & Hoạt động
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/swagger" target="_blank">
+                                <i class="pixelart-icons-font-zap i8-sm text-warning"></i> API <span class="badge apple-badge-blue ms-1">v1</span>
                             </a>
                         </li>
                     </ul>
 
                     <div class="d-flex align-items-center gap-2">
-                        <!-- Khu vực Trạng thái Xác thực Người dùng (Identity) -->
+                        <!-- Khu vực Trạng thái Xác thực Người dùng -->
                         <div id="authNavGuest" class="d-flex align-items-center gap-2">
-                            <button class="btn btn-outline-primary btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#modalLogin">
-                                Đăng nhập
+                            <button class="btn btn-outline-primary btn-sm rounded-2 px-3" data-bs-toggle="modal" data-bs-target="#modalLogin">
+                                <i class="pixelart-icons-font-lock i8-xs me-1"></i> Đăng nhập
                             </button>
-                            <button class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalRegister">
-                                Đăng ký
+                            <button class="btn btn-primary btn-sm rounded-2 px-3" data-bs-toggle="modal" data-bs-target="#modalRegister">
+                                <i class="pixelart-icons-font-user-plus i8-xs me-1"></i> Đăng ký
                             </button>
                         </div>
 
                         <div id="authNavUser" class="d-none align-items-center gap-2">
-                            <img id="navUserAvatar" src="" class="rounded-circle border" style="width: 32px; height: 32px; object-fit: cover;" alt="Avatar" />
+                            <img id="navUserAvatar" src="" class="rounded-2 border" style="width: 34px; height: 34px; object-fit: cover;" alt="Avatar" />
                             <span id="navUserName" class="fw-semibold small"></span>
-                            <button class="btn btn-outline-danger btn-sm rounded-pill px-2 py-0 ms-1" id="btnNavLogout" title="Đăng xuất">
-                                Thoát
+                            <button class="btn btn-secondary btn-sm rounded-2 px-2 py-1 ms-1" id="btnNavLogout" title="Đăng xuất">
+                                <i class="pixelart-icons-font-door-closed i8-xs"></i>
                             </button>
                         </div>
 
-                        <div class="vr mx-1"></div>
+                        <div class="vr mx-1" style="opacity: 0.25;"></div>
 
-                        <!-- Nút đổi theme nhanh (Quick Toggle) -->
-                        <button class="theme-switch-btn" id="quickThemeToggle" type="button" title="Đổi nhanh Chế độ Sáng / Tối">
-                            <span class="theme-icon-active fs-5">🌙</span>
+                        <!-- Nút chuyển đổi Dark / Light Mode Bootstrap 5 -->
+                        <button class="theme-switch-btn" id="themeToggleBtn" type="button" aria-label="Chuyển chế độ Giao diện" title="Chuyển chế độ Sáng / Tối">
+                            <span id="themeToggleIcon" class="theme-icon-active d-inline-flex align-items-center">
+                                <i class="pixelart-icons-font-moon i8-sm text-info"></i>
+                            </span>
+                            <span id="themeToggleText" class="ms-1 d-none d-sm-inline small fw-semibold">Tối</span>
                         </button>
-
-                        <!-- Menu chi tiết chọn Theme (Light / Dark / Auto) -->
-                        <div class="dropdown">
-                            <button class="btn btn-outline-secondary btn-sm dropdown-toggle rounded-pill px-3 py-1" id="themeSwitcher" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                Giao diện
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="themeSwitcher">
-                                <li>
-                                    <button type="button" class="dropdown-item d-flex align-items-center justify-content-between" data-bs-theme-value="light" data-icon="☀️">
-                                        <span>☀️ Sáng (Light)</span>
-                                        <span class="theme-check d-none text-primary ms-2">✓</span>
-                                    </button>
-                                </li>
-                                <li>
-                                    <button type="button" class="dropdown-item d-flex align-items-center justify-content-between" data-bs-theme-value="dark" data-icon="🌙">
-                                        <span>🌙 Tối (Dark)</span>
-                                        <span class="theme-check d-none text-primary ms-2">✓</span>
-                                    </button>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <button type="button" class="dropdown-item d-flex align-items-center justify-content-between" data-bs-theme-value="auto" data-icon="💻">
-                                        <span>💻 Theo hệ thống (Auto)</span>
-                                        <span class="theme-check d-none text-primary ms-2">✓</span>
-                                    </button>
-                                </li>
-                            </ul>
-                        </div>
                     </div>
                 </div>
             </div>
         </nav>
     </header>
 
-    <div class="container">
-        <main role="main" class="pb-3">
+    <div class="container page-container">
+        <main role="main" class="pb-4">
             @RenderBody()
         </main>
     </div>
 
-    <!-- ================= MODAL ĐĂNG NHẬP ================= -->
+    <!-- ================= MODAL ĐĂNG NHẬP (8-BIT RETRO) ================= -->
     <div class="modal fade" id="modalLogin" tabindex="-1" aria-labelledby="modalLoginLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
-            <div class="modal-content shadow-lg rounded-4">
-                <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title fw-bold" id="modalLoginLabel">🔐 Đăng nhập tài khoản</h5>
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+            <div class="modal-content shadow-lg">
+                <div class="modal-header border-bottom">
+                    <h5 class="modal-title fw-bold d-flex align-items-center gap-2" id="modalLoginLabel">
+                        <i class="pixelart-icons-font-lock i8-md text-primary"></i>
+                        <span>Đăng Nhập Tài Khoản</span>
+                    </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="formLogin">
                     <div class="modal-body">
                         <div id="loginAlertBox"></div>
                         <div class="mb-3">
-                            <label class="form-label fw-semibold small">Tên đăng nhập hoặc Email</label>
-                            <input type="text" id="loginIdentifier" class="form-control" placeholder="username hoặc email@domain.com" required />
+                            <label class="form-label fw-semibold small d-flex align-items-center gap-1">
+                                <i class="pixelart-icons-font-user i8-xs text-primary"></i> Tài khoản hoặc Email
+                            </label>
+                            <input type="text" id="loginIdentifier" class="form-control" placeholder="Tên đăng nhập hoặc email" required />
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-semibold small">Mật khẩu</label>
+                            <label class="form-label fw-semibold small d-flex align-items-center gap-1">
+                                <i class="pixelart-icons-font-lock i8-xs text-primary"></i> Mật khẩu
+                            </label>
                             <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" required />
                         </div>
                         <div class="d-flex justify-content-end mb-3">
-                            <a href="#" class="small text-decoration-none text-primary fw-semibold" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#modalForgotPassword">
-                                🔑 Quên mật khẩu?
+                            <a href="#" class="small text-decoration-none" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#modalForgotPassword">
+                                <i class="pixelart-icons-font-circle-info i8-xs me-1"></i> Quên mật khẩu?
                             </a>
                         </div>
-
-                        <!-- Quick Test Accounts for 3 Roles -->
-                        <div class="p-2 bg-body-tertiary rounded-3 border small">
-                            <div class="fw-bold text-muted mb-1" style="font-size: 11px;">ĐĂNG NHẬP NHANH (QUICK DEMO):</div>
-                            <div class="d-flex gap-1">
-                                <button type="button" class="btn btn-sm btn-outline-purple flex-grow-1 py-1" style="font-size: 11px;" onclick="fillLogin('admin', 'Admin@123')">
-                                    👑 Admin
-                                </button>
-                                <button type="button" class="btn btn-sm btn-outline-success flex-grow-1 py-1" style="font-size: 11px;" onclick="fillLogin('parents', 'Parents@123')">
-                                    👨‍👩‍👧 Parents
-                                </button>
-                                <button type="button" class="btn btn-sm btn-outline-warning text-dark flex-grow-1 py-1" style="font-size: 11px;" onclick="fillLogin('kid', 'Kid@123')">
-                                    🧒 Kid
-                                </button>
-                            </div>
-                        </div>
                     </div>
-                    <div class="modal-footer border-0 pt-0">
+                    <div class="modal-footer border-top">
                         <button type="button" class="btn btn-link text-decoration-none btn-sm me-auto" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#modalRegister">
-                            Chưa có tài khoản? Đăng ký
+                            Chưa có tài khoản?
                         </button>
-                        <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm" id="btnSubmitLogin">
-                            Đăng nhập
+                        <button type="submit" class="btn btn-primary rounded-2 px-4" id="btnSubmitLogin">
+                            <i class="pixelart-icons-font-lock i8-xs me-1"></i> Đăng nhập
                         </button>
                     </div>
                 </form>
@@ -171,48 +163,61 @@
         </div>
     </div>
 
-    <!-- ================= MODAL ĐĂNG KÝ ================= -->
+    <!-- ================= MODAL ĐĂNG KÝ (8-BIT RETRO) ================= -->
     <div class="modal fade" id="modalRegister" tabindex="-1" aria-labelledby="modalRegisterLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
-            <div class="modal-content shadow-lg rounded-4">
-                <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title fw-bold" id="modalRegisterLabel">📝 Đăng ký thành viên</h5>
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 460px;">
+            <div class="modal-content shadow-lg">
+                <div class="modal-header border-bottom">
+                    <h5 class="modal-title fw-bold d-flex align-items-center gap-2" id="modalRegisterLabel">
+                        <i class="pixelart-icons-font-user-plus i8-md text-primary"></i>
+                        <span>Đăng Ký Tài Khoản</span>
+                    </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="formRegister">
                     <div class="modal-body">
                         <div id="registerAlertBox"></div>
                         <div class="mb-3">
-                            <label class="form-label fw-semibold small">Tên đăng nhập (Username) <span class="text-danger">*</span></label>
+                            <label class="form-label fw-semibold small d-flex align-items-center gap-1">
+                                <i class="pixelart-icons-font-user i8-xs text-primary"></i> Tên đăng nhập <span class="text-danger">*</span>
+                            </label>
                             <input type="text" id="regUsername" class="form-control" placeholder="Ví dụ: giahuy123" required />
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-semibold small">Địa chỉ Email <span class="text-danger">*</span></label>
+                            <label class="form-label fw-semibold small d-flex align-items-center gap-1">
+                                <i class="pixelart-icons-font-mail i8-xs text-primary"></i> Địa chỉ Email <span class="text-danger">*</span>
+                            </label>
                             <input type="email" id="regEmail" class="form-control" placeholder="name@example.com" required />
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-semibold small">Họ và tên</label>
+                            <label class="form-label fw-semibold small d-flex align-items-center gap-1">
+                                <i class="pixelart-icons-font-heart i8-xs text-primary"></i> Họ và tên
+                            </label>
                             <input type="text" id="regFullName" class="form-control" placeholder="Ví dụ: Nguyễn Gia Huy" />
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-semibold small">Vai trò (Role) <span class="text-danger">*</span></label>
+                            <label class="form-label fw-semibold small d-flex align-items-center gap-1">
+                                <i class="pixelart-icons-font-sliders i8-xs text-primary"></i> Vai trò <span class="text-danger">*</span>
+                            </label>
                             <select id="regRole" class="form-select">
-                                <option value="Parents" selected>👨‍👩‍👧 Phụ huynh (Parents) - Quản lý con em</option>
-                                <option value="Kid">🧒 Trẻ em (Kid) - Tự làm nhiệm vụ & nhận sao</option>
-                                <option value="Admin">👑 Quản trị viên (Admin) - Toàn quyền hệ thống</option>
+                                <option value="Parents" selected>Phụ huynh (Parents)</option>
+                                <option value="Kid">Trẻ em (Kid)</option>
+                                <option value="Admin">Quản trị viên (Admin)</option>
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-semibold small">Mật khẩu (Tối thiểu 6 ký tự) <span class="text-danger">*</span></label>
+                            <label class="form-label fw-semibold small d-flex align-items-center gap-1">
+                                <i class="pixelart-icons-font-lock i8-xs text-primary"></i> Mật khẩu (Tối thiểu 6 ký tự) <span class="text-danger">*</span>
+                            </label>
                             <input type="password" id="regPassword" class="form-control" placeholder="••••••••" minlength="6" required />
                         </div>
                     </div>
-                    <div class="modal-footer border-0 pt-0">
+                    <div class="modal-footer border-top">
                         <button type="button" class="btn btn-link text-decoration-none btn-sm me-auto" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#modalLogin">
-                            Đã có tài khoản? Đăng nhập
+                            Đã có tài khoản?
                         </button>
-                        <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm" id="btnSubmitRegister">
-                            Tạo tài khoản
+                        <button type="submit" class="btn btn-primary rounded-2 px-4" id="btnSubmitRegister">
+                            <i class="pixelart-icons-font-check i8-xs me-1"></i> Tạo tài khoản
                         </button>
                     </div>
                 </form>
@@ -220,46 +225,54 @@
         </div>
     </div>
 
-    <!-- ================= MODAL QUÊN MẬT KHẨU (GỬI MÃ OTP QUA EMAIL) ================= -->
+    <!-- ================= MODAL QUÊN MẬT KHẨU (8-BIT RETRO) ================= -->
     <div class="modal fade" id="modalForgotPassword" tabindex="-1" aria-labelledby="modalForgotLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
-            <div class="modal-content shadow-lg rounded-4">
-                <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title fw-bold" id="modalForgotLabel">🔑 Khôi phục mật khẩu</h5>
+            <div class="modal-content shadow-lg">
+                <div class="modal-header border-bottom">
+                    <h5 class="modal-title fw-bold d-flex align-items-center gap-2" id="modalForgotLabel">
+                        <i class="pixelart-icons-font-shield i8-md text-primary"></i>
+                        <span>Khôi Phục Mật Khẩu</span>
+                    </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 
-                <!-- BƯỚC 1: GỬI MÃ OTP QUA EMAIL -->
+                <!-- BƯỚC 1: GỬI MÃ OTP -->
                 <form id="formForgotStep1">
                     <div class="modal-body">
-                        <p class="text-muted small mb-3">Nhập địa chỉ Email hoặc Tên tài khoản đã đăng ký. Hệ thống sẽ gửi mã OTP gồm 6 chữ số về email của bạn để xác thực.</p>
+                        <p class="text-muted small mb-3">Nhập địa chỉ Email hoặc Tên tài khoản đã đăng ký. Hệ thống sẽ gửi mã OTP gồm 6 chữ số để xác thực.</p>
                         <div id="forgotStep1Alert"></div>
                         <div class="mb-3">
-                            <label class="form-label fw-semibold small">Email hoặc Username <span class="text-danger">*</span></label>
-                            <input type="text" id="forgotIdentifier" class="form-control" placeholder="vidu@gmail.com hoặc username" required />
+                            <label class="form-label fw-semibold small d-flex align-items-center gap-1">
+                                <i class="pixelart-icons-font-mail i8-xs text-primary"></i> Email hoặc Username <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" id="forgotIdentifier" class="form-control" placeholder="name@example.com hoặc username" required />
                         </div>
                     </div>
-                    <div class="modal-footer border-0 pt-0">
+                    <div class="modal-footer border-top">
                         <button type="button" class="btn btn-link text-decoration-none btn-sm me-auto" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#modalLogin">
-                            Quay lại Đăng nhập
+                            Quay lại
                         </button>
-                        <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm" id="btnSubmitForgotStep1">
-                            Gửi mã OTP
+                        <button type="submit" class="btn btn-primary rounded-2 px-4" id="btnSubmitForgotStep1">
+                            <i class="pixelart-icons-font-mail i8-xs me-1"></i> Gửi mã OTP
                         </button>
                     </div>
                 </form>
 
-                <!-- BƯỚC 2: NHẬP MÃ OTP VÀ THAY ĐỔI MẬT KHẨU MỚI -->
+                <!-- BƯỚC 2: NHẬP OTP & ĐỔI MẬT KHẨU -->
                 <form id="formForgotStep2" style="display: none;">
                     <div class="modal-body">
-                        <div class="alert alert-info py-2 small mb-3">
-                            ✉️ Mã xác thực OTP 6 số đã được gửi qua email. Vui lòng kiểm tra hộp thư đến (hoặc thư mục Spam/Rác).
+                        <div class="alert alert-info py-2 small mb-3 d-flex align-items-center gap-2">
+                            <i class="pixelart-icons-font-circle-info i8-sm"></i>
+                            <span>Mã OTP 6 số đã được gửi qua email. Vui lòng kiểm tra hộp thư đến của bạn.</span>
                         </div>
                         <div id="forgotStep2Alert"></div>
                         
                         <div class="mb-3">
-                            <label class="form-label fw-semibold small text-primary">Mã OTP (6 chữ số) <span class="text-danger">*</span></label>
-                            <input type="text" id="forgotOtp" class="form-control text-center fw-bold fs-4 tracking-widest" maxlength="6" placeholder="123456" required />
+                            <label class="form-label fw-semibold small d-flex align-items-center gap-1">
+                                <i class="pixelart-icons-font-lock i8-xs text-primary"></i> Mã OTP (6 chữ số) <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" id="forgotOtp" class="form-control text-center fw-bold fs-4 pixel-font" maxlength="6" placeholder="123456" required style="letter-spacing: 0.25em;" />
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-semibold small">Mật khẩu mới (Tối thiểu 6 ký tự) <span class="text-danger">*</span></label>
@@ -270,20 +283,20 @@
                             <input type="password" id="forgotConfirmPassword" class="form-control" placeholder="••••••••" minlength="6" required />
                         </div>
                         <div class="d-flex justify-content-between align-items-center mt-2">
-                            <button type="button" class="btn btn-link btn-sm text-decoration-none p-0" id="btnBackToStep1">
-                                ← Đổi email khác
+                            <button type="button" class="btn btn-link btn-sm text-decoration-none p-0 text-muted" id="btnBackToStep1">
+                                ← Quay lại bước 1
                             </button>
                             <button type="button" class="btn btn-link btn-sm text-decoration-none p-0 text-primary" id="btnResendOtp">
-                                Gửi lại mã OTP
+                                Gửi lại mã
                             </button>
                         </div>
                     </div>
-                    <div class="modal-footer border-0 pt-0">
+                    <div class="modal-footer border-top">
                         <button type="button" class="btn btn-link text-decoration-none btn-sm me-auto" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#modalLogin">
                             Đăng nhập
                         </button>
-                        <button type="submit" class="btn btn-success rounded-pill px-4 shadow-sm" id="btnSubmitForgotStep2">
-                            Đổi mật khẩu
+                        <button type="submit" class="btn btn-primary rounded-2 px-4" id="btnSubmitForgotStep2">
+                            <i class="pixelart-icons-font-check i8-xs me-1"></i> Đổi mật khẩu
                         </button>
                     </div>
                 </form>
@@ -292,17 +305,32 @@
         </div>
     </div>
 
-    <footer class="footer border-top bg-body-tertiary text-body-secondary">
+    <footer class="footer mt-auto">
         <div class="container d-flex flex-wrap justify-content-between align-items-center py-2">
-            <div>
-                &copy; @DateTime.UtcNow.Year - <strong>KidCare</strong> - Hệ thống Quản lý & Đồng hành cùng Trẻ em
+            <div class="d-flex align-items-center gap-2">
+                <i class="pixelart-icons-font-gamepad i8-sm text-primary"></i>
+                <span>&copy; @DateTime.UtcNow.Year <strong class="pixel-font">KidCare</strong> · Nền tảng Quản lý Trẻ & Gia đình 8-Bit.</span>
             </div>
-            <div class="d-flex gap-3">
-                <a href="/kids" class="text-decoration-none text-body-secondary">Quản lý Trẻ</a>
-                <span>•</span>
-                <a href="/activities" class="text-decoration-none text-body-secondary">Lịch & Hoạt động</a>
-                <span>•</span>
-                <a href="/swagger" class="text-decoration-none text-body-secondary" target="_blank">Swagger API</a>
+            <div class="d-flex gap-3 align-items-center">
+                <a href="/kids" class="text-decoration-none text-muted">
+                    <i class="pixelart-icons-font-users i8-xs me-1"></i> Quản lý Trẻ
+                </a>
+                <span class="text-muted">·</span>
+                <a href="/parental-control" class="text-decoration-none text-muted">
+                    <i class="pixelart-icons-font-shield i8-xs me-1 text-danger"></i> Chặn Web & App
+                </a>
+                <span class="text-muted">·</span>
+                <a href="/screentime" class="text-decoration-none text-muted">
+                    <i class="pixelart-icons-font-clock i8-xs me-1 text-primary"></i> Đặt Giờ Máy
+                </a>
+                <span class="text-muted">·</span>
+                <a href="/activities" class="text-decoration-none text-muted">
+                    <i class="pixelart-icons-font-calendar i8-xs me-1 text-warning"></i> Lịch & Hoạt động
+                </a>
+                <span class="text-muted">·</span>
+                <a href="/swagger" class="text-decoration-none text-muted" target="_blank">
+                    <i class="pixelart-icons-font-zap i8-xs me-1 text-warning"></i> API
+                </a>
             </div>
         </div>
     </footer>
@@ -326,8 +354,8 @@
                 try {
                     const u = JSON.parse(userStr);
                     const roles = u.roles || [];
-                    const roleLabel = roles.includes('Admin') ? '👑 Admin' : (roles.includes('Kid') ? '🧒 Kid' : '👨‍👩‍👧 Parents');
-                    document.getElementById('navUserName').innerHTML = `${u.fullName || u.username} <span class="badge bg-primary-subtle text-primary border small ms-1">${roleLabel}</span>`;
+                    const roleLabel = roles.includes('Admin') ? 'Admin' : (roles.includes('Kid') ? 'Kid' : 'Parents');
+                    document.getElementById('navUserName').innerHTML = `${u.fullName || u.username} <span class="badge apple-badge-blue ms-1">${roleLabel}</span>`;
                     document.getElementById('navUserAvatar').src = u.avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(u.username)}`;
                     guestBox.classList.add('d-none');
                     userBox.classList.remove('d-none');
@@ -346,7 +374,11 @@
             localStorage.removeItem('authToken');
             localStorage.removeItem('authUser');
             updateAuthUI();
-            alert('Đã đăng xuất thành công!');
+            if (window.location.pathname.toLowerCase().includes('kids')) {
+                window.location.reload();
+            } else {
+                alert('Đã đăng xuất thành công.');
+            }
         });
 
         // Xử lý submit Đăng ký
@@ -374,12 +406,12 @@
 
                 const data = await res.json();
                 if (!res.ok) {
-                    const errMsg = data.message || (data.errors ? data.errors.join('<br>') : 'Đăng ký thất bại');
+                    const errMsg = data.message || (data.errors ? data.errors.join('<br>') : 'Đăng ký không thành công');
                     alertBox.innerHTML = `<div class="alert alert-danger py-2 small">${errMsg}</div>`;
                     return;
                 }
 
-                alertBox.innerHTML = `<div class="alert alert-success py-2 small">🎉 Đăng ký thành công! Hãy đăng nhập ngay.</div>`;
+                alertBox.innerHTML = `<div class="alert alert-success py-2 small">Đăng ký thành công! Hãy đăng nhập ngay.</div>`;
                 setTimeout(() => {
                     bootstrap.Modal.getInstance(document.getElementById('modalRegister')).hide();
                     document.getElementById('formRegister').reset();
@@ -387,7 +419,7 @@
                     const loginModal = new bootstrap.Modal(document.getElementById('modalLogin'));
                     document.getElementById('loginIdentifier').value = payload.username;
                     loginModal.show();
-                }, 1500);
+                }, 1200);
             } catch (err) {
                 alertBox.innerHTML = `<div class="alert alert-danger py-2 small">Lỗi kết nối: ${err.message}</div>`;
             } finally {
@@ -418,21 +450,23 @@
 
                 const data = await res.json();
                 if (!res.ok) {
-                    alertBox.innerHTML = `<div class="alert alert-danger py-2 small">${data.message || 'Đăng nhập thất bại'}</div>`;
+                    alertBox.innerHTML = `<div class="alert alert-danger py-2 small">${data.message || 'Đăng nhập không thành công'}</div>`;
                     return;
                 }
 
-                // Lưu JWT Token và User info vào localStorage
                 localStorage.setItem('authToken', data.token);
                 localStorage.setItem('authUser', JSON.stringify(data.user));
                 
-                alertBox.innerHTML = `<div class="alert alert-success py-2 small">✅ ${data.message}</div>`;
+                alertBox.innerHTML = `<div class="alert alert-success py-2 small">${data.message}</div>`;
                 setTimeout(() => {
                     bootstrap.Modal.getInstance(document.getElementById('modalLogin')).hide();
                     document.getElementById('formLogin').reset();
                     alertBox.innerHTML = '';
                     updateAuthUI();
-                }, 1000);
+                    if (window.location.pathname.toLowerCase().includes('kids')) {
+                        window.location.reload();
+                    }
+                }, 800);
             } catch (err) {
                 alertBox.innerHTML = `<div class="alert alert-danger py-2 small">Lỗi kết nối: ${err.message}</div>`;
             } finally {
@@ -444,7 +478,6 @@
         // ================= QUÊN MẬT KHẨU / XÁC THỰC OTP =================
         let currentForgotIdentifier = '';
 
-        // Bước 1: Gửi mã OTP về email người dùng
         document.getElementById('formForgotStep1')?.addEventListener('submit', async (e) => {
             e.preventDefault();
             const input = document.getElementById('forgotIdentifier');
@@ -455,7 +488,7 @@
             if (!currentForgotIdentifier) return;
 
             btn.disabled = true;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang gửi OTP...';
+            btn.innerHTML = 'Đang gửi OTP...';
             alertBox.innerHTML = '';
 
             try {
@@ -471,13 +504,12 @@
                     return;
                 }
 
-                // Chuyển sang Bước 2: Nhập OTP & Đổi mật khẩu
                 document.getElementById('formForgotStep1').style.display = 'none';
                 document.getElementById('formForgotStep2').style.display = 'block';
                 document.getElementById('forgotOtp').value = '';
                 document.getElementById('forgotNewPassword').value = '';
                 document.getElementById('forgotConfirmPassword').value = '';
-                document.getElementById('forgotStep2Alert').innerHTML = `<div class="alert alert-success py-2 small">✅ ${data.message}</div>`;
+                document.getElementById('forgotStep2Alert').innerHTML = `<div class="alert alert-success py-2 small">${data.message}</div>`;
             } catch (err) {
                 alertBox.innerHTML = `<div class="alert alert-danger py-2 small">Lỗi kết nối: ${err.message}</div>`;
             } finally {
@@ -486,14 +518,12 @@
             }
         });
 
-        // Nút quay lại Bước 1
         document.getElementById('btnBackToStep1')?.addEventListener('click', () => {
             document.getElementById('formForgotStep2').style.display = 'none';
             document.getElementById('formForgotStep1').style.display = 'block';
             document.getElementById('forgotStep1Alert').innerHTML = '';
         });
 
-        // Gửi lại mã OTP
         document.getElementById('btnResendOtp')?.addEventListener('click', async () => {
             const btn = document.getElementById('btnResendOtp');
             const alertBox = document.getElementById('forgotStep2Alert');
@@ -509,18 +539,17 @@
                     body: JSON.stringify({ email: currentForgotIdentifier })
                 });
                 const data = await res.json();
-                alertBox.innerHTML = `<div class="alert alert-success py-2 small">🔁 ${data.message || 'Đã gửi lại mã OTP!'}</div>`;
+                alertBox.innerHTML = `<div class="alert alert-success py-2 small">${data.message || 'Đã gửi lại mã OTP'}</div>`;
             } catch (err) {
                 alertBox.innerHTML = `<div class="alert alert-danger py-2 small">Lỗi: ${err.message}</div>`;
             } finally {
                 setTimeout(() => {
                     btn.disabled = false;
-                    btn.textContent = 'Gửi lại mã OTP';
-                }, 5000);
+                    btn.textContent = 'Gửi lại mã';
+                }, 4000);
             }
         });
 
-        // Bước 2: Xác nhận đổi mật khẩu mới với mã OTP
         document.getElementById('formForgotStep2')?.addEventListener('submit', async (e) => {
             e.preventDefault();
             const alertBox = document.getElementById('forgotStep2Alert');
@@ -536,7 +565,7 @@
             }
 
             btn.disabled = true;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang xác thực...';
+            btn.innerHTML = 'Đang xác thực...';
             alertBox.innerHTML = '';
 
             try {
@@ -553,12 +582,12 @@
 
                 const data = await res.json();
                 if (!res.ok) {
-                    const errorMsg = data.errors ? data.errors.join('<br>') : (data.message || 'Đổi mật khẩu thất bại');
+                    const errorMsg = data.errors ? data.errors.join('<br>') : (data.message || 'Đổi mật khẩu không thành công');
                     alertBox.innerHTML = `<div class="alert alert-danger py-2 small">${errorMsg}</div>`;
                     return;
                 }
 
-                alertBox.innerHTML = `<div class="alert alert-success py-2 small">🎉 ${data.message}</div>`;
+                alertBox.innerHTML = `<div class="alert alert-success py-2 small">${data.message}</div>`;
 
                 setTimeout(() => {
                     bootstrap.Modal.getInstance(document.getElementById('modalForgotPassword')).hide();
@@ -570,7 +599,7 @@
                     document.getElementById('loginIdentifier').value = currentForgotIdentifier;
                     document.getElementById('loginPassword').value = '';
                     loginModal.show();
-                }, 1500);
+                }, 1200);
             } catch (err) {
                 alertBox.innerHTML = `<div class="alert alert-danger py-2 small">Lỗi kết nối: ${err.message}</div>`;
             } finally {
