@@ -1,15 +1,17 @@
 using Giahuy0790.Data;
+using Giahuy0790.Hubs;
 using Giahuy0790.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace Giahuy0790.Controllers;
 
 /// <summary>
-/// API Quản lý đàm thoại giọng nói & Bộ đàm gia đình 8-Bit (Family Walkie-Talkie & Voice Intercom)
-/// Cho phép Phụ huynh và Bé trò chuyện bằng giọng nói tức thì
+/// API Quản lý đàm thoại giọng nói & Bộ đàm gia đình (Family Walkie-Talkie & Voice Intercom)
+/// Cho phép Phụ huynh và Bé trò chuyện bằng giọng nói tức thì theo chuẩn Apple Human Interface
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
@@ -17,12 +19,26 @@ public class VoiceMessagesController(
     AppDbContext context,
     UserManager<ApplicationUser> userManager,
     IWebHostEnvironment env,
-    ILogger<VoiceMessagesController> logger) : ControllerBase
+    ILogger<VoiceMessagesController> logger,
+    IHubContext<LocationHub> hubContext) : ControllerBase
 {
-    private static readonly string[] AllowedAudioExtensions = [".webm", ".ogg", ".wav", ".mp3", ".m4a", ".aac", ".bin"];
+    private static readonly string[] AllowedAudioExtensions = [".webm", ".ogg", ".wav", ".mp3", ".m4a", ".mp4", ".aac", ".bin"];
     private const long MaxAudioFileSize = 20 * 1024 * 1024; // 20MB
 
     private static DateTime ToVietnamTime(DateTime utc) => utc.AddHours(7);
+
+    private string GetUploadsDirectory()
+    {
+        var webRoot = !string.IsNullOrEmpty(env.WebRootPath)
+            ? env.WebRootPath
+            : Path.Combine(env.ContentRootPath, "wwwroot");
+        var uploadsDir = Path.Combine(webRoot, "uploads", "voice");
+        if (!Directory.Exists(uploadsDir))
+        {
+            Directory.CreateDirectory(uploadsDir);
+        }
+        return uploadsDir;
+    }
 
     /// <summary>
     /// Lấy danh sách tin nhắn giọng nói giữa Phụ huynh và Bé
@@ -36,24 +52,38 @@ public class VoiceMessagesController(
             return Unauthorized(new { message = "Vui lòng đăng nhập để nghe tin nhắn thoại." });
         }
 
-        var isKid = User.IsInRole("Kid") || User.IsInRole("kid");
+        var isKidRole = User.IsInRole("Kid") || User.IsInRole("kid");
+        var kidProfile = await context.Kids.FirstOrDefaultAsync(k => k.KidUserId == currentUserId);
+        var isKid = isKidRole || kidProfile != null;
+
         int targetKidId;
 
         if (isKid)
         {
-            var kid = await context.Kids.FirstOrDefaultAsync(k => k.KidUserId == currentUserId);
-            if (kid == null)
+            if (kidProfile == null)
             {
                 return NotFound(new { message = "Tài khoản của bạn chưa được liên kết với hồ sơ trẻ." });
             }
-            targetKidId = kid.Id;
+            targetKidId = kidProfile.Id;
         }
         else
         {
             if (!kidId.HasValue)
             {
-                // Nếu phụ huynh không truyền kidId, lấy bé đầu tiên của phụ huynh
+                // Ưu tiên bé của phụ huynh hiện tại
                 var firstKid = await context.Kids.FirstOrDefaultAsync(k => k.ParentId == currentUserId);
+                if (firstKid == null && (User.IsInRole("Admin") || User.IsInRole("admin")))
+                {
+                    firstKid = await context.Kids.FirstOrDefaultAsync();
+                }
+                if (firstKid == null)
+                {
+                    firstKid = await (from k in context.Kids
+                                      join m in context.FamilyMembers on k.FamilyGroupId equals m.FamilyGroupId
+                                      where m.UserId == currentUserId
+                                      select k).FirstOrDefaultAsync();
+                }
+
                 if (firstKid == null)
                 {
                     return Ok(new List<object>());
@@ -63,6 +93,17 @@ public class VoiceMessagesController(
             else
             {
                 targetKidId = kidId.Value;
+            }
+
+            var isAdmin = User.IsInRole("Admin") || User.IsInRole("admin");
+            var hasAccess = isAdmin || await context.Kids.AnyAsync(k =>
+                k.Id == targetKidId && (k.ParentId == currentUserId ||
+                (k.FamilyGroupId != null && context.FamilyMembers.Any(m => m.FamilyGroupId == k.FamilyGroupId && m.UserId == currentUserId))));
+
+            if (!hasAccess)
+            {
+                var kidExists = await context.Kids.AnyAsync(k => k.Id == targetKidId);
+                if (!kidExists) return NotFound(new { message = "Không tìm thấy hồ sơ bé tương ứng." });
             }
         }
 
@@ -111,7 +152,7 @@ public class VoiceMessagesController(
 
         if (audioFile == null || audioFile.Length == 0)
         {
-            return BadRequest(new { message = "Không tìm thấy dữ liệu âm thanh giọng nói." });
+            return BadRequest(new { message = "Không tìm thấy dữ liệu âm thanh giọng nói. Vui lòng bấm giữ nút nói và thử lại." });
         }
 
         if (audioFile.Length > MaxAudioFileSize)
@@ -119,19 +160,15 @@ public class VoiceMessagesController(
             return BadRequest(new { message = "Dung lượng file ghi âm quá lớn (tối đa 20MB)." });
         }
 
-        var extension = Path.GetExtension(audioFile.FileName).ToLowerInvariant();
-        if (string.IsNullOrEmpty(extension))
-        {
-            // Mặc định trình duyệt MediaRecorder xuất audio/webm
-            extension = ".webm";
-        }
-        else if (!AllowedAudioExtensions.Contains(extension))
-        {
-            extension = ".webm";
-        }
+        var rawExt = Path.GetExtension(audioFile.FileName)?.ToLowerInvariant();
+        var extension = !string.IsNullOrEmpty(rawExt) && AllowedAudioExtensions.Contains(rawExt)
+            ? rawExt
+            : (audioFile.ContentType.Contains("mp4") ? ".mp4" : ".webm");
 
         var currentUser = await userManager.FindByIdAsync(currentUserId);
-        var isKid = User.IsInRole("Kid") || User.IsInRole("kid");
+        var isKidRole = User.IsInRole("Kid") || User.IsInRole("kid");
+        var kidProfile = await context.Kids.FirstOrDefaultAsync(k => k.KidUserId == currentUserId);
+        var isKid = isKidRole || kidProfile != null;
 
         int targetKidId;
         string? parentId;
@@ -142,26 +179,37 @@ public class VoiceMessagesController(
 
         if (isKid)
         {
-            var kid = await context.Kids.FirstOrDefaultAsync(k => k.KidUserId == currentUserId);
-            if (kid == null)
+            if (kidProfile == null)
             {
                 return NotFound(new { message = "Tài khoản của bạn chưa được liên kết với hồ sơ trẻ." });
             }
-            targetKidId = kid.Id;
-            parentId = kid.ParentId;
-            familyGroupId = kid.FamilyGroupId;
+            targetKidId = kidProfile.Id;
+            parentId = kidProfile.ParentId;
+            familyGroupId = kidProfile.FamilyGroupId;
             senderRole = "Kid";
-            senderName = kid.FullName;
-            senderAvatarUrl = kid.AvatarUrl ?? currentUser?.AvatarUrl;
+            senderName = !string.IsNullOrWhiteSpace(kidProfile.FullName) ? kidProfile.FullName : (currentUser?.FullName ?? currentUser?.UserName ?? "Bé yêu");
+            senderAvatarUrl = kidProfile.AvatarUrl ?? currentUser?.AvatarUrl;
         }
         else
         {
             if (!kidId.HasValue)
             {
                 var firstKid = await context.Kids.FirstOrDefaultAsync(k => k.ParentId == currentUserId);
+                if (firstKid == null && (User.IsInRole("Admin") || User.IsInRole("admin")))
+                {
+                    firstKid = await context.Kids.FirstOrDefaultAsync();
+                }
                 if (firstKid == null)
                 {
-                    return BadRequest(new { message = "Vui lòng chọn bé để đàm thoại giọng nói." });
+                    firstKid = await (from k in context.Kids
+                                      join m in context.FamilyMembers on k.FamilyGroupId equals m.FamilyGroupId
+                                      where m.UserId == currentUserId
+                                      select k).FirstOrDefaultAsync();
+                }
+
+                if (firstKid == null)
+                {
+                    return BadRequest(new { message = "Vui lòng chọn hoặc thêm hồ sơ bé trước khi gửi tin nhắn thoại." });
                 }
                 targetKidId = firstKid.Id;
             }
@@ -177,20 +225,15 @@ public class VoiceMessagesController(
             }
 
             targetKidId = targetKid.Id;
-            parentId = currentUserId;
+            parentId = targetKid.ParentId ?? currentUserId;
             familyGroupId = targetKid.FamilyGroupId;
-            senderRole = "Parents";
+            senderRole = User.IsInRole("Admin") || User.IsInRole("admin") ? "Admin" : "Parents";
             senderName = currentUser?.FullName ?? currentUser?.UserName ?? "Phụ huynh";
             senderAvatarUrl = currentUser?.AvatarUrl;
         }
 
-        // Lưu file âm thanh vào wwwroot/uploads/voice/
-        var uploadsDir = Path.Combine(env.WebRootPath, "uploads", "voice");
-        if (!Directory.Exists(uploadsDir))
-        {
-            Directory.CreateDirectory(uploadsDir);
-        }
-
+        // Lưu file âm thanh an toàn vào wwwroot/uploads/voice/
+        var uploadsDir = GetUploadsDirectory();
         var safeFileName = $"voice_{targetKidId}_{Guid.NewGuid():N}_{DateTime.UtcNow:yyyyMMddHHmmss}{extension}";
         var fullPath = Path.Combine(uploadsDir, safeFileName);
 
@@ -223,24 +266,37 @@ public class VoiceMessagesController(
         logger.LogInformation("Gửi tin nhắn giọng nói mới ID={Id} từ {Sender} (Role={Role}) cho bé ID={KidId}",
             voiceMessage.Id, senderName, senderRole, targetKidId);
 
+        var payload = new
+        {
+            id = voiceMessage.Id,
+            senderId = voiceMessage.SenderId,
+            senderName = voiceMessage.SenderName,
+            senderRole = voiceMessage.SenderRole,
+            senderAvatarUrl = voiceMessage.SenderAvatarUrl ?? (voiceMessage.SenderRole == "Kid" ? "https://api.dicebear.com/7.x/bottts/svg?seed=Kid" : "https://api.dicebear.com/7.x/bottts/svg?seed=Parent"),
+            isMe = true,
+            audioUrl = voiceMessage.AudioUrl,
+            durationSeconds = voiceMessage.DurationSeconds,
+            fileSizeBytes = voiceMessage.FileSizeBytes,
+            isHeard = voiceMessage.IsHeard,
+            createdAt = voiceMessage.CreatedAt,
+            createdAtVn = ToVietnamTime(voiceMessage.CreatedAt).ToString("HH:mm dd/MM/yyyy")
+        };
+
+        // Bắn SignalR Real-Time cho các client đang mở kết nối
+        try
+        {
+            await hubContext.Clients.Group($"kid_{targetKidId}").SendAsync("ReceiveVoiceMessage", payload);
+            await hubContext.Clients.All.SendAsync("NewVoiceNotification", new { kidId = targetKidId, senderId = currentUserId });
+        }
+        catch (Exception hubEx)
+        {
+            logger.LogWarning("Không thể gửi thông báo SignalR: {Msg}", hubEx.Message);
+        }
+
         return Ok(new
         {
             message = "Đã gửi tin nhắn giọng nói thành công!",
-            voiceMessage = new
-            {
-                id = voiceMessage.Id,
-                senderId = voiceMessage.SenderId,
-                senderName = voiceMessage.SenderName,
-                senderRole = voiceMessage.SenderRole,
-                senderAvatarUrl = voiceMessage.SenderAvatarUrl,
-                isMe = true,
-                audioUrl = voiceMessage.AudioUrl,
-                durationSeconds = voiceMessage.DurationSeconds,
-                fileSizeBytes = voiceMessage.FileSizeBytes,
-                isHeard = voiceMessage.IsHeard,
-                createdAt = voiceMessage.CreatedAt,
-                createdAtVn = ToVietnamTime(voiceMessage.CreatedAt).ToString("HH:mm dd/MM/yyyy")
-            }
+            voiceMessage = payload
         });
     }
 
@@ -275,7 +331,7 @@ public class VoiceMessagesController(
         var msg = await context.VoiceMessages.FindAsync(id);
         if (msg == null) return NotFound(new { message = "Không tìm thấy tin nhắn thoại." });
 
-        // Người gửi hoặc phụ huynh có quyền xóa
+        // Người gửi, phụ huynh hoặc admin có quyền xóa
         var isAdmin = User.IsInRole("Admin") || User.IsInRole("admin");
         if (msg.SenderId != currentUserId && msg.ParentId != currentUserId && !isAdmin)
         {
@@ -286,7 +342,8 @@ public class VoiceMessagesController(
         try
         {
             var fileName = Path.GetFileName(msg.AudioUrl);
-            var filePath = Path.Combine(env.WebRootPath, "uploads", "voice", fileName);
+            var uploadsDir = GetUploadsDirectory();
+            var filePath = Path.Combine(uploadsDir, fileName);
             if (System.IO.File.Exists(filePath))
             {
                 System.IO.File.Delete(filePath);
@@ -312,19 +369,21 @@ public class VoiceMessagesController(
         var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(currentUserId)) return Ok(new { unreadCount = 0 });
 
-        var isKid = User.IsInRole("Kid") || User.IsInRole("kid");
+        var isKidRole = User.IsInRole("Kid") || User.IsInRole("kid");
+        var kidProfile = await context.Kids.FirstOrDefaultAsync(k => k.KidUserId == currentUserId);
+        var isKid = isKidRole || kidProfile != null;
 
         if (isKid)
         {
-            var kid = await context.Kids.FirstOrDefaultAsync(k => k.KidUserId == currentUserId);
-            if (kid == null) return Ok(new { unreadCount = 0 });
+            var kidIdVal = kidProfile?.Id;
+            if (!kidIdVal.HasValue) return Ok(new { unreadCount = 0 });
 
-            // Bé chỉ nhận thông báo khi có tin từ phụ huynh chưa nghe
+            // Bé nhận thông báo khi có tin từ phụ huynh chưa nghe
             var count = await context.VoiceMessages
-                .Where(v => v.KidId == kid.Id && v.SenderRole != "Kid" && !v.IsHeard)
+                .Where(v => v.KidId == kidIdVal.Value && v.SenderRole != "Kid" && !v.IsHeard)
                 .CountAsync();
 
-            return Ok(new { unreadCount = count, kidId = kid.Id });
+            return Ok(new { unreadCount = count, kidId = kidIdVal.Value });
         }
         else
         {
@@ -333,6 +392,11 @@ public class VoiceMessagesController(
                 .Where(k => k.ParentId == currentUserId)
                 .Select(k => k.Id)
                 .ToListAsync();
+
+            if (parentKidIds.Count == 0 && (User.IsInRole("Admin") || User.IsInRole("admin")))
+            {
+                parentKidIds = await context.Kids.Select(k => k.Id).ToListAsync();
+            }
 
             var query = context.VoiceMessages
                 .Where(v => parentKidIds.Contains(v.KidId) && v.SenderRole == "Kid" && !v.IsHeard);

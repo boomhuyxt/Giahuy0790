@@ -56,6 +56,12 @@ namespace Giahuy0790.Migrations
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("LoginOtp")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("LoginOtpExpiry")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");

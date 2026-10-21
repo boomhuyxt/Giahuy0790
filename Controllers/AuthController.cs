@@ -147,7 +147,7 @@ public class AuthController(
     }
 
     /// <summary>
-    /// Đăng nhập tài khoản và nhận JWT Bearer Token chứa thông tin vai trò (Roles)
+    /// Đăng nhập tài khoản: Bước 1 xác thực thông tin và gửi OTP qua Email (nếu có); Bước 2 (hoặc kèm OTP) cấp JWT Token
     /// </summary>
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
@@ -167,6 +167,144 @@ public class AuthController(
             return Unauthorized(new { message = "Tên đăng nhập/Email hoặc mật khẩu không chính xác." });
         }
 
+        // Nếu tài khoản không có email (ví dụ tài khoản độc lập tạo nội bộ), cho phép đăng nhập trực tiếp
+        if (string.IsNullOrWhiteSpace(user.Email))
+        {
+            return await CompleteLoginSuccessAsync(user);
+        }
+
+        // Nếu client cung cấp sẵn mã OTP (xác thực trực tiếp từ màn hình hoặc app mobile)
+        if (!string.IsNullOrWhiteSpace(request.Otp))
+        {
+            return await VerifyAndCompleteLoginAsync(user, request.Otp.Trim());
+        }
+
+        // BƯỚC 1: Sinh mã OTP 6 chữ số và gửi qua Email
+        var otpCode = Random.Shared.Next(100000, 1000000).ToString();
+        user.LoginOtp = otpCode;
+        user.LoginOtpExpiry = DateTime.UtcNow.AddMinutes(5);
+
+        var updateResult = await userManager.UpdateAsync(user);
+        if (!updateResult.Succeeded)
+        {
+            return StatusCode(500, new { message = "Không thể khởi tạo mã OTP xác thực. Vui lòng thử lại." });
+        }
+
+        // Gửi email OTP ngầm không chặn luồng chính
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await emailService.SendLoginOtpAsync(
+                    user.Email!,
+                    otpCode,
+                    string.IsNullOrWhiteSpace(user.FullName) ? user.UserName : user.FullName
+                );
+            }
+            catch
+            {
+                // Tránh crash unhandled exception
+            }
+        });
+
+        return Ok(new
+        {
+            requiresOtp = true,
+            message = "🔐 Mã OTP xác thực đăng nhập đã được gửi tới email của bạn. Vui lòng nhập mã để hoàn tất.",
+            email = MaskEmail(user.Email),
+            username = user.UserName
+        });
+    }
+
+    /// <summary>
+    /// Xác thực mã OTP đăng nhập và nhận JWT Bearer Token
+    /// </summary>
+    [HttpPost("verify-login-otp")]
+    public async Task<IActionResult> VerifyLoginOtp([FromBody] VerifyLoginOtpRequest request)
+    {
+        if (!ModelState.IsValid || string.IsNullOrWhiteSpace(request.UsernameOrEmail) || string.IsNullOrWhiteSpace(request.Otp))
+        {
+            return BadRequest(new { message = "Vui lòng nhập đầy đủ thông tin tài khoản và mã OTP." });
+        }
+
+        var identifier = request.UsernameOrEmail.Trim();
+        var user = await userManager.FindByNameAsync(identifier) 
+                   ?? await userManager.FindByEmailAsync(identifier);
+
+        if (user == null)
+        {
+            return Unauthorized(new { message = "Không tìm thấy thông tin tài khoản." });
+        }
+
+        return await VerifyAndCompleteLoginAsync(user, request.Otp.Trim());
+    }
+
+    /// <summary>
+    /// Gửi lại mã OTP xác thực đăng nhập
+    /// </summary>
+    [HttpPost("resend-login-otp")]
+    public async Task<IActionResult> ResendLoginOtp([FromBody] ResendLoginOtpRequest request)
+    {
+        if (!ModelState.IsValid || string.IsNullOrWhiteSpace(request.UsernameOrEmail))
+        {
+            return BadRequest(new { message = "Vui lòng cung cấp tên đăng nhập hoặc email." });
+        }
+
+        var identifier = request.UsernameOrEmail.Trim();
+        var user = await userManager.FindByNameAsync(identifier) 
+                   ?? await userManager.FindByEmailAsync(identifier);
+
+        if (user == null || string.IsNullOrWhiteSpace(user.Email))
+        {
+            return BadRequest(new { message = "Tài khoản không tồn tại hoặc chưa đăng ký email để nhận mã OTP." });
+        }
+
+        // Sinh mã OTP mới (5 phút hiệu lực)
+        var otpCode = Random.Shared.Next(100000, 1000000).ToString();
+        user.LoginOtp = otpCode;
+        user.LoginOtpExpiry = DateTime.UtcNow.AddMinutes(5);
+        await userManager.UpdateAsync(user);
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await emailService.SendLoginOtpAsync(
+                    user.Email!,
+                    otpCode,
+                    string.IsNullOrWhiteSpace(user.FullName) ? user.UserName : user.FullName
+                );
+            }
+            catch { }
+        });
+
+        return Ok(new
+        {
+            message = "Mã xác thực OTP mới đã được gửi tới email của bạn.",
+            email = MaskEmail(user.Email)
+        });
+    }
+
+    private async Task<IActionResult> VerifyAndCompleteLoginAsync(ApplicationUser user, string inputOtp)
+    {
+        if (string.IsNullOrWhiteSpace(user.LoginOtp) ||
+            user.LoginOtp != inputOtp ||
+            user.LoginOtpExpiry == null ||
+            user.LoginOtpExpiry < DateTime.UtcNow)
+        {
+            return BadRequest(new { message = "Mã xác thực OTP không chính xác hoặc đã hết thời gian hiệu lực (5 phút)." });
+        }
+
+        // Xóa mã OTP sau khi sử dụng thành công để chống tấn công lặp lại (Replay attack)
+        user.LoginOtp = null;
+        user.LoginOtpExpiry = null;
+        await userManager.UpdateAsync(user);
+
+        return await CompleteLoginSuccessAsync(user);
+    }
+
+    private async Task<IActionResult> CompleteLoginSuccessAsync(ApplicationUser user)
+    {
         // Lấy danh sách Roles của người dùng
         var userRoles = await userManager.GetRolesAsync(user);
         if (userRoles.Count == 0)
@@ -179,6 +317,7 @@ public class AuthController(
 
         return Ok(new
         {
+            requiresOtp = false,
             message = "✅ Đăng nhập thành công!",
             token,
             tokenType = "Bearer",
@@ -193,6 +332,20 @@ public class AuthController(
                 roles = userRoles
             }
         });
+    }
+
+    private static string MaskEmail(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email)) return string.Empty;
+        var parts = email.Split('@');
+        if (parts.Length != 2) return email;
+        var name = parts[0];
+        var domain = parts[1];
+        if (name.Length <= 2)
+        {
+            return $"{name}***@{domain}";
+        }
+        return $"{name[..2]}***{name[^1..]}@{domain}";
     }
 
     /// <summary>
@@ -443,11 +596,27 @@ public record RegisterRequest(
 );
 
 /// <summary>
-/// DTO Đăng nhập
+/// DTO Đăng nhập (hỗ trợ nhập mã OTP xác thực)
 /// </summary>
 public record LoginRequest(
     string UsernameOrEmail,
-    string Password
+    string Password,
+    string? Otp = null
+);
+
+/// <summary>
+/// DTO Xác thực mã OTP khi đăng nhập
+/// </summary>
+public record VerifyLoginOtpRequest(
+    string UsernameOrEmail,
+    string Otp
+);
+
+/// <summary>
+/// DTO Gửi lại mã OTP xác thực đăng nhập
+/// </summary>
+public record ResendLoginOtpRequest(
+    string UsernameOrEmail
 );
 
 /// <summary>

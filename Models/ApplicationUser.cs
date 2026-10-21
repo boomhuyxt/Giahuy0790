@@ -31,4 +31,14 @@ public class ApplicationUser : IdentityUser
     /// Thời gian hết hạn của mã OTP đặt lại mật khẩu (UTC)
     /// </summary>
     public DateTime? PasswordResetOtpExpiry { get; set; }
+
+    /// <summary>
+    /// Mã OTP xác thực khi đăng nhập (6 chữ số)
+    /// </summary>
+    public string? LoginOtp { get; set; }
+
+    /// <summary>
+    /// Thời gian hết hạn của mã OTP đăng nhập (UTC)
+    /// </summary>
+    public DateTime? LoginOtpExpiry { get; set; }
 }

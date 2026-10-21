@@ -11,6 +11,11 @@ public interface IEmailService
     Task<bool> SendPasswordResetOtpAsync(string toEmail, string otpCode, string? recipientName = null);
 
     /// <summary>
+    /// Gửi mã xác thực OTP bảo mật khi đăng nhập qua email (Xác thực 2 bước 2FA)
+    /// </summary>
+    Task<bool> SendLoginOtpAsync(string toEmail, string otpCode, string? recipientName = null);
+
+    /// <summary>
     /// Gửi email thông báo cho Phụ huynh khi tài khoản con vừa đăng ký
     /// </summary>
     Task<bool> SendChildRegisteredNotificationAsync(

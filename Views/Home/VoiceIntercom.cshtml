@@ -1,29 +1,170 @@
 @{
-    ViewData["Title"] = "Bộ Đàm Gia Đình 8-Bit - Đàm Thoại Giọng Nói";
+    ViewData["Title"] = "Bộ Đàm Gia Đình - Đàm Thoại Giọng Nói";
 }
 
-<div class="container py-4">
-    <!-- Header banner (8-Bit Walkie-Talkie Console) -->
-    <div class="apple-card-static p-4 mb-4 border-2">
+<style>
+    /* Apple Minimalist 3-Color Design System (Black, White, Blue) */
+    :root {
+        --apple-blue: #0071e3;
+        --apple-blue-hover: #0077ed;
+        --apple-blue-soft: #eff6ff;
+        --apple-blue-border: #bfdbfe;
+        --apple-black: #000000;
+        --apple-dark: #111827;
+        --apple-gray: #6b7280;
+        --apple-light-gray: #f4f4f5;
+        --apple-card-bg: #ffffff;
+        --apple-border: #e5e7eb;
+    }
+
+    .apple-voice-card {
+        background-color: var(--apple-card-bg);
+        border: 1px solid var(--apple-border);
+        border-radius: 1.25rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+        transition: all 0.2s ease;
+    }
+
+    .apple-btn-blue {
+        background-color: var(--apple-blue);
+        color: #ffffff;
+        border: none;
+        border-radius: 9999px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+    .apple-btn-blue:hover {
+        background-color: var(--apple-blue-hover);
+        color: #ffffff;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 113, 227, 0.25);
+    }
+
+    .apple-btn-outline {
+        background-color: #ffffff;
+        color: var(--apple-dark);
+        border: 1px solid var(--apple-border);
+        border-radius: 9999px;
+        font-weight: 500;
+        transition: all 0.15s ease;
+    }
+    .apple-btn-outline:hover {
+        background-color: var(--apple-light-gray);
+        color: var(--apple-black);
+    }
+
+    .apple-channel-pill {
+        border-radius: 9999px;
+        padding: 0.4rem 1rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        border: 1px solid var(--apple-border);
+        background: #ffffff;
+        color: var(--apple-dark);
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+    }
+    .apple-channel-pill.active {
+        background: var(--apple-blue);
+        color: #ffffff;
+        border-color: var(--apple-blue);
+        box-shadow: 0 2px 8px rgba(0, 113, 227, 0.25);
+    }
+
+    /* PTT Big Button */
+    .apple-ptt-button {
+        width: 130px;
+        height: 130px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #0071e3 0%, #0056b3 100%);
+        border: 4px solid #ffffff;
+        box-shadow: 0 8px 24px rgba(0, 113, 227, 0.35);
+        color: #ffffff;
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        user-select: none;
+        transition: all 0.2s ease;
+        outline: none;
+    }
+    .apple-ptt-button:hover {
+        transform: scale(1.03);
+        box-shadow: 0 10px 28px rgba(0, 113, 227, 0.45);
+    }
+    .apple-ptt-button:active,
+    .apple-ptt-button.recording {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        transform: scale(0.96);
+        box-shadow: 0 0 0 10px rgba(0, 113, 227, 0.2), 0 8px 24px rgba(0, 113, 227, 0.4);
+        animation: applePulse 1.5s infinite;
+    }
+
+    @@keyframes applePulse {
+        0% { box-shadow: 0 0 0 0 rgba(0, 113, 227, 0.4); }
+        70% { box-shadow: 0 0 0 16px rgba(0, 113, 227, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(0, 113, 227, 0); }
+    }
+
+    /* Audio wave visualizer bar */
+    .apple-sound-bar {
+        width: 4px;
+        background-color: var(--apple-blue);
+        border-radius: 2px;
+        transition: height 0.1s ease;
+    }
+
+    /* Message Bubbles */
+    .apple-bubble-me {
+        background-color: var(--apple-blue);
+        color: #ffffff;
+        border-radius: 1.25rem 1.25rem 0.25rem 1.25rem;
+    }
+    .apple-bubble-other {
+        background-color: #ffffff;
+        color: var(--apple-dark);
+        border: 1px solid var(--apple-border);
+        border-radius: 1.25rem 1.25rem 1.25rem 0.25rem;
+    }
+
+    .apple-audio-player-pill {
+        background: rgba(255, 255, 255, 0.18);
+        border-radius: 9999px;
+        padding: 0.35rem 0.75rem;
+    }
+    .apple-bubble-other .apple-audio-player-pill {
+        background: var(--apple-light-gray);
+    }
+</style>
+
+<div class="container py-4" style="max-width: 1040px;">
+    <!-- Apple Header -->
+    <div class="apple-voice-card p-4 mb-4">
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
             <div>
-                <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
-                    <i class="pixelart-icons-font-radio i8-xl text-primary i8-bounce"></i>
-                    <h2 class="fw-bold mb-0 text-primary pixel-font" style="letter-spacing: 0.04em;">
-                        BỘ ĐÀM GIA ĐÌNH 8-BIT
-                    </h2>
-                    <span class="badge bg-danger text-white pixel-font">LIVE VOICE INTERCOM</span>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <span class="badge" style="background-color: var(--apple-blue-soft); color: var(--apple-blue); font-size: 0.75rem; font-weight: 600;">
+                        VOICE INTERCOM
+                    </span>
+                    <span class="text-muted small">● Kết nối trực tiếp</span>
                 </div>
+                <h3 class="fw-bold mb-1" style="color: var(--apple-black); letter-spacing: -0.02em;">
+                    Bộ Đàm Gia Đình
+                </h3>
                 <p class="text-muted mb-0 small">
-                    Trò chuyện và gửi tin nhắn thoại tức thì giữa Phụ huynh và Bé. Giữ hoặc bấm để nói như một chiếc bộ đàm arcade thực thụ!
+                    Đàm thoại giọng nói tức thì giữa Ba Mẹ và Bé. Nhấn nút để nói và gửi tin nhắn tức thì.
                 </p>
             </div>
             <div class="d-flex gap-2 flex-wrap align-items-center">
-                <a href="/kids" class="btn btn-outline-secondary px-3 small">
-                    <i class="pixelart-icons-font-users i8-xs me-1"></i> Quản Lý Bé
+                <a href="/kids" class="btn apple-btn-outline btn-sm px-3 py-2">
+                    <i class="bi bi-people me-1"></i> Quản lý bé
                 </a>
-                <a href="/screentime" class="btn btn-outline-primary px-3 small">
-                    <i class="pixelart-icons-font-clock i8-xs me-1"></i> Giờ Dùng Máy
+                <a href="/screentime" class="btn apple-btn-outline btn-sm px-3 py-2">
+                    <i class="bi bi-clock me-1"></i> Giờ dùng máy
                 </a>
             </div>
         </div>
@@ -33,73 +174,80 @@
     <div id="pageAlert"></div>
 
     <!-- Thông báo khi chưa đăng nhập -->
-    <div id="authRequiredNotice" class="alert alert-warning py-3 px-4 rounded-3 d-flex flex-wrap align-items-center justify-content-between mb-4 shadow-sm" style="display: none;">
-        <div class="d-flex align-items-center gap-2 mb-2 mb-sm-0">
-            <i class="pixelart-icons-font-alert i8-sm text-warning"></i>
-            <span>Bạn chưa đăng nhập. Vui lòng đăng nhập để đàm thoại giọng nói với gia đình.</span>
+    <div id="authRequiredNotice" class="apple-voice-card p-4 mb-4 text-center" style="display: none;">
+        <div class="mb-3">
+            <div class="d-inline-flex p-3 rounded-circle" style="background: var(--apple-blue-soft); color: var(--apple-blue); font-size: 2rem;">
+                <i class="bi bi-mic"></i>
+            </div>
         </div>
-        <button class="btn btn-warning btn-sm fw-bold pixel-font" data-bs-toggle="modal" data-bs-target="#modalLogin">
-            <i class="pixelart-icons-font-user i8-xs me-1"></i> Đăng Nhập Ngay
+        <h5 class="fw-bold mb-1" style="color: var(--apple-black);">Đăng nhập để sử dụng bộ đàm</h5>
+        <p class="text-muted small mb-3">Vui lòng đăng nhập tài khoản Phụ huynh hoặc tài khoản Bé để gửi và nhận tin nhắn thoại.</p>
+        <button class="btn apple-btn-blue px-4 py-2" data-bs-toggle="modal" data-bs-target="#modalLogin">
+            <i class="bi bi-box-arrow-in-right me-1"></i> Đăng nhập ngay
         </button>
     </div>
 
-    <!-- KHỐI CHỌN BÉ / KÊNH ĐÀM THOẠI (DÀNH CHO PHỤ HUYNH) -->
-    <div class="apple-card-static p-3 mb-4" id="kidChannelSelector">
-        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+    <!-- KÊNH ĐÀM THOẠI (DÀNH CHO PHỤ HUYNH) -->
+    <div class="apple-voice-card p-3 mb-4" id="kidChannelSelector" style="display: none;">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
             <div class="d-flex align-items-center gap-2 flex-wrap">
-                <span class="fw-bold text-secondary small d-flex align-items-center gap-1 pixel-font">
-                    <i class="pixelart-icons-font-user i8-xs text-primary"></i> KÊNH ĐÀM THOẠI:
+                <span class="fw-semibold small text-muted">
+                    <i class="bi bi-person-circle me-1" style="color: var(--apple-blue);"></i> Chọn bé đàm thoại:
                 </span>
                 <div id="kidSelectorPills" class="d-flex flex-wrap gap-2">
                     <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
                 </div>
             </div>
-            <div class="text-muted small" id="currentChannelLabel" style="font-size: 12px;">
-                Đang kết nối tần số...
+            <div class="small text-muted" id="currentChannelLabel">
+                Đang kết nối...
             </div>
         </div>
     </div>
 
-    <!-- KHỐI KÊNH BÉ (KHI TÀI KHOẢN CON ĐĂNG NHẬP) -->
-    <div class="alert alert-info py-3 px-4 rounded-3 d-flex flex-wrap align-items-center justify-content-between mb-4 shadow-sm" id="kidSelfChannelNotice" style="display: none;">
-        <div class="d-flex align-items-center gap-2">
-            <i class="pixelart-icons-font-gamepad i8-sm text-primary"></i>
-            <span>Kênh kết nối trực tiếp với <strong>Ba Mẹ</strong> của bé <strong id="kidSelfName">...</strong></span>
+    <!-- KÊNH BÉ (KHI TÀI KHOẢN CON ĐĂNG NHẬP) -->
+    <div class="apple-voice-card p-3 mb-4" id="kidSelfChannelNotice" style="display: none; background: var(--apple-blue-soft); border-color: var(--apple-blue-border);">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-broadcast text-primary fs-5"></i>
+                <span class="small" style="color: var(--apple-dark);">
+                    Kênh bộ đàm của bé <strong id="kidSelfName">...</strong> kết nối trực tiếp với <strong>Ba Mẹ</strong>
+                </span>
+            </div>
+            <span class="badge apple-btn-blue px-3 py-1 small">KÊNH CỦA BÉ</span>
         </div>
-        <span class="badge bg-primary text-white pixel-font">BỘ ĐÀM CỦA BÉ</span>
     </div>
 
-    <!-- GIAO DIỆN CHÍNH: 2 CỘT -->
+    <!-- GIAO DIỆN CHÍNH: 2 CỘT (CHUẨN APPLE) -->
     <div class="row g-4" id="intercomMainContent" style="display: none;">
         
-        <!-- CỘT TRÁI: DÒNG THỜI GIAN TIN NHẮN THOẠI (VOICE CONVERSATION FEED) -->
+        <!-- CỘT TRÁI: DANH SÁCH TIN NHẮN THOẠI (FEED) -->
         <div class="col-lg-7">
-            <div class="apple-card p-4 border-2 h-100 d-flex flex-column" style="min-height: 520px;">
-                <div class="d-flex justify-content-between align-items-center pb-3 mb-3 border-bottom">
+            <div class="apple-voice-card p-4 h-100 d-flex flex-column" style="min-height: 540px;">
+                <div class="d-flex justify-content-between align-items-center pb-3 mb-3 border-bottom" style="border-color: var(--apple-border) !important;">
                     <div class="d-flex align-items-center gap-2">
-                        <i class="pixelart-icons-font-message i8-md text-primary"></i>
-                        <h5 class="fw-bold mb-0 pixel-font">HỘP THƯ BỘ ĐÀM</h5>
+                        <i class="bi bi-chat-quote-fill" style="color: var(--apple-blue);"></i>
+                        <h6 class="fw-bold mb-0" style="color: var(--apple-black);">Hộp thư thoại</h6>
                     </div>
                     <div class="d-flex align-items-center gap-2">
-                        <span class="badge bg-secondary-subtle text-secondary small" id="lblMessageCount">0 tin nhắn</span>
-                        <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" onclick="loadVoiceMessages(true)" title="Làm mới tin nhắn">
-                            <i class="pixelart-icons-font-reload i8-xs"></i>
+                        <span class="badge rounded-pill bg-light text-dark border small" id="lblMessageCount">0 tin nhắn</span>
+                        <button type="button" class="btn btn-sm apple-btn-outline p-1 px-2" onclick="loadVoiceMessages(true)" title="Làm mới tin nhắn">
+                            <i class="bi bi-arrow-clockwise"></i>
                         </button>
                     </div>
                 </div>
 
-                <!-- Danh sách tin nhắn giọng nói cuộn mượt -->
+                <!-- Feed container -->
                 <div id="voiceFeedContainer" class="flex-grow-1 overflow-auto pe-2 d-flex flex-column gap-3" style="max-height: 520px; min-height: 380px;">
-                    <!-- Loading spinner -->
-                    <div id="feedLoadingBox" class="text-center py-5">
-                        <div class="spinner-border text-primary" role="status"></div>
+                    <!-- Loading -->
+                    <div id="feedLoadingBox" class="text-center py-5 my-auto">
+                        <div class="spinner-border" style="color: var(--apple-blue); width: 1.75rem; height: 1.75rem;" role="status"></div>
                         <div class="small text-muted mt-2">Đang tải tin nhắn thoại...</div>
                     </div>
-                    <!-- Empty state -->
+                    <!-- Empty -->
                     <div id="feedEmptyBox" class="text-center py-5 my-auto" style="display: none;">
-                        <div style="font-size: 48px;">📻</div>
-                        <h6 class="fw-bold mt-2 pixel-font">Chưa có tin nhắn thoại nào</h6>
-                        <p class="text-muted small mb-0">Hãy bấm nút bộ đàm bên phải để nói và gửi tin nhắn giọng nói đầu tiên nhé!</p>
+                        <div class="mb-2" style="font-size: 2.5rem; color: var(--apple-gray);">🎙️</div>
+                        <h6 class="fw-bold mb-1" style="color: var(--apple-black);">Chưa có tin nhắn thoại nào</h6>
+                        <p class="text-muted small mb-0">Nhấn giữ hoặc bấm nút bộ đàm bên phải để bắt đầu cuộc trò chuyện!</p>
                     </div>
                     <!-- Message bubbles injected here -->
                     <div id="voiceMessagesList" class="d-flex flex-column gap-3"></div>
@@ -107,79 +255,70 @@
             </div>
         </div>
 
-        <!-- CỘT PHẢI: MÁY BỘ ĐÀM PUSH-TO-TALK ARCADE CONSOLE -->
+        <!-- CỘT PHẢI: MÁY BỘ ĐÀM (APPLE INTERCOM CONSOLE) -->
         <div class="col-lg-5">
-            <div class="apple-card p-4 border-2 h-100 d-flex flex-column justify-content-between shadow-sm" style="background: radial-gradient(circle at center, #1e1b4b 0%, #09090b 100%); color: #fff; border-color: var(--pixel-gold);">
+            <div class="apple-voice-card p-4 h-100 d-flex flex-column justify-content-between">
                 
                 <div>
-                    <!-- Đầu máy bộ đàm: Ăng-ten & Đèn LED trạng thái -->
-                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary border-opacity-50">
-                        <div class="d-flex align-items-center gap-2">
-                            <div class="p-1 rounded-1 bg-dark border border-secondary" style="width: 14px; height: 26px;"></div>
-                            <span class="pixel-font small fw-bold text-warning" style="font-size: 11px;">WALKIE-TALKIE MK-8</span>
-                        </div>
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="small" style="font-size: 11px;">Tín hiệu:</span>
-                            <span class="badge bg-success text-white pixel-font" id="badgeLedStatus">
-                                ● SẴN SÀNG
-                            </span>
-                        </div>
+                    <!-- Header máy bộ đàm -->
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: var(--apple-border) !important;">
+                        <span class="small fw-semibold text-muted">BỘ ĐÀM TRỰC TUYẾN</span>
+                        <span class="badge" id="badgeLedStatus" style="background: var(--apple-blue-soft); color: var(--apple-blue); font-weight: 600;">
+                            ● SẴN SÀNG
+                        </span>
                     </div>
 
-                    <!-- Màn hình LCD Retro Pixel (Green/Amber CRT Screen) -->
-                    <div class="p-3 rounded-3 mb-4 border border-2 text-center" id="lcdScreen" style="background-color: #022c22; border-color: #10b981; color: #34d399; font-family: monospace;">
-                        <div class="d-flex justify-content-between align-items-center mb-1 small" style="font-size: 11px; opacity: 0.85;">
-                            <span id="lcdChannelName">CH 01: GIA ĐÌNH</span>
-                            <span id="lcdRecIndicator" style="display: none;" class="text-danger fw-bold i8-pulse">● REC</span>
+                    <!-- Màn hình trạng thái bộ đàm (Apple Status Display) -->
+                    <div class="p-3 rounded-4 mb-4 text-center border" id="intercomScreen" style="background: var(--apple-light-gray); border-color: var(--apple-border);">
+                        <div class="d-flex justify-content-between align-items-center mb-1 small text-muted" style="font-size: 11px;">
+                            <span id="lcdChannelName" class="fw-bold text-uppercase">CH: GIA ĐÌNH</span>
+                            <span id="lcdRecIndicator" style="display: none; color: #dc2626; font-weight: 700;">● ĐANG GHI ÂM</span>
                         </div>
 
-                        <!-- Đồng hồ đếm thời gian ghi âm -->
-                        <div class="display-4 fw-bold pixel-font my-2" id="lcdTimer" style="letter-spacing: 2px;">
+                        <!-- Đồng hồ đếm giây -->
+                        <div class="display-5 fw-bold my-2" id="lcdTimer" style="color: var(--apple-black); font-variant-numeric: tabular-nums; letter-spacing: -0.03em;">
                             00:00
                         </div>
 
-                        <!-- Visualizer thanh sóng âm thanh pixel -->
-                        <div class="d-flex justify-content-center align-items-end gap-1 mb-2" id="lcdWaveform" style="height: 28px;">
-                            <div class="bg-success rounded-1" style="width: 5px; height: 6px; transition: height 0.1s;"></div>
-                            <div class="bg-success rounded-1" style="width: 5px; height: 10px; transition: height 0.1s;"></div>
-                            <div class="bg-success rounded-1" style="width: 5px; height: 16px; transition: height 0.1s;"></div>
-                            <div class="bg-success rounded-1" style="width: 5px; height: 22px; transition: height 0.1s;"></div>
-                            <div class="bg-success rounded-1" style="width: 5px; height: 28px; transition: height 0.1s;"></div>
-                            <div class="bg-success rounded-1" style="width: 5px; height: 18px; transition: height 0.1s;"></div>
-                            <div class="bg-success rounded-1" style="width: 5px; height: 12px; transition: height 0.1s;"></div>
-                            <div class="bg-success rounded-1" style="width: 5px; height: 8px; transition: height 0.1s;"></div>
-                            <div class="bg-success rounded-1" style="width: 5px; height: 14px; transition: height 0.1s;"></div>
-                            <div class="bg-success rounded-1" style="width: 5px; height: 20px; transition: height 0.1s;"></div>
+                        <!-- Waveform bars -->
+                        <div class="d-flex justify-content-center align-items-end gap-1 mb-2" id="lcdWaveform" style="height: 24px;">
+                            <div class="apple-sound-bar" style="height: 6px;"></div>
+                            <div class="apple-sound-bar" style="height: 10px;"></div>
+                            <div class="apple-sound-bar" style="height: 14px;"></div>
+                            <div class="apple-sound-bar" style="height: 20px;"></div>
+                            <div class="apple-sound-bar" style="height: 24px;"></div>
+                            <div class="apple-sound-bar" style="height: 16px;"></div>
+                            <div class="apple-sound-bar" style="height: 12px;"></div>
+                            <div class="apple-sound-bar" style="height: 8px;"></div>
+                            <div class="apple-sound-bar" style="height: 14px;"></div>
+                            <div class="apple-sound-bar" style="height: 18px;"></div>
                         </div>
 
-                        <div class="small fw-semibold" id="lcdStatusText" style="font-size: 11px; opacity: 0.9;">
+                        <div class="small text-muted" id="lcdStatusText" style="font-size: 12px;">
                             Sẵn sàng đàm thoại. Bấm nút dưới để nói!
                         </div>
                     </div>
                 </div>
 
-                <!-- KHU VỰC ĐIỀU KHIỂN BỘ ĐÀM (ARCADE PUSH-TO-TALK BUTTONS) -->
-                <div>
-                    <!-- Nút Push-To-Talk to đùng -->
-                    <div class="text-center mb-3">
-                        <button type="button" class="btn btn-warning rounded-circle shadow-lg d-inline-flex flex-column align-items-center justify-content-center p-0 border border-4 border-light border-opacity-75" id="btnPtt" style="width: 140px; height: 140px; transition: all 0.2s ease;">
-                            <i class="pixelart-icons-font-microphone i8-xl text-dark mb-1" id="btnPttIcon" style="font-size: 38px;"></i>
-                            <span class="pixel-font fw-bold text-dark small" id="btnPttText" style="font-size: 12px;">BẤM ĐỂ NÓI</span>
+                <!-- Khu vực nút bấm bộ đàm -->
+                <div class="text-center py-2">
+                    <button type="button" class="apple-ptt-button" id="btnPtt" title="Bấm hoặc giữ để nói">
+                        <i class="bi bi-mic-fill fs-1 mb-1" id="btnPttIcon"></i>
+                        <span class="small fw-semibold" id="btnPttText" style="font-size: 12px;">BẤM ĐỂ NÓI</span>
+                    </button>
+
+                    <!-- Phím điều khiển nhanh khi đang ghi âm -->
+                    <div class="d-flex justify-content-center gap-2 mt-3" id="boxRecordingActions" style="display: none !important;">
+                        <button type="button" class="btn apple-btn-outline btn-sm px-3" id="btnCancelRecord">
+                            <i class="bi bi-x-circle me-1"></i> Hủy
+                        </button>
+                        <button type="button" class="btn apple-btn-blue btn-sm px-4" id="btnSendRecord">
+                            <i class="bi bi-send-fill me-1"></i> Gửi ngay
                         </button>
                     </div>
 
-                    <!-- Các nút phụ trợ: Hủy / Nghe lại -->
-                    <div class="d-flex justify-content-center gap-2 mb-2" id="boxRecordingActions" style="display: none !important;">
-                        <button type="button" class="btn btn-outline-danger btn-sm px-3 pixel-font" id="btnCancelRecord">
-                            <i class="pixelart-icons-font-close i8-xs me-1"></i> Hủy
-                        </button>
-                        <button type="button" class="btn btn-success btn-sm px-3 pixel-font" id="btnSendRecord">
-                            <i class="pixelart-icons-font-check i8-xs me-1"></i> Gửi Ngay
-                        </button>
-                    </div>
-
-                    <div class="text-center small text-muted" style="font-size: 11px;">
-                        💡 <em>Mẹo: Bấm 1 lần để bắt đầu nói, bấm lần nữa để gửi ngay. Hoặc giữ chuột/chạm để nói!</em>
+                    <div class="mt-3 text-muted small" style="font-size: 12px;">
+                        💡 <em>Nhấn 1 lần để nói, nhấn lần nữa để gửi ngay. Hoặc giữ nút để nói và thả tay để gửi!</em>
                     </div>
                 </div>
 
@@ -195,6 +334,7 @@
     let kidsList = [];
     let isKidRole = false;
     let mediaRecorder = null;
+    let mediaStream = null;
     let audioChunks = [];
     let recordStartTime = null;
     let recordTimerInterval = null;
@@ -203,6 +343,9 @@
     let visualizerAnimation = null;
     let pollInterval = null;
     let currentlyPlayingAudio = null;
+    let isRecording = false;
+    let pttHoldTimer = null;
+    let pttHoldTriggered = false;
 
     function getAuthHeaders() {
         const token = localStorage.getItem('authToken');
@@ -212,8 +355,8 @@
         };
     }
 
-    // Âm thanh 8-bit retro thuần bằng Web Audio API
-    function playRetroBeep(type = 'start') {
+    // Âm thanh thông báo nhẹ nhàng chuẩn Apple
+    function playAppleBeep(type = 'start') {
         try {
             const ctx = new (window.AudioContext || window.webkitAudioContext)();
             const osc = ctx.createOscillator();
@@ -222,38 +365,40 @@
             gain.connect(ctx.destination);
 
             if (type === 'start') {
-                // Tiếng chíp chíp bắt đầu bộ đàm
-                osc.type = 'square';
-                osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
-                osc.frequency.setValueAtTime(880, ctx.currentTime + 0.08); // A5
-                gain.gain.setValueAtTime(0.15, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.16);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+                osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.08); // E5
+                gain.gain.setValueAtTime(0.12, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.16);
                 osc.start(ctx.currentTime);
                 osc.stop(ctx.currentTime + 0.16);
             } else if (type === 'end') {
-                // Tiếng roẹt kết thúc
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(440, ctx.currentTime);
-                osc.frequency.setValueAtTime(220, ctx.currentTime + 0.1);
-                gain.gain.setValueAtTime(0.15, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.18);
-                osc.start(ctx.currentTime);
-                osc.stop(ctx.currentTime + 0.18);
-            } else if (type === 'incoming') {
-                // Tiếng chuông nhận tin nhắn mới
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(659.25, ctx.currentTime); // E5
-                osc.frequency.setValueAtTime(1046.5, ctx.currentTime + 0.1); // C6
-                gain.gain.setValueAtTime(0.2, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+                osc.frequency.setValueAtTime(659.25, ctx.currentTime);
+                osc.frequency.setValueAtTime(523.25, ctx.currentTime + 0.08);
+                gain.gain.setValueAtTime(0.12, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.16);
                 osc.start(ctx.currentTime);
-                osc.stop(ctx.currentTime + 0.25);
+                osc.stop(ctx.currentTime + 0.16);
+            } else if (type === 'incoming') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+                osc.frequency.setValueAtTime(880, ctx.currentTime + 0.08); // A5
+                gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.22);
+                osc.start(ctx.currentTime);
+                osc.stop(ctx.currentTime + 0.22);
             }
         } catch (_) {}
     }
 
     document.addEventListener('DOMContentLoaded', async () => {
         await initIntercomPage();
+
+        // Lắng nghe đăng nhập thành công từ modal
+        window.addEventListener('storage', async (e) => {
+            if (e.key === 'authToken') await initIntercomPage();
+        });
     });
 
     async function initIntercomPage() {
@@ -265,9 +410,10 @@
         const kidSelfNotice = document.getElementById('kidSelfChannelNotice');
 
         if (!token || !userStr) {
-            authNotice.style.display = 'flex';
+            authNotice.style.display = 'block';
             mainContent.style.display = 'none';
             channelSelector.style.display = 'none';
+            kidSelfNotice.style.display = 'none';
             return;
         }
 
@@ -282,33 +428,56 @@
             if (isKidRole) {
                 // Tài khoản con
                 channelSelector.style.display = 'none';
-                kidSelfNotice.style.display = 'flex';
+                kidSelfNotice.style.display = 'block';
                 document.getElementById('kidSelfName').textContent = user.fullName || user.username;
-                document.getElementById('lcdChannelName').textContent = 'CH 01: BA MẸ';
+                document.getElementById('lcdChannelName').textContent = 'CH: BA MẸ';
 
-                await loadVoiceMessages();
+                await loadVoiceMessages(true);
             } else {
-                // Tài khoản Phụ huynh
+                // Tài khoản Phụ huynh / Admin
                 channelSelector.style.display = 'block';
                 kidSelfNotice.style.display = 'none';
                 await loadKidsList();
             }
 
-            // Thiết lập sự kiện nút Push-To-Talk
             setupPttControls();
 
             // Tự động kiểm tra tin nhắn mới mỗi 5 giây
             if (pollInterval) clearInterval(pollInterval);
             pollInterval = setInterval(async () => {
-                if (document.visibilityState === 'visible') {
+                if (document.visibilityState === 'visible' && !isRecording) {
                     await loadVoiceMessages(false);
                 }
             }, 5000);
 
+            // Kết nối SignalR Real-time nếu có Hub
+            setupSignalRListener();
+
         } catch (e) {
             console.error('Lỗi khởi tạo:', e);
-            authNotice.style.display = 'flex';
+            authNotice.style.display = 'block';
         }
+    }
+
+    function setupSignalRListener() {
+        if (typeof signalR === 'undefined') return;
+        try {
+            const hubConnection = new signalR.HubConnectionBuilder()
+                .withUrl('/hubs/location')
+                .withAutomaticReconnect()
+                .build();
+
+            hubConnection.on('ReceiveVoiceMessage', (msg) => {
+                playAppleBeep('incoming');
+                loadVoiceMessages(false);
+            });
+
+            hubConnection.on('NewVoiceNotification', () => {
+                loadVoiceMessages(false);
+            });
+
+            hubConnection.start().catch(() => {});
+        } catch (_) {}
     }
 
     // 1. Tải danh sách bé cho Phụ huynh
@@ -320,8 +489,9 @@
             kidsList = await res.json();
 
             if (!kidsList || kidsList.length === 0) {
-                pillsContainer.innerHTML = '<span class="text-muted small">Chưa có bé nào trong gia đình</span>';
+                pillsContainer.innerHTML = '<span class="text-muted small">Chưa có hồ sơ bé nào</span>';
                 document.getElementById('currentChannelLabel').textContent = 'Chưa có bé';
+                document.getElementById('lcdChannelName').textContent = 'CHƯA CÓ BÉ';
                 return;
             }
 
@@ -335,45 +505,45 @@
             }
 
             renderKidPills();
-            await loadVoiceMessages();
+            await loadVoiceMessages(true);
 
         } catch (err) {
             console.error(err);
-            pillsContainer.innerHTML = '<span class="text-danger small">Lỗi kết nối</span>';
+            pillsContainer.innerHTML = '<span class="text-danger small">Lỗi tải danh sách bé</span>';
         }
     }
 
-    // 2. Render các nút chọn bé
+    // 2. Render nút chọn bé
     function renderKidPills() {
         const pillsContainer = document.getElementById('kidSelectorPills');
         pillsContainer.innerHTML = kidsList.map(k => {
             const isSelected = k.id === currentKidId;
-            const btnClass = isSelected ? 'btn-primary' : 'btn-outline-secondary';
+            const activeClass = isSelected ? 'active' : '';
             const avatar = k.avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(k.fullName)}`;
             return `
-                <button type="button" class="btn btn-sm ${btnClass} rounded-2 d-flex align-items-center gap-2 px-3 py-1" onclick="switchKidChannel(${k.id})">
-                    <img src="${avatar}" class="rounded-1" style="width: 20px; height: 20px; object-fit: cover;" alt="${k.fullName}" />
-                    <span class="fw-semibold">${k.fullName}</span>
-                </button>
+                <div class="apple-channel-pill ${activeClass}" onclick="switchKidChannel(${k.id})">
+                    <img src="${avatar}" class="rounded-circle" style="width: 20px; height: 20px; object-fit: cover;" alt="${k.fullName}" />
+                    <span>${k.fullName}</span>
+                </div>
             `;
         }).join('');
 
         const selectedKid = kidsList.find(k => k.id === currentKidId);
         if (selectedKid) {
-            document.getElementById('currentChannelLabel').innerHTML = `Đang đàm thoại với bé: <strong class="text-primary">${selectedKid.fullName}</strong>`;
-            document.getElementById('lcdChannelName').textContent = `CH: ${selectedKid.fullName.toUpperCase().substring(0, 14)}`;
+            document.getElementById('currentChannelLabel').innerHTML = `Đàm thoại với: <strong style="color: var(--apple-blue);">${selectedKid.fullName}</strong>`;
+            document.getElementById('lcdChannelName').textContent = `CH: ${selectedKid.fullName.toUpperCase().substring(0, 16)}`;
         }
     }
 
     // 3. Chuyển kênh bé khác
-    async function switchKidChannel(kidId) {
+    window.switchKidChannel = async function(kidId) {
         if (currentKidId === kidId) return;
         currentKidId = kidId;
         renderKidPills();
         await loadVoiceMessages(true);
-    }
+    };
 
-    // 4. Tải danh sách tin nhắn giọng nói
+    // 4. Tải tin nhắn giọng nói
     let lastMessageCount = 0;
     async function loadVoiceMessages(showLoading = false) {
         const loadingBox = document.getElementById('feedLoadingBox');
@@ -389,7 +559,10 @@
         try {
             const url = (!isKidRole && currentKidId) ? `/api/voicemessages?kidId=${currentKidId}` : '/api/voicemessages';
             const res = await fetch(url, { headers: getAuthHeaders() });
-            if (!res.ok) return;
+            if (!res.ok) {
+                loadingBox.style.display = 'none';
+                return;
+            }
 
             const messages = await res.json();
             loadingBox.style.display = 'none';
@@ -405,9 +578,8 @@
             emptyBox.style.display = 'none';
             lblCount.textContent = `${messages.length} tin nhắn`;
 
-            // Nếu có tin nhắn mới so với lần trước -> phát tiếng chime
             if (messages.length > lastMessageCount && lastMessageCount > 0) {
-                playRetroBeep('incoming');
+                playAppleBeep('incoming');
             }
             lastMessageCount = messages.length;
 
@@ -419,7 +591,7 @@
         }
     }
 
-    // 5. Render bong bóng tin nhắn thoại retro 8-bit
+    // 5. Render danh sách bong bóng tin nhắn Apple
     function renderMessagesFeed(messages) {
         const listContainer = document.getElementById('voiceMessagesList');
         const feedScroll = document.getElementById('voiceFeedContainer');
@@ -428,54 +600,52 @@
         listContainer.innerHTML = messages.map(m => {
             const isMe = m.isMe;
             const bubbleAlign = isMe ? 'align-self-end' : 'align-self-start';
-            const bubbleBg = isMe 
-                ? 'background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); color: #fff; border-color: var(--pixel-gold);'
-                : 'background: linear-gradient(135deg, #1f2937 0%, #111827 100%); color: #fff; border-color: var(--pixel-cyan);';
-            const roleBadge = m.senderRole === 'Kid' ? '<span class="badge bg-warning text-dark ms-1">Bé</span>' : '<span class="badge bg-primary text-white ms-1">Ba Mẹ</span>';
-            const unreadBadge = (!isMe && !m.isHeard) ? '<span class="badge bg-danger ms-1 i8-pulse">MỚI</span>' : '';
+            const bubbleClass = isMe ? 'apple-bubble-me' : 'apple-bubble-other';
+            const roleBadge = m.senderRole === 'Kid' ? '<span class="badge bg-light text-dark ms-1">Bé</span>' : '<span class="badge" style="background: rgba(0, 113, 227, 0.15); color: var(--apple-blue);">Ba Mẹ</span>';
+            const unreadBadge = (!isMe && !m.isHeard) ? '<span class="badge bg-danger ms-1">MỚI</span>' : '';
 
             return `
-            <div class="${bubbleAlign} d-flex gap-2 max-w-85" style="max-width: 85%;">
-                ${!isMe ? `<img src="${m.senderAvatarUrl}" class="rounded-2 border border-2 border-primary" style="width: 36px; height: 36px; object-fit: cover;" alt="${m.senderName}" />` : ''}
+            <div class="${bubbleAlign} d-flex gap-2" style="max-width: 82%;">
+                ${!isMe ? `<img src="${m.senderAvatarUrl}" class="rounded-circle border" style="width: 34px; height: 34px; object-fit: cover;" alt="${m.senderName}" />` : ''}
                 
-                <div class="p-3 rounded-3 border-2 shadow-sm" style="${bubbleBg} min-width: 240px;">
+                <div class="p-3 shadow-sm ${bubbleClass}" style="min-width: 220px;">
                     <div class="d-flex justify-content-between align-items-center mb-2 small" style="font-size: 11px;">
-                        <span class="fw-bold">${m.senderName} ${roleBadge} ${unreadBadge}</span>
+                        <span class="fw-semibold">${m.senderName} ${roleBadge} ${unreadBadge}</span>
                         <span class="opacity-75">${m.createdAtVn}</span>
                     </div>
 
-                    <!-- Audio Player 8-Bit Retro -->
-                    <div class="d-flex align-items-center gap-2 p-2 rounded-2 bg-black bg-opacity-40 border border-secondary border-opacity-50">
-                        <button type="button" class="btn btn-sm btn-warning rounded-circle p-0 d-flex align-items-center justify-content-center" style="width: 34px; height: 34px;" onclick="playVoiceAudio(${m.id}, '${m.audioUrl}', this)">
-                            <i class="pixelart-icons-font-play i8-xs text-dark" style="margin-left: 2px;"></i>
+                    <!-- Apple Audio Player Pill -->
+                    <div class="d-flex align-items-center gap-2 apple-audio-player-pill">
+                        <button type="button" class="btn btn-sm rounded-circle p-0 d-flex align-items-center justify-content-center" 
+                                style="width: 32px; height: 32px; background: ${isMe ? '#ffffff' : 'var(--apple-blue)'}; color: ${isMe ? 'var(--apple-blue)' : '#ffffff'}; border: none;"
+                                onclick="playVoiceAudio(${m.id}, '${m.audioUrl}', this)">
+                            <i class="bi bi-play-fill fs-5" style="margin-left: 2px;"></i>
                         </button>
                         
-                        <!-- Visualizer tĩnh & thời lượng -->
                         <div class="flex-grow-1">
-                            <div class="d-flex align-items-end gap-1 mb-1 visualizer-bars" style="height: 14px;">
-                                <div class="bg-warning rounded-1" style="width: 3px; height: 4px;"></div>
-                                <div class="bg-warning rounded-1" style="width: 3px; height: 8px;"></div>
-                                <div class="bg-warning rounded-1" style="width: 3px; height: 12px;"></div>
-                                <div class="bg-warning rounded-1" style="width: 3px; height: 14px;"></div>
-                                <div class="bg-warning rounded-1" style="width: 3px; height: 10px;"></div>
-                                <div class="bg-warning rounded-1" style="width: 3px; height: 6px;"></div>
-                                <div class="bg-warning rounded-1" style="width: 3px; height: 12px;"></div>
-                                <div class="bg-warning rounded-1" style="width: 3px; height: 8px;"></div>
+                            <div class="d-flex align-items-center gap-1 mb-1" style="height: 12px;">
+                                <div style="width: 3px; height: 4px; background: currentColor; border-radius: 2px;"></div>
+                                <div style="width: 3px; height: 8px; background: currentColor; border-radius: 2px;"></div>
+                                <div style="width: 3px; height: 12px; background: currentColor; border-radius: 2px;"></div>
+                                <div style="width: 3px; height: 10px; background: currentColor; border-radius: 2px;"></div>
+                                <div style="width: 3px; height: 6px; background: currentColor; border-radius: 2px;"></div>
+                                <div style="width: 3px; height: 11px; background: currentColor; border-radius: 2px;"></div>
+                                <div style="width: 3px; height: 7px; background: currentColor; border-radius: 2px;"></div>
                             </div>
                             <div class="d-flex justify-content-between small opacity-75" style="font-size: 10px;">
-                                <span class="audio-time-label">00:${String(m.durationSeconds).padStart(2, '0')}</span>
-                                <span>🎙️ Thoại</span>
+                                <span>00:${String(m.durationSeconds).padStart(2, '0')}</span>
+                                <span>Ghi âm</span>
                             </div>
                         </div>
 
                         ${isMe || !isKidRole ? `
-                        <button type="button" class="btn btn-link btn-sm text-danger p-0 opacity-75" onclick="deleteVoiceMessage(${m.id})" title="Xóa tin nhắn thoại">
-                            <i class="pixelart-icons-font-trash i8-xs"></i>
+                        <button type="button" class="btn btn-link btn-sm text-danger p-0 ms-1 opacity-75" onclick="deleteVoiceMessage(${m.id})" title="Xóa tin nhắn">
+                            <i class="bi bi-trash3"></i>
                         </button>` : ''}
                     </div>
                 </div>
 
-                ${isMe ? `<img src="${m.senderAvatarUrl}" class="rounded-2 border border-2 border-warning" style="width: 36px; height: 36px; object-fit: cover;" alt="${m.senderName}" />` : ''}
+                ${isMe ? `<img src="${m.senderAvatarUrl}" class="rounded-circle border" style="width: 34px; height: 34px; object-fit: cover;" alt="${m.senderName}" />` : ''}
             </div>
             `;
         }).join('');
@@ -485,34 +655,43 @@
         }
     }
 
-    // 6. Phát file âm thanh giọng nói
+    // 6. Phát file âm thanh
     window.playVoiceAudio = function(msgId, audioUrl, btn) {
         if (currentlyPlayingAudio) {
             currentlyPlayingAudio.pause();
             currentlyPlayingAudio = null;
-            document.querySelectorAll('#voiceMessagesList .btn-warning i').forEach(i => i.className = 'pixelart-icons-font-play i8-xs text-dark');
+            document.querySelectorAll('#voiceMessagesList .bi-pause-fill').forEach(icon => {
+                icon.className = 'bi bi-play-fill fs-5';
+            });
         }
 
+        const icon = btn.querySelector('i');
         const audio = new Audio(audioUrl);
         currentlyPlayingAudio = audio;
-        const icon = btn.querySelector('i');
-        icon.className = 'pixelart-icons-font-pause i8-xs text-dark';
+        icon.className = 'bi bi-pause-fill fs-5';
 
         // Đánh dấu đã nghe
         fetch(`/api/voicemessages/${msgId}/mark-heard`, {
             method: 'PUT',
             headers: getAuthHeaders()
-        });
+        }).catch(() => {});
 
-        audio.play();
-        audio.onended = () => {
-            icon.className = 'pixelart-icons-font-play i8-xs text-dark';
-            currentlyPlayingAudio = null;
-        };
-        audio.onerror = () => {
-            icon.className = 'pixelart-icons-font-play i8-xs text-dark';
+        audio.play().catch(e => {
+            console.error('Audio play error:', e);
+            icon.className = 'bi bi-play-fill fs-5';
             currentlyPlayingAudio = null;
             alert('Không thể phát file âm thanh này.');
+        });
+
+        audio.onended = () => {
+            icon.className = 'bi bi-play-fill fs-5';
+            currentlyPlayingAudio = null;
+        };
+
+        audio.onerror = () => {
+            icon.className = 'bi bi-play-fill fs-5';
+            currentlyPlayingAudio = null;
+            alert('Lỗi định dạng file âm thanh.');
         };
     };
 
@@ -530,16 +709,19 @@
         } catch (_) {}
     };
 
-    // 8. Thiết lập điều khiển bộ đàm Push-To-Talk
-    let isRecording = false;
-
+    // 8. Thiết lập điều khiển ghi âm Push-To-Talk
     function setupPttControls() {
         const btnPtt = document.getElementById('btnPtt');
         const btnCancel = document.getElementById('btnCancelRecord');
         const btnSend = document.getElementById('btnSendRecord');
 
-        // Bấm 1 lần để thu / Bấm lần 2 để gửi
-        btnPtt.addEventListener('click', async () => {
+        // Click để Bắt đầu / Bấm lần nữa để Gửi
+        btnPtt.addEventListener('click', async (e) => {
+            if (pttHoldTriggered) {
+                pttHoldTriggered = false;
+                return;
+            }
+
             if (!isRecording) {
                 await startRecording();
             } else {
@@ -547,100 +729,180 @@
             }
         });
 
-        btnCancel.addEventListener('click', () => {
-            cancelRecording();
-        });
+        // Hỗ trợ Nhấn Giữ để Nói (Push-to-Talk)
+        const onHoldStart = (e) => {
+            if (isRecording) return;
+            pttHoldTimer = setTimeout(async () => {
+                pttHoldTriggered = true;
+                await startRecording();
+            }, 300);
+        };
 
+        const onHoldEnd = async (e) => {
+            if (pttHoldTimer) {
+                clearTimeout(pttHoldTimer);
+                pttHoldTimer = null;
+            }
+            if (pttHoldTriggered && isRecording) {
+                pttHoldTriggered = false;
+                await stopAndSendRecording();
+            }
+        };
+
+        btnPtt.addEventListener('mousedown', onHoldStart);
+        btnPtt.addEventListener('mouseup', onHoldEnd);
+        btnPtt.addEventListener('touchstart', onHoldStart, { passive: true });
+        btnPtt.addEventListener('touchend', onHoldEnd);
+
+        btnCancel.addEventListener('click', cancelRecording);
         btnSend.addEventListener('click', async () => {
             await stopAndSendRecording();
         });
     }
 
-    // Bắt đầu ghi âm qua microphone
+    // Bắt đầu ghi âm an toàn qua microphone
     async function startRecording() {
+        if (isRecording) return;
+
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
             alert('Trình duyệt của bạn không hỗ trợ thu âm microphone.');
             return;
         }
 
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaStream = await navigator.mediaDevices.getUserMedia({
+                audio: {
+                    echoCancellation: true,
+                    noiseSuppression: true,
+                    autoGainControl: true
+                }
+            });
+
             audioChunks = [];
-            
-            // Chọn mimeType phù hợp
-            let mimeType = 'audio/webm';
+
+            // Chọn MIME type tương thích tối đa (Chrome, Safari iOS, Firefox)
+            let chosenMime = '';
             if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
-                mimeType = 'audio/webm;codecs=opus';
-            } else if (MediaRecorder.isTypeSupported('audio/ogg;codecs=opus')) {
-                mimeType = 'audio/ogg;codecs=opus';
+                chosenMime = 'audio/webm;codecs=opus';
+            } else if (MediaRecorder.isTypeSupported('audio/webm')) {
+                chosenMime = 'audio/webm';
             } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
-                mimeType = 'audio/mp4';
+                chosenMime = 'audio/mp4';
+            } else if (MediaRecorder.isTypeSupported('audio/aac')) {
+                chosenMime = 'audio/aac';
+            } else if (MediaRecorder.isTypeSupported('audio/ogg')) {
+                chosenMime = 'audio/ogg';
             }
 
-            mediaRecorder = new MediaRecorder(stream, { mimeType });
+            const options = chosenMime ? { mimeType: chosenMime } : {};
+            mediaRecorder = new MediaRecorder(mediaStream, options);
+
             mediaRecorder.ondataavailable = (e) => {
-                if (e.data && e.data.size > 0) audioChunks.push(e.data);
+                if (e.data && e.data.size > 0) {
+                    audioChunks.push(e.data);
+                }
             };
 
-            mediaRecorder.start(250);
+            mediaRecorder.start(200);
             isRecording = true;
             recordStartTime = Date.now();
-            playRetroBeep('start');
+            playAppleBeep('start');
 
-            // Cập nhật giao diện đang ghi âm
             updatePttUi(true);
-
-            // Bắt đầu đếm giây và visualizer
             startRecordTimer();
-            startVisualizer(stream);
+            startVisualizer(mediaStream);
 
         } catch (err) {
-            console.error('Lỗi microphone:', err);
-            alert('Vui lòng cấp quyền truy cập Microphone cho trình duyệt để sử dụng bộ đàm!');
+            console.error('Lỗi mở microphone:', err);
+            isRecording = false;
+            updatePttUi(false);
+            alert('Không thể mở microphone! Vui lòng cấp quyền truy cập microphone cho trình duyệt.');
         }
     }
 
-    // Dừng và gửi tin nhắn ghi âm
+    // Dừng và gửi bản ghi âm lên server
     async function stopAndSendRecording() {
         if (!mediaRecorder || !isRecording) return;
 
-        playRetroBeep('end');
+        playAppleBeep('end');
         isRecording = false;
         clearInterval(recordTimerInterval);
         stopVisualizer();
 
         const duration = Math.max(1, Math.round((Date.now() - recordStartTime) / 1000));
 
+        // Flush dữ liệu cuối cùng từ MediaRecorder
+        try {
+            if (mediaRecorder.state === 'recording') {
+                mediaRecorder.requestData();
+            }
+        } catch (_) {}
+
         mediaRecorder.onstop = async () => {
-            const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
-            await uploadVoiceMessage(blob, duration);
+            // Tắt stream sau khi đã chốt xong data
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(t => t.stop());
+                mediaStream = null;
+            }
+
+            const mime = mediaRecorder.mimeType || 'audio/webm';
+            const blob = new Blob(audioChunks, { type: mime });
+
+            if (blob.size === 0) {
+                alert('Bản ghi âm quá ngắn hoặc không có âm thanh. Vui lòng thử lại!');
+                updatePttUi(false);
+                return;
+            }
+
+            await uploadVoiceMessage(blob, duration, mime);
             updatePttUi(false);
         };
 
-        mediaRecorder.stop();
-        mediaRecorder.stream.getTracks().forEach(track => track.stop());
+        try {
+            mediaRecorder.stop();
+        } catch (_) {
+            updatePttUi(false);
+        }
     }
 
-    // Hủy bản ghi âm
+    // Hủy ghi âm
     function cancelRecording() {
-        if (mediaRecorder && isRecording) {
-            isRecording = false;
-            clearInterval(recordTimerInterval);
-            stopVisualizer();
-            mediaRecorder.stop();
-            mediaRecorder.stream.getTracks().forEach(track => track.stop());
+        isRecording = false;
+        clearInterval(recordTimerInterval);
+        stopVisualizer();
+
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+            try { mediaRecorder.stop(); } catch (_) {}
+        }
+        if (mediaStream) {
+            mediaStream.getTracks().forEach(t => t.stop());
+            mediaStream = null;
         }
         audioChunks = [];
         updatePttUi(false);
+
+        const lcdStatus = document.getElementById('lcdStatusText');
+        lcdStatus.textContent = 'Đã hủy bản ghi âm.';
+        setTimeout(() => {
+            lcdStatus.textContent = 'Sẵn sàng đàm thoại. Bấm nút dưới để nói!';
+        }, 1500);
     }
 
     // Gửi file âm thanh lên server
-    async function uploadVoiceMessage(blob, duration) {
+    async function uploadVoiceMessage(blob, duration, mimeType) {
         const lcdStatus = document.getElementById('lcdStatusText');
-        lcdStatus.textContent = 'Đang truyền tín hiệu bộ đàm...';
+        lcdStatus.textContent = 'Đang gửi tin nhắn thoại...';
 
+        // Xác định phần mở rộng tương thích chuẩn
+        let ext = 'webm';
+        if (mimeType.includes('mp4')) ext = 'mp4';
+        else if (mimeType.includes('ogg')) ext = 'ogg';
+        else if (mimeType.includes('wav')) ext = 'wav';
+        else if (mimeType.includes('aac')) ext = 'aac';
+
+        const fileName = `voice_${Date.now()}.${ext}`;
         const formData = new FormData();
-        formData.append('audioFile', blob, 'voice_message.webm');
+        formData.append('audioFile', blob, fileName);
         formData.append('durationSeconds', duration);
         if (!isKidRole && currentKidId) {
             formData.append('kidId', currentKidId);
@@ -656,10 +918,10 @@
 
             if (!res.ok) {
                 const errData = await res.json().catch(() => ({}));
-                throw new Error(errData.message || 'Lỗi gửi tin nhắn thoại');
+                throw new Error(errData.message || 'Lỗi gửi tin nhắn thoại từ máy chủ');
             }
 
-            lcdStatus.textContent = '✅ Đã gửi tín hiệu thành công!';
+            lcdStatus.textContent = '✅ Đã gửi tin nhắn thoại thành công!';
             await loadVoiceMessages(false);
 
             setTimeout(() => {
@@ -667,8 +929,8 @@
             }, 2500);
 
         } catch (err) {
-            console.error(err);
-            lcdStatus.textContent = '❌ Lỗi gửi tin: ' + err.message;
+            console.error('Lỗi gửi tin:', err);
+            lcdStatus.textContent = '❌ ' + err.message;
             alert('Lỗi gửi tin nhắn giọng nói: ' + err.message);
         }
     }
@@ -682,24 +944,22 @@
         const actionBox = document.getElementById('boxRecordingActions');
 
         if (recording) {
-            btn.className = 'btn btn-danger rounded-circle shadow-lg d-inline-flex flex-column align-items-center justify-content-center p-0 border border-4 border-warning i8-pulse';
-            btn.style.backgroundColor = '#dc2626';
-            icon.className = 'pixelart-icons-font-square i8-xl text-white mb-1';
-            text.className = 'pixel-font fw-bold text-white small';
+            btn.classList.add('recording');
+            icon.className = 'bi bi-stop-fill fs-1 mb-1';
             text.textContent = 'BẤM ĐỂ GỬI';
 
-            led.className = 'badge bg-danger text-white pixel-font i8-pulse';
-            led.textContent = '● ĐANG THU ÂM';
+            led.style.background = '#fee2e2';
+            led.style.color = '#dc2626';
+            led.textContent = '● ĐANG GHI ÂM';
             recBadge.style.display = 'inline';
             actionBox.style.setProperty('display', 'flex', 'important');
         } else {
-            btn.className = 'btn btn-warning rounded-circle shadow-lg d-inline-flex flex-column align-items-center justify-content-center p-0 border border-4 border-light border-opacity-75';
-            btn.style.backgroundColor = '';
-            icon.className = 'pixelart-icons-font-microphone i8-xl text-dark mb-1';
-            text.className = 'pixel-font fw-bold text-dark small';
+            btn.classList.remove('recording');
+            icon.className = 'bi bi-mic-fill fs-1 mb-1';
             text.textContent = 'BẤM ĐỂ NÓI';
 
-            led.className = 'badge bg-success text-white pixel-font';
+            led.style.background = 'var(--apple-blue-soft)';
+            led.style.color = 'var(--apple-blue)';
             led.textContent = '● SẴN SÀNG';
             recBadge.style.display = 'none';
             actionBox.style.setProperty('display', 'none', 'important');
@@ -715,11 +975,11 @@
             const secs = String(elapsed % 60).padStart(2, '0');
             timerEl.textContent = `${mins}:${secs}`;
 
-            // Tối đa 60 giây tự gửi
+            // Tự động dừng và gửi sau 60 giây
             if (elapsed >= 60) {
                 stopAndSendRecording();
             }
-        }, 500);
+        }, 300);
     }
 
     function startVisualizer(stream) {
@@ -740,7 +1000,7 @@
 
                 bars.forEach((bar, idx) => {
                     const val = dataArray[idx % bufferLength] || 10;
-                    const h = Math.max(4, Math.round((val / 255) * 28));
+                    const h = Math.max(4, Math.round((val / 255) * 24));
                     bar.style.height = `${h}px`;
                 });
 
@@ -757,7 +1017,7 @@
             audioContext = null;
         }
         document.querySelectorAll('#lcdWaveform div').forEach((bar, idx) => {
-            bar.style.height = `${(idx % 4 + 1) * 6}px`;
+            bar.style.height = `${(idx % 4 + 1) * 5}px`;
         });
     }
 </script>

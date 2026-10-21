@@ -126,7 +126,7 @@
 
     <!-- ================= MODAL ĐĂNG NHẬP (8-BIT RETRO) ================= -->
     <div class="modal fade" id="modalLogin" tabindex="-1" aria-labelledby="modalLoginLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
             <div class="modal-content shadow-lg">
                 <div class="modal-header border-bottom">
                     <h5 class="modal-title fw-bold d-flex align-items-center gap-2" id="modalLoginLabel">
@@ -135,6 +135,7 @@
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
+                <!-- BƯỚC 1: NHẬP TÊN ĐĂNG NHẬP / EMAIL VÀ MẬT KHẨU -->
                 <form id="formLogin">
                     <div class="modal-body">
                         <div id="loginAlertBox"></div>
@@ -142,13 +143,13 @@
                             <label class="form-label fw-semibold small d-flex align-items-center gap-1">
                                 <i class="pixelart-icons-font-user i8-xs text-primary"></i> Tài khoản hoặc Email
                             </label>
-                            <input type="text" id="loginIdentifier" class="form-control" placeholder="Tên đăng nhập hoặc email" required />
+                            <input type="text" id="loginIdentifier" class="form-control" placeholder="Tên đăng nhập hoặc email" required autocomplete="username" />
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-semibold small d-flex align-items-center gap-1">
                                 <i class="pixelart-icons-font-lock i8-xs text-primary"></i> Mật khẩu
                             </label>
-                            <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" required />
+                            <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" required autocomplete="current-password" />
                         </div>
                         <div class="d-flex justify-content-end mb-3">
                             <a href="#" class="small text-decoration-none" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#modalForgotPassword">
@@ -161,7 +162,43 @@
                             Chưa có tài khoản?
                         </button>
                         <button type="submit" class="btn btn-primary rounded-2 px-4" id="btnSubmitLogin">
-                            <i class="pixelart-icons-font-lock i8-xs me-1"></i> Đăng nhập
+                            <i class="pixelart-icons-font-lock i8-xs me-1"></i> Tiếp tục
+                        </button>
+                    </div>
+                </form>
+
+                <!-- BƯỚC 2: XÁC THỰC MÃ OTP ĐĂNG NHẬP (2-FACTOR AUTH) -->
+                <form id="formLoginOtp" style="display: none;">
+                    <div class="modal-body">
+                        <div class="alert alert-primary py-2 px-3 small mb-3 d-flex align-items-start gap-2">
+                            <i class="pixelart-icons-font-shield i8-sm mt-1 text-primary"></i>
+                            <div>
+                                <strong class="d-block">Xác thực 2 bước (Mã OTP)</strong>
+                                <span class="text-muted">Mã OTP gồm 6 chữ số đã gửi tới email <span id="loginMaskedEmail" class="fw-bold text-dark"></span>. Hiệu lực trong 5 phút.</span>
+                            </div>
+                        </div>
+                        <div id="loginOtpAlertBox"></div>
+                        <div class="mb-3 text-center">
+                            <label class="form-label fw-semibold small d-block mb-2">
+                                <i class="pixelart-icons-font-lock i8-xs text-primary me-1"></i> Nhập mã OTP 6 chữ số <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" id="loginOtpCode" class="form-control text-center fw-bold fs-3 pixel-font" maxlength="6" placeholder="------" style="letter-spacing: 0.35em;" required autocomplete="one-time-code" />
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-3 pt-1">
+                            <button type="button" class="btn btn-link btn-sm text-decoration-none p-0 text-muted" id="btnBackToLoginCredentials">
+                                ← Đổi tài khoản khác
+                            </button>
+                            <button type="button" class="btn btn-link btn-sm text-decoration-none p-0 text-primary fw-semibold" id="btnResendLoginOtp">
+                                Gửi lại mã OTP
+                            </button>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top">
+                        <button type="button" class="btn btn-secondary btn-sm rounded-2 px-3" data-bs-dismiss="modal">
+                            Hủy bỏ
+                        </button>
+                        <button type="submit" class="btn btn-success rounded-2 px-4" id="btnSubmitLoginOtp">
+                            <i class="pixelart-icons-font-check i8-xs me-1"></i> Xác nhận & Đăng nhập
                         </button>
                     </div>
                 </form>
@@ -434,6 +471,10 @@
     <script>
         // Quản lý trạng thái Đăng nhập / Đăng ký người dùng
         window.fillLogin = function(username, password) {
+            const formStep1 = document.getElementById('formLogin');
+            const formStep2 = document.getElementById('formLoginOtp');
+            if (formStep1) formStep1.style.display = 'block';
+            if (formStep2) formStep2.style.display = 'none';
             document.getElementById('loginIdentifier').value = username;
             document.getElementById('loginPassword').value = password;
         };
@@ -743,16 +784,21 @@
             }
         });
 
-        // Xử lý submit Đăng nhập
+        // ================= XỬ LÝ ĐĂNG NHẬP (2 BƯỚC VỚI MÃ OTP) =================
+        let currentLoginIdentifier = '';
+
+        // Bước 1: Kiểm tra tài khoản & Mật khẩu -> Gửi OTP về Email
         document.getElementById('formLogin')?.addEventListener('submit', async (e) => {
             e.preventDefault();
             const alertBox = document.getElementById('loginAlertBox');
             const btn = document.getElementById('btnSubmitLogin');
             btn.disabled = true;
-            btn.innerHTML = 'Đang đăng nhập...';
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Đang kiểm tra...';
+            alertBox.innerHTML = '';
 
+            currentLoginIdentifier = document.getElementById('loginIdentifier').value.trim();
             const payload = {
-                usernameOrEmail: document.getElementById('loginIdentifier').value.trim(),
+                usernameOrEmail: currentLoginIdentifier,
                 password: document.getElementById('loginPassword').value
             };
 
@@ -769,6 +815,18 @@
                     return;
                 }
 
+                // Nếu tài khoản yêu cầu xác thực 2 bước bằng mã OTP (2FA)
+                if (data.requiresOtp) {
+                    document.getElementById('formLogin').style.display = 'none';
+                    document.getElementById('formLoginOtp').style.display = 'block';
+                    document.getElementById('loginMaskedEmail').textContent = data.email || currentLoginIdentifier;
+                    document.getElementById('loginOtpCode').value = '';
+                    document.getElementById('loginOtpAlertBox').innerHTML = `<div class="alert alert-info py-2 small mb-3">${data.message}</div>`;
+                    setTimeout(() => document.getElementById('loginOtpCode')?.focus(), 250);
+                    return;
+                }
+
+                // Trường hợp tài khoản không có email hoặc đã xác thực trực tiếp
                 localStorage.setItem('authToken', data.token);
                 localStorage.setItem('authUser', JSON.stringify(data.user));
                 
@@ -778,7 +836,7 @@
                     document.getElementById('formLogin').reset();
                     alertBox.innerHTML = '';
                     updateAuthUI();
-                    if (window.location.pathname.toLowerCase().includes('kids')) {
+                    if (window.location.pathname.toLowerCase().includes('kids') || window.location.pathname.toLowerCase().includes('intercom') || window.location.pathname.toLowerCase().includes('voice')) {
                         window.location.reload();
                     }
                 }, 800);
@@ -786,8 +844,120 @@
                 alertBox.innerHTML = `<div class="alert alert-danger py-2 small">Lỗi kết nối: ${err.message}</div>`;
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = 'Đăng nhập';
+                btn.innerHTML = '<i class="pixelart-icons-font-lock i8-xs me-1"></i> Tiếp tục';
             }
+        });
+
+        // Bước 2: Xác thực mã OTP để nhận JWT Token
+        document.getElementById('formLoginOtp')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const alertBox = document.getElementById('loginOtpAlertBox');
+            const btn = document.getElementById('btnSubmitLoginOtp');
+            const otpCode = document.getElementById('loginOtpCode').value.trim();
+
+            if (!otpCode || otpCode.length !== 6) {
+                alertBox.innerHTML = `<div class="alert alert-danger py-2 small">Vui lòng nhập đủ 6 chữ số mã OTP.</div>`;
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Đang xác thực...';
+            alertBox.innerHTML = '';
+
+            try {
+                const res = await fetch('/api/auth/verify-login-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        usernameOrEmail: currentLoginIdentifier,
+                        otp: otpCode
+                    })
+                });
+
+                const data = await res.json();
+                if (!res.ok) {
+                    alertBox.innerHTML = `<div class="alert alert-danger py-2 small">${data.message || 'Mã OTP không hợp lệ hoặc đã hết hạn.'}</div>`;
+                    return;
+                }
+
+                localStorage.setItem('authToken', data.token);
+                localStorage.setItem('authUser', JSON.stringify(data.user));
+
+                alertBox.innerHTML = `<div class="alert alert-success py-2 small">${data.message}</div>`;
+                setTimeout(() => {
+                    const loginModal = bootstrap.Modal.getInstance(document.getElementById('modalLogin'));
+                    if (loginModal) loginModal.hide();
+                    document.getElementById('formLogin').reset();
+                    document.getElementById('formLoginOtp').reset();
+                    document.getElementById('formLogin').style.display = 'block';
+                    document.getElementById('formLoginOtp').style.display = 'none';
+                    alertBox.innerHTML = '';
+                    updateAuthUI();
+                    if (window.location.pathname.toLowerCase().includes('kids') || window.location.pathname.toLowerCase().includes('intercom') || window.location.pathname.toLowerCase().includes('voice')) {
+                        window.location.reload();
+                    }
+                }, 800);
+            } catch (err) {
+                alertBox.innerHTML = `<div class="alert alert-danger py-2 small">Lỗi kết nối: ${err.message}</div>`;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="pixelart-icons-font-check i8-xs me-1"></i> Xác nhận & Đăng nhập';
+            }
+        });
+
+        // Nút quay lại Bước 1 để đổi tài khoản
+        document.getElementById('btnBackToLoginCredentials')?.addEventListener('click', () => {
+            document.getElementById('formLoginOtp').style.display = 'none';
+            document.getElementById('formLogin').style.display = 'block';
+            document.getElementById('loginOtpAlertBox').innerHTML = '';
+            document.getElementById('loginAlertBox').innerHTML = '';
+        });
+
+        // Nút gửi lại mã OTP đăng nhập
+        document.getElementById('btnResendLoginOtp')?.addEventListener('click', async () => {
+            const btn = document.getElementById('btnResendLoginOtp');
+            const alertBox = document.getElementById('loginOtpAlertBox');
+            if (!currentLoginIdentifier) return;
+
+            btn.disabled = true;
+            btn.textContent = 'Đang gửi lại...';
+
+            try {
+                const res = await fetch('/api/auth/resend-login-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ usernameOrEmail: currentLoginIdentifier })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    alertBox.innerHTML = `<div class="alert alert-success py-2 small">${data.message}</div>`;
+                } else {
+                    alertBox.innerHTML = `<div class="alert alert-danger py-2 small">${data.message || 'Không thể gửi lại mã OTP.'}</div>`;
+                }
+            } catch (err) {
+                alertBox.innerHTML = `<div class="alert alert-danger py-2 small">Lỗi: ${err.message}</div>`;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Gửi lại mã OTP';
+            }
+        });
+
+        // Tự động khôi phục giao diện đăng nhập về Bước 1 khi đóng modal
+        document.getElementById('modalLogin')?.addEventListener('hidden.bs.modal', () => {
+            const formStep1 = document.getElementById('formLogin');
+            const formStep2 = document.getElementById('formLoginOtp');
+            if (formStep1) {
+                formStep1.style.display = 'block';
+                formStep1.reset();
+            }
+            if (formStep2) {
+                formStep2.style.display = 'none';
+                formStep2.reset();
+            }
+            const alert1 = document.getElementById('loginAlertBox');
+            const alert2 = document.getElementById('loginOtpAlertBox');
+            if (alert1) alert1.innerHTML = '';
+            if (alert2) alert2.innerHTML = '';
         });
 
         // ================= QUÊN MẬT KHẨU / XÁC THỰC OTP =================

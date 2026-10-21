@@ -123,6 +123,56 @@ public class EmailService(IConfiguration config, ILogger<EmailService> logger) :
         );
     }
 
+    public async Task<bool> SendLoginOtpAsync(string toEmail, string otpCode, string? recipientName = null)
+    {
+        var displayName = string.IsNullOrWhiteSpace(recipientName) ? "Quý khách" : recipientName;
+        var htmlContent = $@"
+<!DOCTYPE html>
+<html lang=""vi"">
+<head>
+    <meta charset=""UTF-8"">
+    <title>Mã OTP xác thực đăng nhập</title>
+</head>
+<body style=""font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px;"">
+    <div style=""max-width: 540px; margin: 0 auto; background-color: #ffffff; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.08);"">
+        <div style=""background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%); color: #ffffff; padding: 30px 20px; text-align: center;"">
+            <h1 style=""margin: 0; font-size: 24px; font-weight: 700;"">🔐 Xác thực đăng nhập (OTP)</h1>
+            <p style=""margin: 8px 0 0; opacity: 0.9; font-size: 14px;"">Hệ thống KidCare - Quản Lý An Toàn Trẻ Em</p>
+        </div>
+        <div style=""padding: 30px 24px; color: #333333; line-height: 1.6;"">
+            <p style=""font-size: 16px; margin-top: 0;"">Xin chào <strong>{displayName}</strong>,</p>
+            <p style=""font-size: 15px; color: #555555;"">
+                Hệ thống nhận được yêu cầu đăng nhập vào tài khoản của bạn trên <strong>KidCare</strong>.
+            </p>
+            <p style=""font-size: 15px; color: #555555;"">Vui lòng sử dụng mã OTP gồm 6 chữ số dưới đây để xác thực và hoàn tất đăng nhập:</p>
+            <div style=""text-align: center; margin: 28px 0;"">
+                <span style=""display: inline-block; font-size: 34px; font-weight: 800; letter-spacing: 8px; color: #2563eb; background-color: #eff6ff; padding: 14px 28px; border-radius: 10px; border: 2px dashed #93c5fd;"">
+                    {otpCode}
+                </span>
+            </div>
+            <p style=""font-size: 14px; color: #dc2626; text-align: center; font-weight: 600;"">
+                ⏳ Mã OTP này chỉ có hiệu lực trong vòng <strong>5 phút</strong>.
+            </p>
+            <div style=""background-color: #fef2f2; border: 1px solid #fee2e2; border-radius: 8px; padding: 12px 16px; margin-top: 20px; font-size: 13px; color: #991b1b;"">
+                ⚠️ <strong>Cảnh báo bảo mật:</strong> Tuyệt đối không chia sẻ mã này cho bất kỳ ai. Nếu bạn không thực hiện đăng nhập này, hãy đổi mật khẩu tài khoản ngay để bảo vệ dữ liệu.
+            </div>
+        </div>
+        <div style=""background-color: #fafafa; border-top: 1px solid #f0f0f0; padding: 16px; text-align: center; font-size: 12px; color: #999999;"">
+            © {DateTime.UtcNow.Year} KidCare. Tất cả các quyền được bảo lưu.
+        </div>
+    </div>
+</body>
+</html>";
+
+        return await SendEmailAsync(
+            toEmail,
+            $"[{otpCode}] Mã OTP xác thực đăng nhập - KidCare",
+            htmlContent,
+            $"Mã OTP xác thực đăng nhập của bạn là: {otpCode}. Mã có hiệu lực trong vòng 5 phút. Vui lòng không chia sẻ mã này cho bất kỳ ai.",
+            displayName
+        );
+    }
+
     public async Task<bool> SendChildRegisteredNotificationAsync(
         string parentEmail,
         string parentName,
