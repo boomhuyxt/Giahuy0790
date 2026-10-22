@@ -35,9 +35,13 @@ WORKDIR /app
 # Copy các file đã build với quyền sở hữu của người dùng app
 COPY --chown=$APP_UID:$APP_UID --from=publish /app/publish .
 
-# Tạo thư mục lưu trữ ảnh uploads và phân quyền ghi cho ứng dụng
+# Tạo thư mục lưu trữ uploads và phân quyền ghi cho ứng dụng
 USER root
-RUN mkdir -p /app/wwwroot/uploads/products /app/wwwroot/uploads/posts \
+RUN mkdir -p /app/wwwroot/uploads/products \
+             /app/wwwroot/uploads/posts \
+             /app/wwwroot/uploads/voice \
+             /app/wwwroot/uploads/kids \
+             /app/wwwroot/uploads/avatars \
     && chown -R $APP_UID:$APP_UID /app/wwwroot/uploads \
     && chmod -R 775 /app/wwwroot/uploads
 USER $APP_UID

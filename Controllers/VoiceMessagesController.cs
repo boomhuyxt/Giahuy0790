@@ -233,13 +233,26 @@ public class VoiceMessagesController(
         }
 
         // Lưu file âm thanh an toàn vào wwwroot/uploads/voice/
-        var uploadsDir = GetUploadsDirectory();
         var safeFileName = $"voice_{targetKidId}_{Guid.NewGuid():N}_{DateTime.UtcNow:yyyyMMddHHmmss}{extension}";
-        var fullPath = Path.Combine(uploadsDir, safeFileName);
-
-        await using (var stream = new FileStream(fullPath, FileMode.Create))
+        try
         {
-            await audioFile.CopyToAsync(stream);
+            var uploadsDir = GetUploadsDirectory();
+            var fullPath = Path.Combine(uploadsDir, safeFileName);
+
+            await using (var stream = new FileStream(fullPath, FileMode.Create))
+            {
+                await audioFile.CopyToAsync(stream);
+            }
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            logger.LogError(ex, "Lỗi phân quyền khi ghi file âm thanh vào wwwroot/uploads/voice trên Linux.");
+            return StatusCode(500, new { message = "Lỗi phân quyền thư mục trên máy chủ Linux. Vui lòng cấp quyền ghi trên server bằng lệnh: chmod -R 777 wwwroot/uploads" });
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Lỗi khi lưu file ghi âm: {Msg}", ex.Message);
+            return StatusCode(500, new { message = $"Không thể lưu file âm thanh trên máy chủ: {ex.Message}" });
         }
 
         var relativeAudioUrl = $"/uploads/voice/{safeFileName}";
