@@ -1,268 +1,301 @@
-# HỆ THỐNG POS & BÁN HÀNG TIỆN LỢI - QUẢN LÝ BÀI ĐĂNG
-### ASP.NET Core 10 Web API & Flutter Mobile App (Identity & Phân quyền JWT)
-
-Dự án cung cấp giải pháp toàn diện bao gồm:
-1. **Backend Web API (.NET 10)**: Tích hợp ASP.NET Core Identity, xác thực JWT phân quyền (Role-based Authorization), Repository Pattern, kết nối cơ sở dữ liệu Supabase PostgreSQL (hỗ trợ Session Pooler), tải ảnh trực tiếp, và đóng gói Docker container chạy trên cổng **8888**.
-2. **Web Frontend (Razor Views + Dark Mode)**: Giao diện quản lý Sản phẩm và Bài đăng (Facebook-like feed) với cơ chế chuyển đổi Dark/Light mode tự động và gọi AJAX RESTful API.
-3. **Mobile App (Flutter)**: Ứng dụng di động phân quyền cho **Admin**, **Staff** và **User**, tích hợp `jwt_decode`, `flutter_dotenv`, và `shared_preferences` để tự động đăng nhập (Auto-login).
+# HỆ THỐNG GIÁM SÁT TRẺ EM, BỘ ĐÀM GIA ĐÌNH & QUẢN LÝ TIỆN LỢI (KIDCARE & POS)
+### Đồ án Chuyên ngành: ASP.NET Core 10 Web API, SignalR & Flutter Mobile App
+**Tác giả:** Diệp Gia Huy | **MSSV:** 0790  
+**Tệp tin Database đính kèm:** [`DiepGiaHuy0790.sql`](file:///C:/Users/boomh/OneDrive/Documents/Giahuy0790/DiepGiaHuy0790.sql)
 
 ---
 
-## 1. THÔNG TIN TÀI KHOẢN & PHÂN QUYỀN (ROLES)
+## 1. TỔNG QUAN HỆ THỐNG
 
-Hệ thống được cấu hình sẵn cơ chế Seeder tự động nạp 3 tài khoản mặc định đại diện cho 3 phân quyền khi khởi động:
+Dự án cung cấp một nền tảng giám sát thông minh và tương tác toàn diện giữa Phụ huynh và Trẻ em, kết hợp quản lý tiện ích bán hàng và sinh hoạt gia đình:
 
-| Tài khoản (Username) | Mật khẩu (Password) | Vai trò (Role) | Phạm vi quyền hạn & Giao diện trên Mobile App |
-| :--- | :--- | :--- | :--- |
-| **`admin`** | `Admin@123` | **Admin** *(Quản trị viên)* | - Toàn quyền quản trị hệ thống, quản lý người dùng & cấp quyền.<br>- Quản lý danh mục sản phẩm, duyệt và quản lý toàn bộ bài đăng.<br>- Xem báo cáo doanh thu & hóa đơn POS.<br>- **Màn hình Mobile**: `AdminDashboardScreen` (Giao diện Quản trị viền đỏ). |
-| **`staff`** | `Staff@123` | **Staff** *(Nhân viên POS & Kho)* | - Bán hàng tại quầy thu ngân (POS) và in hóa đơn.<br>- Quét mã vạch (Barcode Scanner) kiểm tra giá sản phẩm.<br>- Tra cứu và kiểm kê hàng tồn kho.<br>- **Màn hình Mobile**: `StaffPosScreen` (Giao diện Thu ngân viền cam). |
-| **`user`** | `User@123` | **User** *(Khách hàng)* | - Xem danh sách sản phẩm tiện lợi & tìm kiếm sản phẩm.<br>- Xem và tương tác bảng tin bài viết chia sẻ phong cách Facebook.<br>- Giỏ hàng và lịch sử đơn hàng cá nhân.<br>- **Màn hình Mobile**: `UserHomeScreen` (Giao diện Mua sắm viền xanh). |
+1. **Backend Web API (.NET 10)**:
+   - Xây dựng trên nền tảng **ASP.NET Core 10**.
+   - Quản lý danh tính người dùng và phân quyền bằng **ASP.NET Core Identity** kết hợp **JWT (JSON Web Token)**.
+   - Cơ chế bảo mật 2 lớp: Xác thực đăng nhập qua mã **OTP gửi về Email (Gmail SMTP)**.
+   - Tương tác thời gian thực hai chiều bằng **SignalR WebSockets** (`LocationHub`).
+   - Sử dụng **Entity Framework Core** kết nối cơ sở dữ liệu **PostgreSQL (Supabase)** thông qua cơ chế Transaction & Session Pooler.
+   - Kiến trúc **Repository Pattern** tách biệt rõ ràng giữa tầng dữ liệu và tầng nghiệp vụ.
+   - Đóng gói container hóa qua **Docker & Docker Compose** chạy độc lập trên cổng **8888** với cấu hình phân quyền root chuẩn cho Linux.
 
-> 💡 **Mẹo:** Trên màn hình đăng nhập của ứng dụng di động Flutter có sẵn 3 nút nhấn nhanh **Admin / Staff / User**. Bạn chỉ cần bấm vào nút tương ứng là form tự động điền tài khoản và mật khẩu để test nhanh.
+2. **Web Frontend (Razor Pages / MVC & Dark Mode Apple UI)**:
+   - Giao diện thiết kế theo ngôn ngữ hiện đại của Apple (Apple Human Interface Guidelines), hỗ trợ chuyển đổi giao diện Sáng / Tối (Dark/Light Mode).
+   - Hệ thống **Bộ đàm & Đàm thoại gia đình (Voice Intercom / Walkie-Talkie)**: Thu âm trực tiếp từ microphone trình duyệt, mã hóa sang file định dạng **MP3 128kbps** theo thời gian thực bằng **Web Audio API** và thư viện **LAME.js** (`lame.min.js`), phát và đồng bộ tức thì qua SignalR.
+   - Bản đồ theo dõi lộ trình GPS di chuyển của trẻ và thiết lập vùng an toàn Geofencing.
+
+3. **Mobile App (Flutter)**:
+   - Ứng dụng di động đa nền tảng viết bằng Flutter (Dart).
+   - Phân quyền theo vai trò (**Admin**, **Staff**, **User**), tích hợp `jwt_decode`, `flutter_dotenv` và `shared_preferences` hỗ trợ ghi nhớ đăng nhập (Auto-login).
+
+4. **Cơ sở dữ liệu (Database SQL)**:
+   - Tệp tin [`DiepGiaHuy0790.sql`](file:///C:/Users/boomh/OneDrive/Documents/Giahuy0790/DiepGiaHuy0790.sql) chứa toàn bộ kịch bản DDL tạo bảng, chỉ mục (indexes), khóa chính/khóa ngoại và dữ liệu khởi tạo mặc định cho hệ thống PostgreSQL.
 
 ---
 
-## 2. HƯỚNG DẪN CHẠY DỰ ÁN
+## 2. PHÂN QUYỀN HỆ THỐNG & TÀI KHOẢN MẪU
+
+Hệ thống được cấu hình sẵn 5 nhóm vai trò (Roles) chính:
+
+| Vai trò (Role) | Mô tả & Phạm vi quyền hạn | Tài khoản mẫu | Mật khẩu mẫu |
+| :--- | :--- | :---: | :---: |
+| **`Admin`** | Quản trị toàn hệ thống, quản lý người dùng, duyệt dữ liệu, xem toàn bộ hồ sơ trẻ và báo cáo | `admin` | `Admin@123` |
+| **`Parents`** | Phụ huynh: Định vị vị trí con, giao nhiệm vụ, giới hạn giờ dùng máy, chặn web/app, gửi voice walkie-talkie | *(Tạo khi đăng ký)* | - |
+| **`Kid`** | Trẻ em: Đăng nhập vào thiết bị trẻ, gửi tọa độ GPS định kỳ, gửi tin nhắn thoại bộ đàm, xem nhiệm vụ | *(Gán từ hồ sơ bé)* | - |
+| **`Staff`** | Nhân viên quầy thu ngân tiện lợi (POS), kiểm kê hàng hóa | `staff` | `Staff@123` |
+| **`User`** | Người dùng thành viên, tra cứu thông tin | `user` | `User@123` |
+
+---
+
+## 3. CƠ SỞ DỮ LIỆU & FILE SQL (`DiepGiaHuy0790.sql`)
+
+### A. Thông tin kết nối CSDL (PostgreSQL / Supabase)
+- **Host**: `aws-0-ap-southeast-1.pooler.supabase.com`
+- **Port**: `5432` *(Session Pooler)*
+- **Database**: `postgres`
+- **Cơ chế tự động**: Cờ `"AutoMigrateOnStartup": true` trong `appsettings.json` cho phép ứng dụng tự động kiểm tra và áp dụng migrations mỗi khi khởi động.
+
+### B. Danh sách các bảng chính trong Database
+
+| Tên bảng | Mô tả chi tiết |
+| :--- | :--- |
+| `AspNetUsers` | Thông tin tài khoản người dùng, họ tên, email, ảnh đại diện, mã OTP đăng nhập |
+| `AspNetRoles` | Danh sách nhóm quyền (`Admin`, `Parents`, `Kid`, `Staff`, `User`) |
+| `kids` | Hồ sơ trẻ em: Họ tên, biệt danh, ngày sinh, giới tính, mã PIN mở máy, điểm thưởng, mã tài khoản |
+| `family_groups` | Nhóm gia đình, mã chia sẻ gia đình (`FamilyCode`) |
+| `family_members` | Danh sách thành viên và mối quan hệ (Bố, Mẹ, Con, Người giám hộ) |
+| `family_qr_invites` | Mã QR mời tham gia gia đình tạm thời (thời hạn 60 giây) |
+| `kid_locations` | Nhật ký tọa độ GPS: Kinh độ, vĩ độ, độ cao, tốc độ, mức pin, trạng thái sạc, địa chỉ |
+| `kid_geofences` | Thiết lập Vùng an toàn: Tọa độ tâm, bán kính (mét), cờ cảnh báo vào/ra vùng an toàn |
+| `voice_messages` | Tin nhắn thoại / Bộ đàm: Đường dẫn file âm thanh MP3, thời lượng (giây), dung lượng, trạng thái đã nghe |
+| `kid_screen_times` | Cấu hình giới hạn thời gian sử dụng thiết bị của trẻ: Tổng phút/ngày, khung giờ cấm, cờ khóa máy tức thì |
+| `blocked_items` | Danh sách ứng dụng và trang web bị phụ huynh chặn trên thiết bị trẻ |
+| `kid_activities` | Nhật ký sinh hoạt, danh sách bài tập/nhiệm vụ và điểm thưởng tương ứng |
+
+### C. Hướng dẫn nạp Database thủ công bằng `DiepGiaHuy0790.sql`
+Nếu muốn tạo một Database mới hoàn toàn trên PostgreSQL / Supabase / pgAdmin:
+1. Mở công cụ quản trị CSDL (**DBeaver**, **pgAdmin** hoặc **Supabase SQL Editor**).
+2. Mở tệp tin [`DiepGiaHuy0790.sql`](file:///C:/Users/boomh/OneDrive/Documents/Giahuy0790/DiepGiaHuy0790.sql).
+3. Nhấn **Execute / Run** để tạo toàn bộ bảng, chỉ mục và dữ liệu phân quyền khởi tạo.
+
+---
+
+## 4. HƯỚNG DẪN KHỞI CHẠY DỰ ÁN
 
 ### Yêu cầu môi trường
-- [.NET 10 SDK](https://dotnet.microsoft.com/download)
-- [Flutter SDK](https://flutter.dev) (phiên bản >= 3.0.0)
-- [Docker Desktop](https://www.docker.com/) (nếu chạy bằng Docker)
+- [.NET 10.0 SDK](https://dotnet.microsoft.com/download)
+- [Docker & Docker Compose](https://www.docker.com/) (nếu chạy qua Docker)
+- [Flutter SDK](https://flutter.dev) (nếu chạy Mobile App)
 
 ---
 
-### Cách 1: Chạy Backend trực tiếp qua .NET CLI
+### Cách 1: Chạy Backend trực tiếp trên máy cục bộ (.NET CLI)
 
-1. Mở cửa sổ dòng lệnh tại thư mục gốc của dự án (`Giahuy0790`):
+1. Mở Terminal tại thư mục dự án `Giahuy0790`:
    ```bash
    dotnet restore
    dotnet run
    ```
-2. Ứng dụng sẽ khởi chạy tại:
-   - **Giao diện Web & Swagger API**: [http://localhost:5231/swagger](http://localhost:5231/swagger)
-   - **Giao diện Quản lý Web (Có Dark Mode)**: [http://localhost:5231](http://localhost:5231)
+2. Truy cập ứng dụng:
+   - **Tài liệu Swagger API**: [http://localhost:5231/swagger](http://localhost:5231/swagger)
+   - **Giao diện Web Quản trị**: [http://localhost:5231](http://localhost:5231)
+   - **Bộ đàm thoại gia đình (Voice Intercom)**: [http://localhost:5231/Home/VoiceIntercom](http://localhost:5231/Home/VoiceIntercom)
 
 ---
 
-### Cách 2: Chạy Backend qua Docker Container (Cổng 8888)
+### Cách 2: Chạy Backend trên Docker / Linux (Khuyến nghị cho Server)
 
-Dự án đã có sẵn [Dockerfile](file:///C:/Users/boomh/OneDrive/Documents/Giahuy0790/Dockerfile) cấu hình đa tầng (multi-stage build) chạy độc lập trên cổng `8888`:
+Dự án đã được cấu hình tối ưu sẵn tệp tin [`Dockerfile`](file:///C:/Users/boomh/OneDrive/Documents/Giahuy0790/Dockerfile) và [`docker-compose.yml`](file:///C:/Users/boomh/OneDrive/Documents/Giahuy0790/docker-compose.yml) trên cổng **8888**:
 
-1. **Build Docker Image:**
+1. **Khởi động với Docker Compose:**
    ```bash
-   docker build -t pos-backend:10.0 .
+   docker compose up -d --build
    ```
 
-2. **Chạy Docker Container:**
+2. **Lưu ý phân quyền trên Linux khi upload file:**
+   Trên hệ điều hành Linux, để ứng dụng ghi được file ảnh và âm thanh vào volume mount `wwwroot/uploads`:
    ```bash
-   docker run -d -p 8888:8888 --name pos_container pos-backend:10.0
+   sudo chown -R $USER:$USER wwwroot
+   sudo chmod -R 777 wwwroot/uploads
    ```
 
-3. Truy cập hệ thống:
-   - **Swagger UI**: [http://localhost:8888/swagger](http://localhost:8888/swagger)
-   - **Web UI**: [http://localhost:8888](http://localhost:8888)
+3. **Truy cập ứng dụng:**
+   - **Swagger UI**: `http://<IP_SERVER>:8888/swagger`
+   - **Web UI**: `http://<IP_SERVER>:8888`
 
 ---
 
-### Cách 3: Chạy Ứng dụng Di Động Flutter (`mobile_app`)
+### Cách 3: Chạy ứng dụng di động Flutter (`mobile_app`)
 
-1. **Di chuyển vào thư mục ứng dụng di động:**
+1. Di chuyển vào thư mục:
    ```bash
    cd mobile_app
-   ```
-
-2. **Tải các gói thư viện phụ thuộc:**
-   ```bash
    flutter pub get
    ```
-
-3. **Cấu hình địa chỉ IP Backend trong file `.env`:**
-   Mở file [`mobile_app/.env`](file:///C:/Users/boomh/OneDrive/Documents/Giahuy0790/mobile_app/.env) và chọn đúng URL tùy theo môi trường chạy:
+2. Cấu hình địa chỉ IP Backend trong file `mobile_app/.env`:
    ```properties
-   # 1. Nếu chạy trên Android Emulator:
+   # Cho máy ảo Android Emulator kết nối với Backend máy chủ
    API_BASE_URL=http://10.0.2.2:5231/api
-
-   # 2. Nếu chạy trên Windows App hoặc Chrome Web:
-   # API_BASE_URL=http://localhost:5231/api
-
-   # 3. Nếu chạy qua Docker:
-   # API_BASE_URL=http://10.0.2.2:8888/api
-
-   # 4. Nếu chạy trên máy thật kết nối cùng mạng WiFi:
-   # API_BASE_URL=http://192.168.1.x:5231/api
    ```
-
-4. **Khởi chạy ứng dụng Flutter:**
+3. Chạy ứng dụng:
    ```bash
    flutter run
    ```
 
 ---
 
-## 3. CƠ CHẾ BẢO MẬT & XỬ LÝ PHÍA FLUTTER
+## 5. TÀI LIỆU CHI TIẾT CÁC ĐẦU API (RESTful API REFERENCE)
 
-### A. Quản lý URL API tách biệt với `flutter_dotenv`
-- File `.env` lưu trữ các đường dẫn API và biến môi trường nhạy cảm, không bị mã hóa cứng (hard-coded) trong mã Dart.
-- Lớp `AppConfig` nạp dữ liệu từ `.env` giúp dễ dàng chuyển đổi môi trường dev, staging hoặc production mà không cần sửa code.
+### 1. Nhóm Xác thực & Tài khoản (`/api/auth`)
 
-### B. Giải mã Token & Kiểm tra Thời hạn với `jwt_decode`
-- Khi người dùng đăng nhập thành công, Server trả về một chuỗi **JWT Token**.
-- Lớp `UserTokenModel.fromJwt(token)` sử dụng `jwt_decode` để:
-  1. Trích xuất Payload: User ID (`nameid`/`sub`), Username, Email, Họ tên (`FullName`).
-  2. Trích xuất vai trò: `role` (Admin, Staff, User).
-  3. Kiểm tra hạn sử dụng: `Jwt.isExpired(token)` và `Jwt.getExpiryDate(token)`.
-- Dựa vào kết quả này, ứng dụng sẽ tự động chuyển hướng đến đúng giao diện chức năng tương ứng của người dùng.
-
-### C. Lưu trữ Token & Tự động Đăng nhập với `shared_preferences`
-- Token sau khi nhận từ API được lưu trực tiếp vào bộ nhớ cục bộ của thiết bị thông qua `SharedPreferences`.
-- Mỗi lần mở app, `SplashScreen` sẽ đọc Token này lên:
-  - Nếu **có Token và Token chưa hết hạn**: Tự động chuyển thẳng vào màn hình làm việc tương ứng với quyền của tài khoản.
-  - Nếu **chưa có hoặc Token đã hết hạn**: Tự động xóa dữ liệu và chuyển về màn hình Đăng nhập (`LoginScreen`).
-- Khi người dùng chọn **Đăng xuất (Logout)**: Hệ thống sẽ gọi lệnh xóa token trong `SharedPreferences` và đưa người dùng về `LoginScreen`.
-
----
-
-## 4. TÀI LIỆU RESTful API
-
-### 1. Nhóm Xác thực & Phân quyền (`/api/auth`)
-
-| Phương thức | Đường dẫn API | Mô tả chức năng | Yêu cầu quyền |
+| Phương thức | Đường dẫn API | Mô tả chức năng | Quyền hạn |
 | :---: | :--- | :--- | :---: |
-| `POST` | `/api/auth/register` | Đăng ký tài khoản mới (hỗ trợ chỉ định role: Admin, Staff, User) | Public |
-| `POST` | `/api/auth/login` | Đăng nhập hệ thống, nhận JWT Token và thông tin vai trò | Public |
-| `GET` | `/api/auth/me` | Lấy thông tin tài khoản đang đăng nhập từ Token | `Bearer JWT` |
-
-#### Payload mẫu Đăng ký (`POST /api/auth/register`):
-```json
-{
-  "username": "nguyenvana",
-  "email": "vana@example.com",
-  "password": "Password@123",
-  "fullName": "Nguyễn Văn A",
-  "role": "Staff"
-}
-```
-
-#### Response mẫu Đăng nhập (`POST /api/auth/login`):
-```json
-{
-  "message": "Đăng nhập thành công",
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "username": "admin",
-  "fullName": "System Administrator",
-  "roles": ["Admin"]
-}
-```
+| `POST` | `/api/auth/register` | Đăng ký tài khoản mới (hỗ trợ chọn vai trò: Admin, Parents, Staff, User) | Public |
+| `POST` | `/api/auth/login` | Đăng nhập tài khoản, trả về JWT Token và thông tin vai trò | Public |
+| `POST` | `/api/auth/send-login-otp` | Gửi mã xác thực OTP 6 số qua Email (Gmail SMTP) để đăng nhập không cần mật khẩu | Public |
+| `POST` | `/api/auth/verify-login-otp` | Xác thực mã OTP và nhận JWT Token đăng nhập | Public |
+| `GET` | `/api/auth/me` | Lấy thông tin tài khoản và phân quyền của người dùng hiện tại | `Bearer JWT` |
 
 ---
 
-### 2. Nhóm Quản lý Sản phẩm (`/api/products`)
+### 2. Nhóm Định vị & Giám sát Vị trí Trẻ (`/api/kids/{kidId}/locations`)
 
 | Phương thức | Đường dẫn API | Mô tả chức năng |
 | :---: | :--- | :--- |
-| `GET` | `/api/products` | Lấy toàn bộ danh sách sản phẩm |
-| `GET` | `/api/products/{id}` | Lấy chi tiết sản phẩm theo ID |
-| `GET` | `/api/products/search?name={tên}` | Tìm kiếm sản phẩm theo tên (không phân biệt hoa thường) |
-| `POST` | `/api/products` | Thêm mới sản phẩm |
-| `PUT` | `/api/products/{id}` | Chỉnh sửa thông tin sản phẩm |
-| `DELETE` | `/api/products/{id}` | Xóa sản phẩm theo ID |
+| `POST` | `/api/kids/{kidId}/locations` | Thiết bị của trẻ gửi tọa độ GPS hiện tại lên hệ thống (tự động phát cảnh báo ra/vào vùng an toàn và gửi realtime qua SignalR) |
+| `GET` | `/api/kids/{kidId}/locations/latest` | Lấy thông tin tọa độ, pin, địa chỉ mới nhất của trẻ |
+| `GET` | `/api/kids/{kidId}/locations/history?date={yyyy-MM-dd}` | Lấy lịch sử lộ trình di chuyển của trẻ theo ngày |
+| `POST` | `/api/kids/{kidId}/locations/simulate?step={n}` | Chạy mô phỏng di chuyển GPS thực tế (phục vụ test) |
+| `GET` | `/api/kids/{kidId}/locations/geofences` | Lấy danh sách vùng an toàn đã thiết lập cho trẻ |
+| `POST` | `/api/kids/{kidId}/locations/geofences` | Tạo vùng an toàn mới (tọa độ tâm, bán kính mét, cảnh báo vào/ra) |
+| `DELETE` | `/api/kids/{kidId}/locations/geofences/{geofenceId}` | Xóa vùng an toàn |
 
-#### Payload mẫu Thêm Sản Phẩm:
+#### Mẫu JSON gửi tọa độ GPS (`POST /api/kids/{kidId}/locations`):
 ```json
 {
-  "name": "Bánh mì que Pate Hải Phòng",
-  "price": 15000,
-  "image": "/uploads/products/banhmi.jpg",
-  "description": "Bánh mì que giòn rụm với pate thơm ngon đặc sản"
+  "latitude": 21.028511,
+  "longitude": 105.854167,
+  "accuracy": 10.0,
+  "speed": 15.2,
+  "altitude": 15.0,
+  "batteryLevel": 88,
+  "isCharging": false,
+  "address": "Trường Tiểu Học Kim Đồng, Hà Nội"
 }
 ```
 
 ---
 
-### 3. Nhóm Quản lý Bài Đăng Bảng Tin (`/api/posts`)
+### 3. Nhóm Bộ đàm & Tin nhắn thoại (`/api/voicemessages`)
 
 | Phương thức | Đường dẫn API | Mô tả chức năng |
 | :---: | :--- | :--- |
-| `GET` | `/api/posts` | Lấy danh sách bài đăng (tự động xếp mới nhất lên đầu) |
-| `GET` | `/api/posts/{id}` | Lấy thông tin chi tiết bài viết theo ID |
-| `POST` | `/api/posts` | Đăng bài viết mới (tương tự Facebook post) |
-| `PUT` | `/api/posts/{id}` | Cập nhật bài viết |
-| `DELETE` | `/api/posts/{id}` | Xóa bài viết |
-
-#### Payload mẫu Đăng Bài:
-```json
-{
-  "title": "Chương trình khuyến mãi mùa hè 2026",
-  "content": "Giảm giá 20% cho toàn bộ sản phẩm nước giải khát!",
-  "author": "Ban Quản Trị",
-  "imageUrl": "/uploads/posts/khuyenmai.jpg"
-}
-```
+| `GET` | `/api/voicemessages?kidId={id}` | Lấy danh sách tin nhắn thoại giữa Phụ huynh và Bé |
+| `POST` | `/api/voicemessages/send` | Gửi tin nhắn thoại mới (nhận file qua `multipart/form-data`, lưu file MP3 vào server và phát tín hiệu SignalR) |
+| `PUT` | `/api/voicemessages/{id}/mark-heard` | Đánh dấu tin nhắn thoại đã được nghe |
+| `DELETE` | `/api/voicemessages/{id}` | Xóa tin nhắn thoại và xóa file âm thanh trên đĩa cứng |
+| `GET` | `/api/voicemessages/unread-count` | Lấy số lượng tin nhắn thoại mới chưa nghe |
 
 ---
 
-### 4. Nhóm Tải lên Hình Ảnh (`/api/uploads`)
+### 4. Nhóm Quản lý Hồ sơ Trẻ & Gia đình (`/api/kids` & `/api/family`)
 
-- `POST /api/uploads/product`: Nhận file ảnh qua `multipart/form-data` (key: `file`), tự động lưu vào thư mục `wwwroot/uploads/products/` và trả về đường dẫn URL.
-- `POST /api/uploads/post`: Nhận file ảnh qua `multipart/form-data` (key: `file`), tự động lưu vào thư mục `wwwroot/uploads/posts/` và trả về đường dẫn URL.
+| Phương thức | Đường dẫn API | Mô tả chức năng |
+| :---: | :--- | :--- |
+| `GET` | `/api/kids` | Lấy danh sách trẻ thuộc sự quản lý của phụ huynh đang đăng nhập |
+| `POST` | `/api/kids` | Tạo hồ sơ trẻ mới (họ tên, ngày sinh, mã PIN mở máy) |
+| `GET` | `/api/kids/{id}` | Lấy chi tiết hồ sơ bé kèm danh sách cảnh báo vi phạm |
+| `GET` | `/api/family/my-group` | Lấy thông tin nhóm gia đình và danh sách các thành viên |
+| `POST` | `/api/family/create` | Tạo nhóm gia đình mới và sinh mã `FamilyCode` |
+| `POST` | `/api/family/join` | Tham gia vào gia đình bằng mã mời `FamilyCode` |
+| `POST` | `/api/family/qr-invite` | Sinh mã QR mời tham gia gia đình (hiệu lực trong 60 giây) |
 
 ---
 
-## 5. CẤU TRÚC THƯ MỤC TOÀN BỘ DỰ ÁN
+### 5. Nhóm Thời gian sử dụng & Khóa máy (`/api/screentime`)
+
+| Phương thức | Đường dẫn API | Mô tả chức năng |
+| :---: | :--- | :--- |
+| `GET` | `/api/screentime/{kidId}` | Lấy cấu hình giới hạn thời gian sử dụng thiết bị của bé |
+| `POST` | `/api/screentime/{kidId}` | Cập nhật cấu hình thời gian sử dụng (số phút/ngày, khung giờ cấm) |
+| `POST` | `/api/screentime/{kidId}/instant-lock` | Khóa máy hoặc mở khóa máy tức thì từ xa |
+
+---
+
+### 6. Nhóm Chặn Web & Ứng dụng (`/api/blockeditems`)
+
+| Phương thức | Đường dẫn API | Mô tả chức năng |
+| :---: | :--- | :--- |
+| `GET` | `/api/blockeditems/{kidId}` | Lấy danh sách website và ứng dụng bị chặn của bé |
+| `POST` | `/api/blockeditems/{kidId}` | Thêm một website hoặc ứng dụng vào danh sách chặn |
+| `PUT` | `/api/blockeditems/{id}/toggle` | Bật / Tắt trạng thái chặn |
+| `DELETE` | `/api/blockeditems/{id}` | Xóa mục khỏi danh sách chặn |
+
+---
+
+### 7. Nhóm Nhật ký & Nhiệm vụ của trẻ (`/api/kidactivities`)
+
+| Phương thức | Đường dẫn API | Mô tả chức năng |
+| :---: | :--- | :--- |
+| `GET` | `/api/kidactivities/kid/{kidId}` | Lấy danh sách hoạt động và nhiệm vụ của trẻ |
+| `POST` | `/api/kidactivities` | Giao một nhiệm vụ mới cho bé (kèm điểm thưởng `RewardPoints`) |
+| `PUT` | `/api/kidactivities/{id}/status` | Cập nhật trạng thái nhiệm vụ (tự động cộng điểm khi chuyển sang `Completed`) |
+| `DELETE` | `/api/kidactivities/{id}` | Xóa nhiệm vụ / hoạt động |
+
+---
+
+### 8. Kênh Real-time SignalR (`/hubs/location`)
+- **Hub Endpoint**: `/hubs/location`
+- **Group tham gia**: `kid_{kidId}`
+- **Sự kiện lắng nghe chính**:
+  - `ReceiveLocationUpdate`: Nhận tọa độ GPS mới nhất và cảnh báo Geofence.
+  - `ReceiveVoiceMessage`: Nhận file âm thanh tin nhắn thoại mới từ bộ đàm.
+  - `NewVoiceNotification`: Thông báo có tin nhắn thoại mới cần phát.
+
+---
+
+## 6. CẤU TRÚC THƯ MỤC DỰ ÁN
 
 ```text
 Giahuy0790/
-├── Controllers/                  # Controller xử lý các đầu API
-│   ├── AuthController.cs         # Xác thực Identity & tạo JWT
-│   ├── ProductsController.cs     # CRUD & Tìm kiếm sản phẩm
-│   ├── PostsController.cs        # CRUD Bài viết mạng xã hội
-│   ├── UploadsController.cs      # Upload ảnh sản phẩm & bài viết
+├── Controllers/                  # Các bộ xử lý RESTful Web API
+│   ├── AuthController.cs         # Xác thực JWT, Identity & Email OTP
+│   ├── KidsController.cs         # Quản lý hồ sơ trẻ và mã PIN
+│   ├── FamilyController.cs       # Nhóm gia đình & QR invite
+│   ├── LocationsController.cs    # Định vị GPS, Geofencing & Simulation
+│   ├── VoiceMessagesController.cs# Bộ đàm thoại & upload file MP3
+│   ├── ScreenTimeController.cs   # Quản lý thời gian sử dụng & khóa máy
+│   ├── BlockedItemsController.cs # Chặn Web & Ứng dụng độc hại
+│   ├── KidActivitiesController.cs# Nhiệm vụ, nhật ký & điểm thưởng
+│   ├── UploadsController.cs      # Upload ảnh đại diện và hồ sơ
 │   └── HomeController.cs         # Giao diện Web MVC
 ├── Data/
-│   └── AppDbContext.cs           # EF Core IdentityDbContext nối Supabase
-├── Models/
-│   ├── ApplicationUser.cs        # Model người dùng mở rộng từ IdentityUser
-│   ├── Product.cs                # Model bảng Product
-│   ├── Post.cs                   # Model bảng Post
-│   └── DTOs/                     # Data Transfer Objects (Login, Register)
-├── Repositories/                 # Repository Pattern phân tách logic truy vấn
-│   ├── IRepository.cs / Repository.cs
-│   ├── IProductRepository.cs / ProductRepository.cs
-│   └── IPostRepository.cs / PostRepository.cs
-├── Views/                        # Giao diện Web Razor Views (Dark Mode)
+│   └── AppDbContext.cs           # Entity Framework Core kết nối Supabase
+├── Hubs/
+│   └── LocationHub.cs            # SignalR Hub cho GPS và Voice Real-Time
+├── Migrations/                   # Các bản ghi chuyển đổi CSDL của EF Core
+├── Models/                       # Các thực thể dữ liệu (Entities) & DTOs
+├── Views/                        # Giao diện Razor Pages (Apple Design & Dark Mode)
 │   ├── Home/
-│   │   ├── Index.cshtml          # Quản lý Sản phẩm
-│   │   └── Posts.cshtml          # Quản lý Bài đăng (Facebook-like)
-│   └── Shared/                   # Layout & thanh chuyển Dark Mode
+│   │   ├── VoiceIntercom.cshtml  # Giao diện Bộ đàm thoại gia đình MP3
+│   │   └── ...
+│   └── Shared/
 ├── wwwroot/                      # Thư mục tài nguyên tĩnh
-│   └── uploads/                  # Nơi lưu trữ ảnh tải lên (products & posts)
-├── appsettings.json              # Chuỗi kết nối Supabase & Khóa bí mật JWT
+│   ├── js/lame.min.js            # Thư viện mã hóa MP3 LAME.js
+│   └── uploads/                  # Thư mục lưu trữ tệp tin upload
+│       ├── voice/                # Lưu file tin nhắn thoại MP3
+│       └── avatars/              # Lưu ảnh đại diện
+├── DiepGiaHuy0790.sql            # Script SQL tạo CSDL và phân quyền hoàn chỉnh
 ├── Dockerfile                    # Kịch bản đóng gói container chạy cổng 8888
-├── Program.cs                    # Cấu hình dịch vụ, JWT, Identity & Data Seeder
-└── mobile_app/                   # Dự án ứng dụng di động Flutter
-    ├── .env                      # File cấu hình biến môi trường API_BASE_URL
-    ├── pubspec.yaml              # Khai báo jwt_decode, flutter_dotenv, shared_preferences
-    └── lib/
-        ├── config/               # Cấu hình AppConfig lấy từ dotenv
-        ├── models/               # Model UserTokenModel giải mã JWT
-        ├── services/             # AuthService gọi API, lưu cache máy
-        ├── screens/              # Giao diện Splash, Login, Register, Admin, Staff, User
-        └── main.dart             # Điểm bắt đầu ứng dụng di động
+├── docker-compose.yml            # Điều phối dịch vụ Docker với volume uploads
+├── appsettings.json              # Chuỗi kết nối CSDL và cấu hình bảo mật
+├── Program.cs                    # Cấu hình dịch vụ, SignalR, Identity, Seeder
+└── mobile_app/                   # Mã nguồn ứng dụng di động Flutter
+    ├── lib/                      # Logic màn hình, mô hình và dịch vụ
+    └── pubspec.yaml              # Thư viện phụ thuộc của Flutter
 ```
 
 ---
 
-## 6. THÔNG TIN CƠ SỞ DỮ LIỆU (SUPABASE POSTGRESQL)
-
-Dự án kết nối trực tiếp đến hệ thống cơ sở dữ liệu Supabase thông qua **Session Pooler**:
-- **Host**: `aws-0-ap-southeast-1.pooler.supabase.com`
-- **Port**: `5432` *(Session Mode - hỗ trợ đầy đủ các thao tác Migration & Identity DDL)*
-- **Database**: `postgres`
-- **Username**: `postgres.fddbvowrgywnlcingnnc`
-- **Cơ chế tự động**: Cờ `"AutoMigrateOnStartup": true` trong `appsettings.json` giúp ứng dụng tự động kiểm tra và chạy migration EF Core mỗi khi khởi động server, đảm bảo bảng dữ liệu luôn được đồng bộ.
-
----
-
-## 7. LIÊN HỆ & TÁC GIẢ
-- Dự án phát triển phục vụ học phần Lập trình Di động & Web API.
-- Tác giả: **Gia Huy** (MSSV: `0790`).
+## 7. LIÊN HỆ & BẢN QUYỀN
+- Đồ án được thiết kế và hoàn thiện bởi: **Diệp Gia Huy (MSSV: 0790)**.
+- Mọi thắc mắc kỹ thuật vui lòng liên hệ qua email: `boomhuyxt@gmail.com`.
